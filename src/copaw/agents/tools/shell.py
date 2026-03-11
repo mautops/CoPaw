@@ -5,6 +5,7 @@
 
 import asyncio
 import locale
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,7 @@ from agentscope.message import TextBlock
 from agentscope.tool import ToolResponse
 
 from copaw.constant import WORKING_DIR
+from copaw.context import get_user_context
 from .utils import truncate_shell_output
 
 
@@ -21,6 +23,7 @@ def _execute_subprocess_sync(
     cmd: str,
     cwd: str,
     timeout: int,
+    env: Optional[dict] = None,
 ) -> tuple[int, str, str]:
     """Execute subprocess synchronously in a thread.
 
@@ -34,6 +37,8 @@ def _execute_subprocess_sync(
             The working directory for the command execution.
         timeout (`int`):
             The maximum time (in seconds) allowed for the command to run.
+        env (`Optional[dict]`):
+            Environment variables to pass to the subprocess.
 
     Returns:
         `tuple[int, str, str]`:
@@ -50,6 +55,7 @@ def _execute_subprocess_sync(
             cwd=cwd,
             timeout=timeout,
             check=True,
+            env=env,
         )
         return (
             result.returncode,
@@ -76,6 +82,12 @@ async def execute_shell_command(
     error within <returncode></returncode>, <stdout></stdout> and
     <stderr></stderr> tags.
 
+    The command will have access to user context via environment variables:
+    - COPAW_USER_ID: Current user ID
+    - COPAW_USERNAME: Current username
+    - COPAW_SESSION_ID: Current session ID
+    - COPAW_CHANNEL: Current channel name
+
     Args:
         command (`str`):
             The shell command to execute.
@@ -98,6 +110,27 @@ async def execute_shell_command(
     # Set working directory
     working_dir = cwd if cwd is not None else WORKING_DIR
 
+    # Prepare environment variables with user context
+    env = os.environ.copy()
+    user_context = get_user_context()
+
+    # Build readonly preamble: declare COPAW_* as readonly before running
+    # user's command. This prevents modification via export/assignment.
+    copaw_vars = {
+        "COPAW_USER_ID": user_context.get("user_id") or "",
+        "COPAW_USERNAME": user_context.get("username") or "",
+        "COPAW_SESSION_ID": user_context.get("session_id") or "",
+        "COPAW_CHANNEL": user_context.get("channel") or "",
+    }
+    env.update(copaw_vars)
+
+    # Wrap user command with readonly declarations (bash/sh only)
+    if sys.platform != "win32":
+        readonly_lines = "\n".join(
+            f"readonly {k}" for k in copaw_vars
+        )
+        cmd = f"{readonly_lines}\n{cmd}"
+
     try:
         if sys.platform == "win32":
             # Windows: use thread pool to avoid asyncio subprocess limitations
@@ -106,6 +139,7 @@ async def execute_shell_command(
                 cmd,
                 str(working_dir),
                 timeout,
+                env,
             )
         else:
             proc = await asyncio.create_subprocess_shell(
@@ -114,6 +148,7 @@ async def execute_shell_command(
                 stderr=asyncio.subprocess.PIPE,
                 bufsize=0,
                 cwd=str(working_dir),
+                env=env,
             )
 
             try:

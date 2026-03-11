@@ -25,6 +25,7 @@ from ...config import load_config
 from ...constant import (
     WORKING_DIR,
 )
+from ...context import set_user_context
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,15 @@ class AgentRunner(Runner):
             session_id = request.session_id
             user_id = request.user_id
             channel = getattr(request, "channel", DEFAULT_CHANNEL)
+
+            # Set user context for implicit access in tools/MCP/skills
+            # This is thread-safe and automatically isolated per async task
+            set_user_context(
+                user_id=user_id,
+                session_id=session_id,
+                channel=channel,
+                username=user_id,  # Use user_id as username by default
+            )
 
             logger.info(
                 "Handle agent query:\n%s",
