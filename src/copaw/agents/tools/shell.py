@@ -54,6 +54,7 @@ def _execute_subprocess_sync(
             text=False,
             cwd=cwd,
             timeout=timeout,
+            env=env,
             check=True,
             env=env,
         )

@@ -265,7 +265,7 @@ class AgentsConfig(BaseModel):
     )
     language: str = Field(
         default="zh",
-        description="Language for agent MD files (en/zh)",
+        description="Language for agent MD files (zh/en/ru)",
     )
     installed_md_files_language: Optional[str] = Field(
         default=None,
@@ -430,6 +430,11 @@ class ToolsConfig(BaseModel):
                 name="get_current_time",
                 enabled=True,
                 description="Get current date and time",
+            ),
+            "get_token_usage": BuiltinToolConfig(
+                name="get_token_usage",
+                enabled=True,
+                description="Get llm token usage",
             ),
         },
     )
