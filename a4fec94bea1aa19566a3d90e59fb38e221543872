@@ -1,0 +1,24 @@
+src/copaw/app/channels/wecom/channel.py
+  9a3c5ed9f7d16913 2,4-8,16,40,50,53-55,74,79-80,82-83,95,108,121,124,141,153,166,173,175,177,191,194,198,224,231,239,242,246,250,254,258,262,266,275,283,286,291,298,300-302,305-306,317,322-326,332-346,348,350-365,368,375,378-379,382,391,403,411,414-416,437,440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.11",
+  "base_commit_sha": "a4fec94bea1aa19566a3d90e59fb38e221543872",
+  "prompts": {
+    "9a3c5ed9f7d16913": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c9ddcaf3-4ce5-4b41-84d4-2b4d96ddaa32",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 342,
+      "total_deletions": 93,
+      "accepted_lines": 743,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/e16c280a4170eb01918f302f0464a258b1dedb9fe5b690f8a59af4e920c639d4"
+    }
+  }
+}
