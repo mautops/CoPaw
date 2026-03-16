@@ -163,12 +163,10 @@ async def execute_shell_command(
     # Prepare environment variables
     # If env is provided, merge it with current environment;
     # otherwise use current process environment
+    exec_env = os.environ.copy()
     if env is not None:
         # Start with current environment and update with provided vars
-        exec_env = os.environ.copy()
         exec_env.update(env)
-    else:
-        exec_env = os.environ.copy()
 
     # Ensure the venv Python is on PATH for subprocesses
     python_bin_dir = str(Path(sys.executable).parent)
