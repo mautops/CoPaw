@@ -10,6 +10,7 @@ import functools
 import logging
 import os
 import re
+import sys
 from typing import Any, List, Literal, Optional, Type
 
 from agentscope.agent import ReActAgent
@@ -195,9 +196,14 @@ class CoPawAgent(ToolGuardMixin, ReActAgent):
                     readonly_vars.append(safe_key)
 
             # Wrap with readonly declarations to prevent tampering
-            if readonly_vars and not command.startswith("bash -c ") and sys.platform != "win32":
+            if (
+                readonly_vars
+                and not command.startswith("bash -c ")
+                and sys.platform != "win32"
+            ):
                 escaped_cmd = command.replace('"', '\\"')
-                command = f'bash -c "{'; '.join(f'readonly {v}' for v in readonly_vars)}; {escaped_cmd}"'
+                readonly_decl = "; ".join(f"readonly {v}" for v in readonly_vars)
+                command = f'bash -c "{readonly_decl}; {escaped_cmd}"'
 
             return await tool_func(command, env=env, **kwargs)
 
