@@ -43,8 +43,9 @@ export function useChannels() {
       "qq",
       "matrix",
       "xiaoyi",
+      "wecom",
     ],
-    [],
+    []
   );
 
   const orderedKeys = useMemo(
@@ -52,13 +53,13 @@ export function useChannels() {
       ...builtinOrder.filter((k) => channelTypes.includes(k)),
       ...channelTypes.filter((k) => !builtinOrder.includes(k)),
     ],
-    [builtinOrder, channelTypes],
+    [builtinOrder, channelTypes]
   );
 
   // Read isBuiltin from API response
   const isBuiltin = useCallback(
     (key: string) => Boolean(channels[key]?.isBuiltin),
-    [channels],
+    [channels]
   );
 
   return {

@@ -27,7 +27,7 @@ from agentscope_runtime.engine.schemas.agent_schemas import (
     ImageContent,
     TextContent,
 )
-from aibot import WSClient, WSClientOptions, generate_req_id
+from wecom_aibot_sdk import WSClient, generate_req_id
 
 from ....constant import DEFAULT_MEDIA_DIR
 from ..base import (
@@ -518,9 +518,7 @@ class WecomChannel(BaseChannel):
             if hint_ext and Path(fn).suffix in ("", ".bin", ".file"):
                 fn = (Path(fn).stem or "file") + hint_ext
             self._media_dir.mkdir(parents=True, exist_ok=True)
-            safe_name = (
-                "".join(c for c in fn if c.isalnum() or c in "-_.") or "media"
-            )
+            safe_name = "".join(c for c in fn if c.isalnum() or c in "-_.") or "media"
             url_hash = hashlib.md5(url.encode()).hexdigest()[:8]
             path = self._media_dir / f"wecom_{url_hash}_{safe_name}"
             path.write_bytes(data)
@@ -595,9 +593,7 @@ class WecomChannel(BaseChannel):
         m = meta or {}
         frame = m.get("wecom_frame")
         chatid = (
-            m.get("wecom_chatid")
-            or self._parse_chatid_from_handle(to_handle)
-            or ""
+            m.get("wecom_chatid") or self._parse_chatid_from_handle(to_handle) or ""
         )
 
         prefix = m.get("bot_prefix", "") or self.bot_prefix or ""
@@ -694,9 +690,7 @@ class WecomChannel(BaseChannel):
             return
         m = meta or {}
         chatid = (
-            m.get("wecom_chatid")
-            or self._parse_chatid_from_handle(to_handle)
-            or ""
+            m.get("wecom_chatid") or self._parse_chatid_from_handle(to_handle) or ""
         )
         frame = m.get("wecom_frame")
         prefix = m.get("bot_prefix", "") or self.bot_prefix or ""
@@ -776,12 +770,11 @@ class WecomChannel(BaseChannel):
             )
 
         self._loop = asyncio.get_running_loop()
-        options = WSClientOptions(
+        self._client = WSClient(
             bot_id=self.bot_id,
             secret=self.secret,
             max_reconnect_attempts=self._max_reconnect_attempts,
         )
-        self._client = WSClient(options)
 
         # Register event handlers
         self._client.on("message", self._on_message_sync)
