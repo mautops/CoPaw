@@ -1,0 +1,60 @@
+src/copaw/app/authz/sensitive_paths.py
+  3ac445636fd72fc3 1-98
+src/copaw/app/authz/admin_tools.py
+  3ac445636fd72fc3 1-19
+src/copaw/app/authz/agent_lifecycle.py
+  3ac445636fd72fc3 1-281
+src/copaw/app/runner/runner.py
+  3ac445636fd72fc3 196,208-209
+src/copaw/app/routers/auth.py
+  3ac445636fd72fc3 43-46,54-83
+src/copaw/app/_app.py
+  3ac445636fd72fc3 159-169,310-313
+src/copaw/app/routers/agents_management.py
+  3ac445636fd72fc3 1-288
+src/copaw/app/agent_context.py
+  3ac445636fd72fc3 21-26,68-70,81-82,128-145
+src/copaw/config/config.py
+  3ac445636fd72fc3 737-741
+src/copaw/app/authz/__init__.py
+  3ac445636fd72fc3 1-31
+src/copaw/app/routers/agent_scoped.py
+  3ac445636fd72fc3 7-9,17,21,28,40-42,49-78,87-122
+docs/authz.json.example
+  3ac445636fd72fc3 1-38
+docs/implementation-summary.md
+  3ac445636fd72fc3 1-215
+src/copaw/app/auth.py
+  3ac445636fd72fc3 114-123,127,132-136,145-152,154-155,157-159,184-197,211-212,217-221,228-271,295,297-298,307,309,311-316,320-322,324-333,335,346-349,358-366,368-387,400-425,454-455,464-466
+src/copaw/security/tool_guard/guardians/rule_guardian.py
+  3ac445636fd72fc3 336-342,390-464,466-561
+src/copaw/app/multi_agent_manager.py
+  3ac445636fd72fc3 33,41,50-52,54-56,70,74,79-80,83
+src/copaw/app/authz/models.py
+  3ac445636fd72fc3 1-74
+src/copaw/app/workspace.py
+  3ac445636fd72fc3 46,52,57,130-135,389-457
+src/copaw/app/authz/service.py
+  3ac445636fd72fc3 1-593
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.16",
+  "base_commit_sha": "32dc9f9ccf7c37be2487465649565b8d4df737f1",
+  "prompts": {
+    "3ac445636fd72fc3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dea082f6-589c-4adc-b4cc-e81f0ce3e963",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 1191,
+      "total_deletions": 47,
+      "accepted_lines": 2263,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/e117bd55924d63b433beda38a3c60a2a5bc375c0e5d195fbd9807f14480f7c59"
+    }
+  }
+}
