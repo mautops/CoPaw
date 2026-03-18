@@ -40,13 +40,47 @@ class AuthStatusResponse(BaseModel):
 
 @router.post("/login")
 async def login(req: LoginRequest):
-    """Authenticate with username and password."""
+    """Authenticate with username and password.
+
+    On first login, automatically creates a default agent for the user.
+    """
     if not is_auth_enabled():
         return LoginResponse(token="", username="")
 
     token = authenticate(req.username, req.password)
     if token is None:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    # Auto-create default agent on first login if authz is enabled
+    try:
+        import os
+        authz_enabled = os.environ.get("COPAW_AUTHZ_ENABLED", "").strip().lower() in ("true", "1", "yes")
+
+        if authz_enabled:
+            # Extract user_id from token payload
+            payload = verify_token(token)
+            if payload:
+                user_id = payload.get("user_id")
+                username = payload.get("sub", req.username)
+
+                if user_id:
+                    from ..authz.service import get_authz_service
+                    from ..authz.agent_lifecycle import ensure_user_default_agent
+
+                    authz = get_authz_service()
+
+                    # Check if user exists in authz config, create if not
+                    user = authz.get_user(user_id)
+                    if user is None:
+                        authz.add_user(user_id, username)
+
+                    # Check if user has any agents, create default if not
+                    user_agents = authz.list_user_agents(user_id)
+                    if not user_agents:
+                        await ensure_user_default_agent(user_id, username)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Failed to auto-create agent on login: %s", e)
 
     return LoginResponse(token=token, username=req.username)
 

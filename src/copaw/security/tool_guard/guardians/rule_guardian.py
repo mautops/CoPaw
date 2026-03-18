@@ -333,6 +333,13 @@ class RuleBasedToolGuardian(BaseToolGuardian):
     ) -> list[GuardFinding]:
         """Scan all string-like parameter values against loaded rules."""
         findings: list[GuardFinding] = []
+
+        # Check for sensitive path access first (before rule matching)
+        findings.extend(self._check_sensitive_paths(tool_name, params))
+
+        # Check user tool permissions
+        findings.extend(self._check_tool_permissions(tool_name))
+
         applicable_rules = [
             r for r in self._rules if r.applies_to_tool(tool_name)
         ]
@@ -379,4 +386,176 @@ class RuleBasedToolGuardian(BaseToolGuardian):
                             guardian=self.name,
                         ),
                     )
+        return findings
+
+    def _check_sensitive_paths(
+        self,
+        tool_name: str,
+        params: dict[str, Any],
+    ) -> list[GuardFinding]:
+        """Check if tool is attempting to access sensitive/protected files.
+
+        Args:
+            tool_name: Name of the tool being called
+            params: Tool parameters
+
+        Returns:
+            List of findings for sensitive path access attempts
+        """
+        # Import here to avoid circular dependency
+        try:
+            from ....app.authz.sensitive_paths import is_sensitive_path
+        except ImportError:
+            logger.warning("Could not import sensitive_paths module")
+            return []
+
+        findings: list[GuardFinding] = []
+
+        # File-related tools that we need to check
+        file_tools = {
+            "write_file",
+            "edit_file",
+            "read_file",
+            "delete_file",
+            "move_file",
+            "copy_file",
+        }
+
+        if tool_name not in file_tools:
+            return findings
+
+        # Check common file path parameter names
+        path_params = ["file_path", "path", "src", "dst", "source", "destination"]
+
+        for param_name in path_params:
+            if param_name not in params:
+                continue
+
+            file_path = params[param_name]
+            if not file_path or not isinstance(file_path, str):
+                continue
+
+            if is_sensitive_path(file_path):
+                findings.append(
+                    GuardFinding(
+                        id=f"GUARD-{uuid.uuid4().hex}",
+                        rule_id="SENSITIVE_PATH_ACCESS",
+                        category=GuardThreatCategory.SENSITIVE_FILE_ACCESS,
+                        severity=GuardSeverity.CRITICAL,
+                        title="[CRITICAL] Attempted to access protected system file",
+                        description=(
+                            f"Tool '{tool_name}' attempted to access protected file: "
+                            f"{file_path}. This file is blacklisted to prevent "
+                            f"privilege escalation and unauthorized system access."
+                        ),
+                        tool_name=tool_name,
+                        param_name=param_name,
+                        matched_value=file_path,
+                        matched_pattern="<sensitive_path_blacklist>",
+                        snippet=file_path,
+                        remediation=(
+                            "This file is protected and cannot be accessed by AI tools. "
+                            "If you need to modify system configuration, please do so "
+                            "manually outside of the AI agent."
+                        ),
+                        guardian=self.name,
+                    ),
+                )
+
+        return findings
+
+    def _check_tool_permissions(
+        self,
+        tool_name: str,
+    ) -> list[GuardFinding]:
+        """Check if current user has permission to use this tool.
+
+        Args:
+            tool_name: Name of the tool being called
+
+        Returns:
+            List of findings for permission violations
+        """
+        findings: list[GuardFinding] = []
+
+        # Get current user_id from context
+        try:
+            from ....app.agent_context import get_current_user_id
+            user_id = get_current_user_id()
+        except ImportError:
+            logger.debug("Could not import agent_context, skipping permission check")
+            return findings
+
+        if not user_id:
+            # No user_id in context - skip permission check
+            return findings
+
+        # Check if authz is enabled
+        try:
+            from ....app.authz.service import get_authz_service
+            from ....app.authz.admin_tools import ADMIN_ONLY_TOOLS
+
+            authz = get_authz_service()
+
+            # Check if authz is enabled via environment variable
+            if not authz.ensure_authz_enabled():
+                return findings
+
+            # Check admin-only tools
+            if tool_name in ADMIN_ONLY_TOOLS:
+                if not authz.is_admin(user_id):
+                    findings.append(
+                        GuardFinding(
+                            id=f"GUARD-{uuid.uuid4().hex}",
+                            rule_id="ADMIN_TOOL_ACCESS",
+                            category=GuardThreatCategory.PRIVILEGE_ESCALATION,
+                            severity=GuardSeverity.CRITICAL,
+                            title=f"[CRITICAL] Tool '{tool_name}' requires admin privileges",
+                            description=(
+                                f"Tool '{tool_name}' is restricted to admin users only. "
+                                f"User '{user_id}' does not have admin privileges."
+                            ),
+                            tool_name=tool_name,
+                            param_name=None,
+                            matched_value=None,
+                            matched_pattern="<admin_only_tools>",
+                            snippet=None,
+                            remediation=(
+                                "This tool requires admin privileges. "
+                                "Contact your system administrator to request access."
+                            ),
+                            guardian=self.name,
+                        ),
+                    )
+                    return findings
+
+            # Check general tool permissions
+            if not authz.check_resource_permission(user_id, "tool", tool_name):
+                findings.append(
+                    GuardFinding(
+                        id=f"GUARD-{uuid.uuid4().hex}",
+                        rule_id="UNAUTHORIZED_TOOL",
+                        category=GuardThreatCategory.PRIVILEGE_ESCALATION,
+                        severity=GuardSeverity.HIGH,
+                        title=f"[HIGH] No permission to use tool '{tool_name}'",
+                        description=(
+                            f"User '{user_id}' does not have permission to use tool '{tool_name}'. "
+                            f"This tool is not in the user's allowed tools list."
+                        ),
+                        tool_name=tool_name,
+                        param_name=None,
+                        matched_value=None,
+                        matched_pattern="<user_permissions>",
+                        snippet=None,
+                        remediation=(
+                            "This tool is not authorized for your account. "
+                            "Contact your system administrator to request access."
+                        ),
+                        guardian=self.name,
+                    ),
+                )
+
+        except Exception as e:
+            logger.warning("Tool permission check failed: %s", e)
+
         return findings

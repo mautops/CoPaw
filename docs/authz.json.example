@@ -1,0 +1,38 @@
+{
+  "users": {
+    "user_abc123": {
+      "username": "alice",
+      "role": "admin",
+      "agents": ["user_abc123_default", "*"],
+      "permissions": {
+        "mcps": ["*"],
+        "tools": ["*"],
+        "skills": ["*"]
+      }
+    },
+    "user_def456": {
+      "username": "bob",
+      "role": "user",
+      "agents": ["user_def456_default"],
+      "permissions": {
+        "mcps": ["filesystem", "github"],
+        "tools": ["read_file", "write_file", "execute_shell_command"],
+        "skills": ["code_review"]
+      }
+    }
+  },
+  "agents": {
+    "user_abc123_default": {
+      "owner": "user_abc123",
+      "shared_with": []
+    },
+    "user_def456_default": {
+      "owner": "user_def456",
+      "shared_with": []
+    },
+    "shared_agent_001": {
+      "owner": "user_abc123",
+      "shared_with": ["user_def456"]
+    }
+  }
+}

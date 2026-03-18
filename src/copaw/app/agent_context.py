@@ -18,6 +18,12 @@ _current_agent_id: ContextVar[Optional[str]] = ContextVar(
     default=None,
 )
 
+# Context variable to store current user ID across async calls
+_current_user_id: ContextVar[Optional[str]] = ContextVar(
+    "current_user_id",
+    default=None,
+)
+
 
 async def get_agent_for_request(
     request: Request,
@@ -59,6 +65,9 @@ async def get_agent_for_request(
         config = load_config()
         target_agent_id = config.agents.active_agent or "default"
 
+    # Extract user_id from request.state (set by AuthMiddleware or AgentContextMiddleware)
+    user_id = getattr(request.state, "user_id", None)
+
     # Get MultiAgentManager
     if not hasattr(request.app.state, "multi_agent_manager"):
         raise HTTPException(
@@ -69,7 +78,8 @@ async def get_agent_for_request(
     manager: MultiAgentManager = request.app.state.multi_agent_manager
 
     try:
-        workspace = await manager.get_agent(target_agent_id)
+        # Pass user_id to get_agent for permission filtering
+        workspace = await manager.get_agent(target_agent_id, user_id)
         if not workspace:
             raise HTTPException(
                 status_code=404,
@@ -115,3 +125,21 @@ def get_current_agent_id() -> str:
     if agent_id:
         return agent_id
     return get_active_agent_id()
+
+
+def set_current_user_id(user_id: Optional[str]) -> None:
+    """Set current user ID in context.
+
+    Args:
+        user_id: User ID to set
+    """
+    _current_user_id.set(user_id)
+
+
+def get_current_user_id() -> Optional[str]:
+    """Get current user ID from context.
+
+    Returns:
+        Current user ID, or None if not set
+    """
+    return _current_user_id.get()

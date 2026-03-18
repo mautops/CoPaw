@@ -4,6 +4,9 @@
 This provides agent isolation by injecting agentId into request.state,
 allowing downstream APIs to access the correct agent context.
 """
+import json
+import logging
+
 from fastapi import APIRouter, Request
 from starlette.middleware.base import (
     BaseHTTPMiddleware,
@@ -11,20 +14,20 @@ from starlette.middleware.base import (
 )
 from starlette.responses import Response
 
+logger = logging.getLogger(__name__)
+
 
 class AgentContextMiddleware(BaseHTTPMiddleware):
-    """Middleware to inject agentId into request.state."""
+    """Middleware to inject agentId and userId into request.state."""
 
     async def dispatch(
         self,
         request: Request,
         call_next: RequestResponseEndpoint,
     ) -> Response:
-        """Extract agentId from path/header and inject into context."""
-        import logging
+        """Extract agentId from path/header, userId from JWT, inject into context."""
         from ..agent_context import set_current_agent_id
 
-        logger = logging.getLogger(__name__)
         agent_id = None
 
         # Priority 1: Extract agentId from path: /api/agents/{agentId}/...
@@ -34,13 +37,45 @@ class AgentContextMiddleware(BaseHTTPMiddleware):
                 agent_id = path_parts[3]
                 request.state.agent_id = agent_id
                 logger.debug(
-                    f"AgentContextMiddleware: agent_id={agent_id} "
-                    f"from path={request.url.path}",
+                    "AgentContextMiddleware: agent_id=%s from path=%s",
+                    agent_id,
+                    request.url.path,
                 )
 
         # Priority 2: Check X-Agent-Id header
         if not agent_id:
             agent_id = request.headers.get("X-Agent-Id")
+
+        # Extract user_id from JWT token if auth is enabled
+        user_id = getattr(request.state, "user_id", None)
+        if user_id is None:
+            user_id = self._extract_user_id(request)
+            request.state.user_id = user_id
+
+        # Check agent access permissions if both user_id and agent_id are available
+        if user_id and agent_id:
+            try:
+                from ..auth import is_auth_enabled
+                from ..authz.service import get_authz_service
+
+                if is_auth_enabled():
+                    authz = get_authz_service()
+                    if not authz.check_agent_access(user_id, agent_id):
+                        logger.warning(
+                            "Access denied: user '%s' cannot access agent '%s'",
+                            user_id,
+                            agent_id,
+                        )
+                        return Response(
+                            content=json.dumps(
+                                {"detail": "Access denied to this agent"}
+                            ),
+                            status_code=403,
+                            media_type="application/json",
+                        )
+            except Exception as e:
+                # If authz check fails, log and continue (fail open for now)
+                logger.warning("Agent access check failed: %s", e)
 
         # Set agent_id in context variable for use by runners
         if agent_id:
@@ -48,6 +83,43 @@ class AgentContextMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
         return response
+
+    @staticmethod
+    def _extract_user_id(request: Request):
+        """Extract user_id from JWT token in request headers.
+
+        Args:
+            request: HTTP request
+
+        Returns:
+            user_id from JWT payload, or None if not available
+        """
+        try:
+            from ..auth import is_auth_enabled, verify_token
+
+            if not is_auth_enabled():
+                return None
+
+            auth_header = request.headers.get("Authorization", "")
+            token = None
+
+            if auth_header.startswith("Bearer "):
+                token = auth_header[7:]
+            elif "upgrade" in request.headers.get("connection", "").lower():
+                token = request.query_params.get("token")
+
+            if not token:
+                return None
+
+            payload = verify_token(token)
+            if payload is None:
+                return None
+
+            return payload.get("user_id")
+
+        except Exception as e:
+            logger.debug("Failed to extract user_id from token: %s", e)
+            return None
 
 
 def create_agent_scoped_router() -> APIRouter:

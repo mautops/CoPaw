@@ -734,6 +734,11 @@ class SecurityConfig(BaseModel):
     skill_scanner: SkillScannerConfig = Field(
         default_factory=SkillScannerConfig,
     )
+    authz_enabled: bool = Field(
+        default=False,
+        description="Whether authorization (multi-tenant permissions) is enabled. "
+        "Can also be set via COPAW_AUTHZ_ENABLED environment variable.",
+    )
 
 
 class Config(BaseModel):

@@ -111,19 +111,29 @@ def _get_jwt_secret() -> str:
     return secret
 
 
-def create_token(username: str) -> str:
-    """Create an HMAC-signed token: ``base64(payload).signature``."""
+def create_token(username: str, user_id: Optional[str] = None) -> str:
+    """Create an HMAC-signed token: ``base64(payload).signature``.
+
+    Args:
+        username: Username to encode in token
+        user_id: Optional user ID to include in token payload
+
+    Returns:
+        Signed token string
+    """
     import base64
 
     secret = _get_jwt_secret()
-    payload = json.dumps(
-        {
-            "sub": username,
-            "exp": int(time.time()) + TOKEN_EXPIRY_SECONDS,
-            "iat": int(time.time()),
-        },
-    )
-    payload_b64 = base64.urlsafe_b64encode(payload.encode()).decode()
+    payload: dict = {
+        "sub": username,
+        "exp": int(time.time()) + TOKEN_EXPIRY_SECONDS,
+        "iat": int(time.time()),
+    }
+    if user_id is not None:
+        payload["user_id"] = user_id
+
+    payload_str = json.dumps(payload)
+    payload_b64 = base64.urlsafe_b64encode(payload_str.encode()).decode()
     sig = hmac.new(
         secret.encode(),
         payload_b64.encode(),
@@ -132,8 +142,21 @@ def create_token(username: str) -> str:
     return f"{payload_b64}.{sig}"
 
 
-def verify_token(token: str) -> Optional[str]:
-    """Verify *token*, return username if valid, ``None`` otherwise."""
+def verify_token(token: str) -> Optional[dict]:
+    """Verify *token*, return payload dict if valid, ``None`` otherwise.
+
+    The returned dict contains:
+    - ``sub``: username
+    - ``user_id``: user ID (if present in token)
+    - ``exp``: expiry timestamp
+    - ``iat``: issued at timestamp
+
+    Args:
+        token: Token string to verify
+
+    Returns:
+        Payload dict if valid, None if invalid or expired
+    """
     import base64
 
     try:
@@ -152,10 +175,26 @@ def verify_token(token: str) -> Optional[str]:
         payload = json.loads(base64.urlsafe_b64decode(payload_b64))
         if payload.get("exp", 0) < time.time():
             return None
-        return payload.get("sub")
+        return payload
     except (json.JSONDecodeError, KeyError, ValueError, TypeError) as exc:
         logger.debug("Token verification failed: %s", exc)
         return None
+
+
+def verify_token_username(token: str) -> Optional[str]:
+    """Verify token and return username for backward compatibility.
+
+    Args:
+        token: Token string to verify
+
+    Returns:
+        Username if valid, None otherwise
+    """
+    payload = verify_token(token)
+    if payload is None:
+        return None
+    return payload.get("sub")
+
 
 
 # ---------------------------------------------------------------------------
@@ -169,15 +208,67 @@ def _load_auth_data() -> dict:
     Returns the parsed dict, or a sentinel with ``_auth_load_error``
     set to ``True`` when the file exists but cannot be read/parsed so
     that callers can fail closed instead of silently bypassing auth.
+
+    Supports both old single-user format and new multi-user format.
     """
     if AUTH_FILE.is_file():
         try:
             with open(AUTH_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Migrate old format to new format if needed
+                if "user" in data and "users" not in data:
+                    data = _migrate_single_to_multi_user(data)
+                return data
         except (json.JSONDecodeError, OSError) as exc:
             logger.error("Failed to load auth file %s: %s", AUTH_FILE, exc)
             return {"_auth_load_error": True}
     return {}
+
+
+def _migrate_single_to_multi_user(old_data: dict) -> dict:
+    """Migrate old single-user format to new multi-user format.
+
+    Old format:
+    {
+      "user": {"username": "...", "password_hash": "...", "password_salt": "..."},
+      "jwt_secret": "..."
+    }
+
+    New format:
+    {
+      "users": {
+        "user_id": {"username": "...", "password_hash": "...", "password_salt": "..."}
+      },
+      "jwt_secret": "..."
+    }
+
+    Args:
+        old_data: Old format auth data
+
+    Returns:
+        New format auth data
+    """
+    user_data = old_data.get("user")
+    if not user_data:
+        return old_data
+
+    # Generate user_id from username
+    username = user_data.get("username", "default")
+    user_id = f"user_{hashlib.sha256(username.encode()).hexdigest()[:16]}"
+
+    new_data = {
+        "users": {
+            user_id: user_data
+        },
+        "jwt_secret": old_data.get("jwt_secret", "")
+    }
+
+    # Save migrated data
+    _save_auth_data(new_data)
+    logger.info("Migrated auth.json from single-user to multi-user format")
+
+    return new_data
+
 
 
 def _save_auth_data(data: dict) -> None:
@@ -201,9 +292,10 @@ def is_auth_enabled() -> bool:
 
 
 def has_registered_users() -> bool:
-    """Return ``True`` if a user has been registered."""
+    """Return ``True`` if at least one user has been registered."""
     data = _load_auth_data()
-    return bool(data.get("user"))
+    # Support both old format (user) and new format (users)
+    return bool(data.get("users") or data.get("user"))
 
 
 # ---------------------------------------------------------------------------
@@ -212,18 +304,35 @@ def has_registered_users() -> bool:
 
 
 def register_user(username: str, password: str) -> Optional[str]:
-    """Register the single user account.
+    """Register a new user account.
 
-    Returns a token on success, ``None`` if a user already exists.
+    Returns a token on success, ``None`` if username already exists.
+
+    Args:
+        username: Username to register
+        password: Password for the user
+
+    Returns:
+        JWT token if successful, None if username exists
     """
     data = _load_auth_data()
 
-    # Only one user allowed
-    if data.get("user"):
-        return None
+    # Initialize users dict if not present
+    if "users" not in data:
+        data["users"] = {}
 
+    # Check if username already exists
+    for user_data in data["users"].values():
+        if user_data.get("username") == username:
+            logger.warning("Username '%s' already exists", username)
+            return None
+
+    # Generate user_id
+    user_id = f"user_{hashlib.sha256(username.encode()).hexdigest()[:16]}"
+
+    # Hash password
     pw_hash, salt = _hash_password(password)
-    data["user"] = {
+    data["users"][user_id] = {
         "username": username,
         "password_hash": pw_hash,
         "password_salt": salt,
@@ -234,8 +343,10 @@ def register_user(username: str, password: str) -> Optional[str]:
         data["jwt_secret"] = secrets.token_hex(32)
 
     _save_auth_data(data)
-    logger.info("User '%s' registered", username)
-    return create_token(username)
+    logger.info("User '%s' registered with ID '%s'", username, user_id)
+
+    # Create token with user_id
+    return create_token(username, user_id)
 
 
 # ---------------------------------------------------------------------------
@@ -244,8 +355,36 @@ def register_user(username: str, password: str) -> Optional[str]:
 
 
 def authenticate(username: str, password: str) -> Optional[str]:
-    """Authenticate *username* / *password*.  Returns a token if valid."""
+    """Authenticate *username* / *password*.  Returns a token if valid.
+
+    Args:
+        username: Username to authenticate
+        password: Password to verify
+
+    Returns:
+        JWT token if authentication successful, None otherwise
+    """
     data = _load_auth_data()
+
+    # Support new multi-user format
+    if "users" in data:
+        for user_id, user_data in data["users"].items():
+            if user_data.get("username") != username:
+                continue
+
+            stored_hash = user_data.get("password_hash", "")
+            stored_salt = user_data.get("password_salt", "")
+
+            if (
+                stored_hash
+                and stored_salt
+                and verify_password(password, stored_hash, stored_salt)
+            ):
+                return create_token(username, user_id)
+
+        return None
+
+    # Fallback to old single-user format (should not happen after migration)
     user = data.get("user")
     if not user:
         return None
@@ -258,7 +397,32 @@ def authenticate(username: str, password: str) -> Optional[str]:
         and stored_salt
         and verify_password(password, stored_hash, stored_salt)
     ):
-        return create_token(username)
+        # Generate user_id for old format
+        user_id = f"user_{hashlib.sha256(username.encode()).hexdigest()[:16]}"
+        return create_token(username, user_id)
+    return None
+
+
+def get_user_id_by_username(username: str) -> Optional[str]:
+    """Get user ID by username.
+
+    Args:
+        username: Username to look up
+
+    Returns:
+        User ID if found, None otherwise
+    """
+    data = _load_auth_data()
+
+    if "users" in data:
+        for user_id, user_data in data["users"].items():
+            if user_data.get("username") == username:
+                return user_id
+
+    # Fallback: generate user_id from username for old format
+    if data.get("user", {}).get("username") == username:
+        return f"user_{hashlib.sha256(username.encode()).hexdigest()[:16]}"
+
     return None
 
 
@@ -287,8 +451,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 media_type="application/json",
             )
 
-        user = verify_token(token)
-        if user is None:
+        payload = verify_token(token)
+        if payload is None:
             return Response(
                 content=json.dumps(
                     {"detail": "Invalid or expired token"},
@@ -297,7 +461,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 media_type="application/json",
             )
 
-        request.state.user = user
+        # Store both username and user_id in request state
+        request.state.user = payload.get("sub")
+        request.state.user_id = payload.get("user_id")
         return await call_next(request)
 
     @staticmethod

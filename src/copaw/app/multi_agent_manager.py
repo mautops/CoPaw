@@ -30,7 +30,7 @@ class MultiAgentManager:
         self._lock = asyncio.Lock()
         logger.debug("MultiAgentManager initialized")
 
-    async def get_agent(self, agent_id: str) -> Workspace:
+    async def get_agent(self, agent_id: str, user_id: str = None) -> Workspace:
         """Get agent workspace by ID (lazy loading).
 
         If workspace doesn't exist in memory, it will be created and started.
@@ -38,6 +38,7 @@ class MultiAgentManager:
 
         Args:
             agent_id: Agent ID to retrieve
+            user_id: Optional user ID for permission filtering
 
         Returns:
             Workspace: The requested workspace instance
@@ -46,10 +47,13 @@ class MultiAgentManager:
             ValueError: If agent ID not found in configuration
         """
         async with self._lock:
+            # Generate cache key including user_id for permission-filtered workspaces
+            cache_key = f"{agent_id}:{user_id}" if user_id else agent_id
+
             # Return existing agent if already loaded
-            if agent_id in self.agents:
-                logger.debug(f"Returning cached agent: {agent_id}")
-                return self.agents[agent_id]
+            if cache_key in self.agents:
+                logger.debug(f"Returning cached agent: {cache_key}")
+                return self.agents[cache_key]
 
             # Load configuration to get agent reference
             config = load_config()
@@ -63,19 +67,20 @@ class MultiAgentManager:
             agent_ref = config.agents.profiles[agent_id]
 
             # Create and start new workspace
-            logger.info(f"Creating new workspace: {agent_id}")
+            logger.info(f"Creating new workspace: {cache_key}")
             instance = Workspace(
                 agent_id=agent_id,
                 workspace_dir=agent_ref.workspace_dir,
+                user_id=user_id,  # Pass user_id for permission filtering
             )
 
             try:
                 await instance.start()
-                self.agents[agent_id] = instance
-                logger.info(f"Workspace created and started: {agent_id}")
+                self.agents[cache_key] = instance
+                logger.info(f"Workspace created and started: {cache_key}")
                 return instance
             except Exception as e:
-                logger.error(f"Failed to start workspace {agent_id}: {e}")
+                logger.error(f"Failed to start workspace {cache_key}: {e}")
                 raise
 
     async def stop_agent(self, agent_id: str) -> bool:

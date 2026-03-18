@@ -193,7 +193,7 @@ class AgentRunner(Runner):
         )
 
         # Set agent context for model creation
-        from ..agent_context import set_current_agent_id
+        from ..agent_context import set_current_agent_id, set_current_user_id
 
         set_current_agent_id(self.agent_id)
 
@@ -204,6 +204,9 @@ class AgentRunner(Runner):
             session_id = request.session_id
             user_id = request.user_id
             channel = getattr(request, "channel", DEFAULT_CHANNEL)
+
+            # Set user_id in context for tool guard permission checks
+            set_current_user_id(user_id)
 
             logger.info(
                 "Handle agent query:\n%s",

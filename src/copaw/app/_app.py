@@ -156,6 +156,17 @@ async def lifespan(
     migrate_legacy_workspace_to_default_agent()
     ensure_default_agent_exists()
 
+    # --- Authorization service initialization ---
+    import os as _os
+    _authz_enabled = _os.environ.get("COPAW_AUTHZ_ENABLED", "").strip().lower() in ("true", "1", "yes")
+    if _authz_enabled:
+        try:
+            from .authz.service import get_authz_service
+            authz_service = get_authz_service()
+            logger.info("Authorization service initialized: %s", authz_service.config_path)
+        except Exception as e:
+            logger.warning("Failed to initialize authorization service: %s", e)
+
     # --- Multi-agent manager initialization ---
     logger.info("Initializing MultiAgentManager...")
     multi_agent_manager = MultiAgentManager()
@@ -295,6 +306,10 @@ app.include_router(api_router, prefix="/api")
 # Agent-scoped router: /api/agents/{agentId}/chats, etc.
 agent_scoped_router = create_agent_scoped_router()
 app.include_router(agent_scoped_router, prefix="/api")
+
+# Agent management API: /api/user/agents
+from .routers.agents_management import router as agents_management_router  # noqa: E402
+app.include_router(agents_management_router, prefix="/api")
 
 
 app.include_router(

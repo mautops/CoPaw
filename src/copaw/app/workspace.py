@@ -43,16 +43,18 @@ class Workspace:
     All components use existing single-agent code without modification.
     """
 
-    def __init__(self, agent_id: str, workspace_dir: str):
+    def __init__(self, agent_id: str, workspace_dir: str, user_id: Optional[str] = None):
         """Initialize agent instance.
 
         Args:
             agent_id: Unique agent identifier
             workspace_dir: Path to agent's workspace directory
+            user_id: Optional user ID for permission filtering
         """
         self.agent_id = agent_id
         self.workspace_dir = Path(workspace_dir).expanduser()
         self.workspace_dir.mkdir(parents=True, exist_ok=True)
+        self.user_id = user_id  # User ID for permission filtering
 
         # All components are None until start() is called (lazy loading)
         self._runner: Optional[AgentRunner] = None
@@ -125,6 +127,12 @@ class Workspace:
             # 1. Load agent configuration from workspace/agent.json
             self._config = load_agent_config(self.agent_id)
             agent_config = self._config
+
+            # Apply permission filters if user_id is set
+            if self.user_id:
+                agent_config = await self._apply_permission_filters(agent_config)
+                self._config = agent_config
+
             logger.debug(f"Loaded config for agent: {self.agent_id}")
 
             # 2. Create Runner
@@ -377,6 +385,75 @@ class Workspace:
         await self.stop()
         await self.start()
         logger.info(f"Agent instance reloaded: {self.agent_id}")
+
+    async def _apply_permission_filters(self, agent_config):
+        """Apply permission filters based on user_id.
+
+        Filters MCP clients and disables tools the user is not allowed to use.
+        This method modifies a copy of the config to avoid changing the shared config.
+
+        Args:
+            agent_config: Agent configuration to filter
+
+        Returns:
+            Filtered agent configuration
+        """
+        from ..config.config import AgentProfileConfig
+
+        # Import here to avoid circular dependency
+        try:
+            from .authz.service import get_authz_service
+            authz = get_authz_service()
+        except Exception as e:
+            logger.warning("Could not load authz service, skipping permission filters: %s", e)
+            return agent_config
+
+        # Check if authorization is enabled
+        if not authz.ensure_authz_enabled():
+            return agent_config
+
+        # Create a deep copy to avoid modifying shared config
+        import copy
+        config = copy.deepcopy(agent_config)
+
+        # Filter MCPs
+        if config.mcp and config.mcp.clients:
+            allowed_mcps = authz.list_user_resources(self.user_id, "mcp")
+            if "*" not in allowed_mcps:
+                original_count = len(config.mcp.clients)
+                config.mcp.clients = {
+                    k: v for k, v in config.mcp.clients.items()
+                    if k in allowed_mcps
+                }
+                filtered_count = original_count - len(config.mcp.clients)
+                if filtered_count > 0:
+                    logger.debug(
+                        "Filtered %d MCP(s) for user '%s' on agent '%s'",
+                        filtered_count,
+                        self.user_id,
+                        self.agent_id,
+                    )
+
+        # Filter Tools (disable those not in allowed list)
+        if config.tools and config.tools.builtin_tools:
+            allowed_tools = authz.list_user_resources(self.user_id, "tool")
+            if "*" not in allowed_tools:
+                disabled_count = 0
+                for tool_name, tool_config in config.tools.builtin_tools.items():
+                    if tool_name not in allowed_tools and tool_config.enabled:
+                        tool_config.enabled = False
+                        disabled_count += 1
+                if disabled_count > 0:
+                    logger.debug(
+                        "Disabled %d tool(s) for user '%s' on agent '%s'",
+                        disabled_count,
+                        self.user_id,
+                        self.agent_id,
+                    )
+
+        return config
+
+
 
     async def _start_config_watchers(self):
         """Start config watchers for hot-reload of agent.json changes."""
