@@ -56,7 +56,7 @@ steps:
     skill: web_search
     params:
       query: "今日新闻"
-      
+
   - name: Generate report
     agent: report-writer
     skill: write_document
@@ -117,10 +117,15 @@ class TestWorkflowsEndpoints:
 
     def test_create_workflow_success(self, client, sample_workflow_content):
         """Test creating a new workflow successfully."""
-        payload = {"filename": "new_workflow.yml", "content": sample_workflow_content}
+        payload = {
+            "filename": "new_workflow.yml",
+            "content": sample_workflow_content,
+        }
 
         response = client.post(
-            "/api/workflows", json=payload, headers={"Content-Type": "application/json"}
+            "/api/workflows",
+            json=payload,
+            headers={"Content-Type": "application/json"},
         )
         assert response.status_code == 201
         data = response.json()
@@ -135,17 +140,31 @@ class TestWorkflowsEndpoints:
         assert created_file.exists()
         assert created_file.read_text() == sample_workflow_content
 
-    def test_create_workflow_invalid_extension(self, client, sample_workflow_content):
+    def test_create_workflow_invalid_extension(
+        self,
+        client,
+        sample_workflow_content,
+    ):
         """Test creating workflow with invalid extension."""
-        payload = {"filename": "workflow.txt", "content": sample_workflow_content}
+        payload = {
+            "filename": "workflow.txt",
+            "content": sample_workflow_content,
+        }
 
         response = client.post("/api/workflows", json=payload)
         assert response.status_code == 400
         data = response.json()
         assert "detail" in data
-        assert "extension" in data["detail"].lower() or ".yml" in data["detail"].lower()
+        assert (
+            "extension" in data["detail"].lower()
+            or ".yml" in data["detail"].lower()
+        )
 
-    def test_create_workflow_path_traversal(self, client, sample_workflow_content):
+    def test_create_workflow_path_traversal(
+        self,
+        client,
+        sample_workflow_content,
+    ):
         """Test preventing path traversal attack."""
         payload = {
             "filename": "../../../etc/passwd.yml",
@@ -166,7 +185,10 @@ class TestWorkflowsEndpoints:
         existing_file.write_text(sample_workflow_content)
 
         # Try to create again
-        payload = {"filename": "existing.yml", "content": sample_workflow_content}
+        payload = {
+            "filename": "existing.yml",
+            "content": sample_workflow_content,
+        }
 
         response = client.post("/api/workflows", json=payload)
         assert response.status_code == 409
@@ -188,7 +210,8 @@ description: Updated description
 """
 
         response = client.put(
-            "/api/workflows/update_test.yml", json={"content": updated_content}
+            "/api/workflows/update_test.yml",
+            json={"content": updated_content},
         )
         assert response.status_code == 200
         data = response.json()
@@ -200,14 +223,16 @@ description: Updated description
     def test_update_workflow_not_found(self, client, sample_workflow_content):
         """Test updating non-existent workflow."""
         response = client.put(
-            "/api/workflows/nonexistent.yml", json={"content": sample_workflow_content}
+            "/api/workflows/nonexistent.yml",
+            json={"content": sample_workflow_content},
         )
         assert response.status_code == 404
         data = response.json()
         assert "detail" in data
 
     # Note: Path traversal protection is tested in POST and DELETE endpoints.
-    # FastAPI handles URL-encoded paths differently, so we skip this test for PUT.
+    # FastAPI handles URL-encoded paths differently, so we skip this test
+    # for PUT.
 
     def test_delete_workflow_success(self, client, sample_workflow_content):
         """Test deleting workflow successfully."""
@@ -271,13 +296,19 @@ class TestWorkflowValidation:
 
     def test_filename_yaml_extension(self, client, sample_workflow_content):
         """Test filename with .yaml extension."""
-        payload = {"filename": "workflow.yaml", "content": sample_workflow_content}
+        payload = {
+            "filename": "workflow.yaml",
+            "content": sample_workflow_content,
+        }
         response = client.post("/api/workflows", json=payload)
         assert response.status_code == 201
 
     def test_filename_yml_extension(self, client, sample_workflow_content):
         """Test filename with .yml extension."""
-        payload = {"filename": "workflow.yml", "content": sample_workflow_content}
+        payload = {
+            "filename": "workflow.yml",
+            "content": sample_workflow_content,
+        }
         response = client.post("/api/workflows", json=payload)
         assert response.status_code == 201
 

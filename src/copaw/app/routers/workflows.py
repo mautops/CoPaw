@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Workflows API - User-level workflow management.
 
-Provides RESTful API for managing user-level workflows that can orchestrate multiple agents.
+Provides RESTful API for managing user-level workflows that can
+orchestrate multiple agents.
 """
 
 import logging
-from pathlib import Path
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Request
+from typing import List
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from ...constant import WORKFLOWS_DIR
@@ -42,7 +42,10 @@ class WorkflowListResponse(BaseModel):
 class WorkflowCreateRequest(BaseModel):
     """Request for creating a workflow."""
 
-    filename: str = Field(..., description="Workflow filename (e.g., daily_report.yml)")
+    filename: str = Field(
+        ...,
+        description="Workflow filename (e.g., daily_report.yml)",
+    )
     content: str = Field(..., description="Workflow content in YAML format")
 
 
@@ -50,7 +53,10 @@ class WorkflowCreateRequest(BaseModel):
     "",
     response_model=WorkflowListResponse,
     summary="List all workflows",
-    description="Get list of all workflow files in the user-level workflows directory",
+    description=(
+        "Get list of all workflow files in the user-level "
+        "workflows directory"
+    ),
 )
 async def list_workflows() -> WorkflowListResponse:
     """List all workflow files."""
@@ -67,7 +73,7 @@ async def list_workflows() -> WorkflowListResponse:
                 size=stat.st_size,
                 created_time=str(stat.st_ctime),
                 modified_time=str(stat.st_mtime),
-            )
+            ),
         )
 
     # Also include .yaml files
@@ -80,7 +86,7 @@ async def list_workflows() -> WorkflowListResponse:
                 size=stat.st_size,
                 created_time=str(stat.st_ctime),
                 modified_time=str(stat.st_mtime),
-            )
+            ),
         )
 
     return WorkflowListResponse(workflows=workflows)
