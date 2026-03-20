@@ -54,8 +54,7 @@ class WorkflowCreateRequest(BaseModel):
     response_model=WorkflowListResponse,
     summary="List all workflows",
     description=(
-        "Get list of all workflow files in the user-level "
-        "workflows directory"
+        "Get list of all workflow files in the user-level workflows directory"
     ),
 )
 async def list_workflows() -> WorkflowListResponse:
