@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
 """CLI init: interactively create working_dir config.json and HEARTBEAT.md."""
+
 from __future__ import annotations
 
 import click
@@ -25,7 +26,7 @@ from ..config.config import (
 )
 from ..constant import HEARTBEAT_DEFAULT_EVERY
 from ..providers import ProviderManager
-from ..constant import WORKING_DIR
+from ..constant import WORKING_DIR, WORKFLOWS_DIR
 
 SECURITY_WARNING = """
 Security warning — please read.
@@ -196,6 +197,10 @@ def init_cmd(
     ensure_default_agent_exists()
     click.echo("✓ Default workspace initialized")
 
+    # --- Ensure user-level workflows directory exists ---
+    WORKFLOWS_DIR.mkdir(parents=True, exist_ok=True)
+    click.echo(f"✓ Workflows directory: {WORKFLOWS_DIR}")
+
     # Get default workspace path for subsequent operations
     default_workspace = Path(f"{WORKING_DIR}/workspaces/default").expanduser()
 
@@ -310,8 +315,7 @@ def init_cmd(
 
         # --- channels (interactive when not --defaults) ---
         if not use_defaults and prompt_confirm(
-            "Configure channels? "
-            "(iMessage/Discord/DingTalk/Feishu/QQ/Console)",
+            "Configure channels? (iMessage/Discord/DingTalk/Feishu/QQ/Console)",
             default=False,
         ):
             configure_channels_interactive(existing)
