@@ -1,0 +1,24 @@
+src/copaw/app/routers/workflows.py
+  1399fc5690ecd227 157,159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.16",
+  "base_commit_sha": "04394d29f696b1bea95d950beb601c31a098f541",
+  "prompts": {
+    "1399fc5690ecd227": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e6ddf1a6-5b8c-48f4-800f-d55259ca933f",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 1,
+      "accepted_lines": 2,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/c814ba68065950995b6d40dc0d9de95a5dc64a2f22c81c4257e9b3b93e2a7a2f"
+    }
+  }
+}
