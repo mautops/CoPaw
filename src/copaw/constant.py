@@ -3,10 +3,14 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env file from project root before reading any env vars
-_env_path = Path(__file__).resolve().parent.parent.parent / ".env"
-if _env_path.exists():
+# Load .env from CoPaw repo root, then optional monorepo parent (e.g. hi-ops/.env for BETTER_AUTH_SECRET)
+_copaw_root = Path(__file__).resolve().parent.parent.parent
+_env_path = _copaw_root / ".env"
+if _env_path.is_file():
     load_dotenv(_env_path)
+_hiops_monorepo_env = _copaw_root.parent / ".env"
+if _hiops_monorepo_env.is_file():
+    load_dotenv(_hiops_monorepo_env, override=False)
 
 
 class EnvVarLoader:
@@ -37,9 +41,7 @@ class EnvVarLoader:
                 return min_value
             if max_value is not None and value > max_value:
                 return max_value
-            if not allow_inf and (
-                value == float("inf") or value == float("-inf")
-            ):
+            if not allow_inf and (value == float("inf") or value == float("-inf")):
                 return default
             return value
         except (TypeError, ValueError):
@@ -70,9 +72,7 @@ class EnvVarLoader:
 
 
 WORKING_DIR = (
-    Path(EnvVarLoader.get_str("COPAW_WORKING_DIR", "~/.copaw"))
-    .expanduser()
-    .resolve()
+    Path(EnvVarLoader.get_str("COPAW_WORKING_DIR", "~/.copaw")).expanduser().resolve()
 )
 SECRET_DIR = (
     Path(

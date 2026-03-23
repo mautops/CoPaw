@@ -15,16 +15,20 @@ Uses only Python stdlib (hashlib, hmac, secrets) to avoid adding new
 dependencies.  The password is stored as a salted SHA-256 hash in
 ``auth.json`` under ``SECRET_DIR``.
 """
+
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
 import hmac
 import json
 import logging
 import os
+import re
 import secrets
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -295,6 +299,142 @@ def authenticate(username: str, password: str) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
+# Upstream HS256 JWT (hi-ops Better Auth proxy, Bearer / X-Access-Token)
+# ---------------------------------------------------------------------------
+
+
+def _upstream_jwt_secret() -> str:
+    return (
+        os.environ.get("COPAW_UPSTREAM_JWT_SECRET", "").strip()
+        or os.environ.get("BETTER_AUTH_SECRET", "").strip()
+    )
+
+
+def _b64url_decode(segment: str) -> bytes:
+    pad = "=" * ((4 - len(segment) % 4) % 4)
+    return base64.urlsafe_b64decode(segment + pad)
+
+
+def _verify_hs256_jwt(token: str, secret: str) -> Optional[dict[str, Any]]:
+    parts = token.split(".")
+    if len(parts) != 3:
+        return None
+    header_b64, payload_b64, sig_b64 = parts
+    try:
+        header = json.loads(_b64url_decode(header_b64))
+    except (json.JSONDecodeError, ValueError, binascii.Error):
+        return None
+    if header.get("alg") != "HS256":
+        return None
+    signing_input = f"{header_b64}.{payload_b64}".encode("ascii")
+    expected_sig = hmac.new(
+        secret.encode("utf-8"),
+        signing_input,
+        hashlib.sha256,
+    ).digest()
+    try:
+        sig_bytes = _b64url_decode(sig_b64)
+    except (ValueError, binascii.Error):
+        return None
+    if not secrets.compare_digest(sig_bytes, expected_sig):
+        return None
+    try:
+        payload = json.loads(_b64url_decode(payload_b64))
+    except (json.JSONDecodeError, ValueError):
+        return None
+    exp = payload.get("exp")
+    if exp is not None:
+        try:
+            if int(exp) < int(time.time()):
+                return None
+        except (TypeError, ValueError):
+            return None
+    return payload
+
+
+_UUID_WORKFLOW_SEGMENT = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+    re.I,
+)
+
+
+def _workflow_segment_from_claim_value(value: object) -> Optional[str]:
+    if not isinstance(value, str):
+        return None
+    s = value.strip()
+    if not s:
+        return None
+    if "@" in s:
+        s = s.split("@", 1)[0].strip()
+    if not s or ".." in s:
+        return None
+    if _UUID_WORKFLOW_SEGMENT.match(s):
+        return None
+    if re.search(r"[\x00-\x1f/\\\\]", s):
+        return None
+    return s
+
+
+def _username_from_jwt_payload(payload: dict[str, Any]) -> Optional[str]:
+    for key in ("preferred_username", "username", "email", "name"):
+        seg = _workflow_segment_from_claim_value(payload.get(key))
+        if seg:
+            return seg
+    sub = payload.get("sub")
+    if isinstance(sub, str) and sub.strip():
+        s = sub.strip()
+        if len(s) == 36 and s.count("-") == 4:
+            return None
+        return _workflow_segment_from_claim_value(s)
+    return None
+
+
+def _resolve_user_from_access_token(token: str) -> Optional[str]:
+    t = token.strip()
+    if not t:
+        return None
+    parts = t.split(".")
+    if len(parts) == 2:
+        return verify_token(t)
+    if len(parts) != 3:
+        return None
+    secret = _upstream_jwt_secret()
+    if not secret:
+        return None
+    payload = _verify_hs256_jwt(t, secret)
+    if not payload:
+        return None
+    return _username_from_jwt_payload(payload)
+
+
+def _extract_access_token_header(request: Request) -> Optional[str]:
+    x = request.headers.get("X-Access-Token", "").strip()
+    if x:
+        return x
+    auth = request.headers.get("Authorization", "").strip()
+    if auth.startswith("Bearer "):
+        return auth[7:].strip()
+    return None
+
+
+class AccessTokenUserMiddleware(BaseHTTPMiddleware):
+    """Set ``request.state.user`` from verified CoPaw token or HS256 upstream JWT."""
+
+    async def dispatch(self, request: Request, call_next):
+        if request.method == "OPTIONS":
+            return await call_next(request)
+        if not request.url.path.startswith("/api/"):
+            return await call_next(request)
+        raw = _extract_access_token_header(request)
+        if not raw:
+            return await call_next(request)
+        user = _resolve_user_from_access_token(raw)
+        if user:
+            request.state.user = user
+        return await call_next(request)
+
+
+# ---------------------------------------------------------------------------
 # FastAPI middleware
 # ---------------------------------------------------------------------------
 
@@ -309,6 +449,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         """Check Bearer token on protected API routes; skip public paths."""
         if self._should_skip_auth(request):
+            return await call_next(request)
+
+        existing = getattr(request.state, "user", None)
+        if existing:
             return await call_next(request)
 
         token = self._extract_token(request)
@@ -343,9 +487,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if request.method == "OPTIONS":
             return True
 
-        if path in _PUBLIC_PATHS or any(
-            path.startswith(p) for p in _PUBLIC_PREFIXES
-        ):
+        if path in _PUBLIC_PATHS or any(path.startswith(p) for p in _PUBLIC_PREFIXES):
             return True
 
         # Only protect /api/ routes

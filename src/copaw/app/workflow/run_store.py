@@ -25,10 +25,12 @@ def _safe_basename(name: str) -> str:
     return _UNSAFE_FILENAME_RE.sub("--", name)
 
 
-def runs_file_path(workflow_filename: str) -> Path:
-    """Path to the JSON list file for *workflow_filename* (e.g. daily.md)."""
-    safe = _safe_basename(workflow_filename)
-    return WORKFLOW_RUNS_DIR / f"{safe}.runs.json"
+def runs_file_path(username: str, workflow_rel_filename: str) -> Path:
+    """Path to the JSON list file for a workflow relative path (e.g. daily.md, a/b.md)."""
+    stem = workflow_rel_filename.replace("/", "__")
+    safe_user = _safe_basename(username)
+    safe_stem = _safe_basename(stem)
+    return WORKFLOW_RUNS_DIR / safe_user / f"{safe_stem}.runs.json"
 
 
 def _load_list(path: Path) -> List[dict[str, Any]]:
@@ -59,9 +61,9 @@ def _save_atomic(path: Path, items: List[dict[str, Any]]) -> None:
     shutil.move(str(tmp_path), str(path))
 
 
-def delete_runs_file(workflow_filename: str) -> None:
+def delete_runs_file(username: str, workflow_rel_filename: str) -> None:
     """Remove run history file when the workflow file is deleted."""
-    path = runs_file_path(workflow_filename)
+    path = runs_file_path(username, workflow_rel_filename)
     try:
         if path.is_file():
             path.unlink()
@@ -85,13 +87,18 @@ class WorkflowRunStore:
                 cls._instance = cls()
             return cls._instance
 
-    async def list_runs(self, workflow_filename: str) -> List[dict[str, Any]]:
+    async def list_runs(
+        self,
+        username: str,
+        workflow_rel_filename: str,
+    ) -> List[dict[str, Any]]:
         async with self._file_lock:
-            return _load_list(runs_file_path(workflow_filename))
+            return _load_list(runs_file_path(username, workflow_rel_filename))
 
     async def append_run(
         self,
-        workflow_filename: str,
+        username: str,
+        workflow_rel_filename: str,
         *,
         user_id: str,
         session_id: str,
@@ -105,7 +112,7 @@ class WorkflowRunStore:
             at = at.replace(tzinfo=timezone.utc)
         record: dict[str, Any] = {
             "run_id": run_id,
-            "workflow_id": workflow_filename,
+            "workflow_id": workflow_rel_filename,
             "user_id": user_id,
             "session_id": session_id,
             "trigger": trigger,
@@ -114,7 +121,7 @@ class WorkflowRunStore:
         if status is not None:
             record["status"] = status
 
-        path = runs_file_path(workflow_filename)
+        path = runs_file_path(username, workflow_rel_filename)
         async with self._file_lock:
             items = _load_list(path)
             items.append(record)
@@ -123,11 +130,12 @@ class WorkflowRunStore:
 
     async def get_run(
         self,
-        workflow_filename: str,
+        username: str,
+        workflow_rel_filename: str,
         run_id: str,
     ) -> dict[str, Any] | None:
         async with self._file_lock:
-            for row in _load_list(runs_file_path(workflow_filename)):
+            for row in _load_list(runs_file_path(username, workflow_rel_filename)):
                 if row.get("run_id") == run_id:
                     return row
         return None
