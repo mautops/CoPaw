@@ -8,6 +8,9 @@ export const qkWorkflowRuns = (name: string) =>
 export const PAGE_SIZE = 12;
 export const TAGS_VISIBLE = 5;
 
+/** 列表卡片执行趋势图的时间跨度 (天, 含当日). */
+export const WORKFLOW_RUNS_CHART_DAYS = 14;
+
 export function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -164,4 +167,56 @@ export function matchesWorkflowFilter(w: WorkflowInfo, query: string): boolean {
     }
   }
   return true;
+}
+
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Match ``formatWorkflowTimestamp`` / API: numeric string as unix seconds. */
+export function parseWorkflowRunExecutedAtMs(raw: string): number | null {
+  const n = Number(raw);
+  const ms = Number.isFinite(n) ? n * 1000 : Date.parse(raw);
+  return Number.isFinite(ms) ? ms : null;
+}
+
+export type DailyRunPoint = { date: string; label: string; count: number };
+
+/** Last *days* calendar days (local), including today; missing days get count 0. */
+export function dailyRunCountsForChart(
+  runs: { executed_at: string }[],
+  days = WORKFLOW_RUNS_CHART_DAYS,
+): DailyRunPoint[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const keys: string[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    keys.push(localDateKey(d));
+  }
+  const startKey = keys[0]!;
+  const endKey = keys[keys.length - 1]!;
+  const counts = new Map<string, number>();
+  for (const k of keys) counts.set(k, 0);
+
+  for (const r of runs) {
+    const ms = parseWorkflowRunExecutedAtMs(r.executed_at);
+    if (ms == null) continue;
+    const key = localDateKey(new Date(ms));
+    if (key < startKey || key > endKey) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  return keys.map((date) => {
+    const parts = date.split("-");
+    const m = Number(parts[1]);
+    const day = Number(parts[2]);
+    const label =
+      Number.isFinite(m) && Number.isFinite(day) ? `${m}/${day}` : date;
+    return { date, label, count: counts.get(date) ?? 0 };
+  });
 }

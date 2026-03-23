@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  isWorkflowMarkdownFilename,
+  ensureWorkflowMarkdownFilename,
   workflowApi,
   type WorkflowInfo,
 } from "@/lib/workflow-api";
@@ -20,7 +20,10 @@ import {
 } from "@/lib/workflow-chat-bridge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppShell } from "../../app-shell";
-import { WorkflowCreateDialog } from "./workflow-create-dialog";
+import {
+  DEFAULT_NEW_WORKFLOW_MARKDOWN,
+  WorkflowCreateDialog,
+} from "./workflow-create-dialog";
 import { WorkflowDeleteDialog } from "./workflow-delete-dialog";
 import { WorkflowDetailSheet } from "./workflow-detail-sheet";
 import {
@@ -50,7 +53,7 @@ export function WorkflowsClient() {
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newContent, setNewContent] = useState("");
+  const [newContent, setNewContent] = useState(DEFAULT_NEW_WORKFLOW_MARKDOWN);
   const [page, setPage] = useState(1);
   const [filterQuery, setFilterQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -159,11 +162,14 @@ export function WorkflowsClient() {
 
   const createMutation = useMutation({
     mutationFn: (body: { filename: string; content: string }) =>
-      workflowApi.create(body),
+      workflowApi.create({
+        ...body,
+        filename: ensureWorkflowMarkdownFilename(body.filename),
+      }),
     onSuccess: async (_, vars) => {
       setCreateOpen(false);
       setNewName("");
-      setNewContent("");
+      setNewContent(DEFAULT_NEW_WORKFLOW_MARKDOWN);
       await invalidateList();
       setSelected(vars.filename);
       setSheetOpen(true);
@@ -223,7 +229,7 @@ export function WorkflowsClient() {
     if (!open) setSelected(null);
   };
 
-  const canCreate = isWorkflowMarkdownFilename(newName);
+  const canCreate = newName.trim().length > 0;
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-base">
@@ -244,7 +250,11 @@ export function WorkflowsClient() {
             onToggleLeftSidebar={toggleLeftSidebar}
             filterQuery={filterQuery}
             onOpenSearch={() => setSearchOpen(true)}
-            onCreateClick={() => setCreateOpen(true)}
+            onCreateClick={() => {
+              setNewName("");
+              setNewContent(DEFAULT_NEW_WORKFLOW_MARKDOWN);
+              setCreateOpen(true);
+            }}
             modifierKeyPrefix={modifierKeyPrefix}
           />
           <WorkflowListContent
@@ -282,7 +292,13 @@ export function WorkflowsClient() {
 
       <WorkflowCreateDialog
         open={createOpen}
-        onOpenChange={setCreateOpen}
+        onOpenChange={(open) => {
+          setCreateOpen(open);
+          if (open) {
+            setNewName("");
+            setNewContent(DEFAULT_NEW_WORKFLOW_MARKDOWN);
+          }
+        }}
         newName={newName}
         onNewNameChange={setNewName}
         newContent={newContent}

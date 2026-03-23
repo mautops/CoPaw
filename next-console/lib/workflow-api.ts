@@ -8,6 +8,24 @@ export function isWorkflowMarkdownFilename(name: string): boolean {
   return WORKFLOW_MARKDOWN_EXTS.some((ext) => n.endsWith(ext));
 }
 
+/**
+ * If the last path segment has no ``.md`` / ``.markdown`` suffix, append ``.md``.
+ * Preserves relative paths like ``ops/daily``.
+ */
+export function ensureWorkflowMarkdownFilename(raw: string): string {
+  const t = raw.trim().replace(/\\/g, "/");
+  if (!t) return t;
+  const parts = t.split("/").filter((p) => p.length > 0);
+  if (parts.length === 0) return t;
+  const last = parts[parts.length - 1]!;
+  const low = last.toLowerCase();
+  const hasExt = WORKFLOW_MARKDOWN_EXTS.some((ext) => low.endsWith(ext));
+  if (!hasExt) {
+    parts[parts.length - 1] = `${last}.md`;
+  }
+  return parts.join("/");
+}
+
 /** Parsed from YAML frontmatter in the Markdown file. */
 export interface WorkflowMeta {
   name?: string | null;

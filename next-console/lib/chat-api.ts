@@ -83,6 +83,50 @@ const TOOL_OUTPUT_TYPES = new Set([
   "component_call_output",
 ]);
 
+/** AgentScope / runtime may emit these before content deltas (not only ``in_progress``). */
+const LIVE_MESSAGE_STATUSES = new Set(["generating", "created", "in_progress"]);
+
+function isLiveMessageStatus(status: unknown): boolean {
+  return (
+    typeof status === "string" &&
+    LIVE_MESSAGE_STATUSES.has(status.toLowerCase())
+  );
+}
+
+function isCompletedStatus(status: unknown): boolean {
+  return typeof status === "string" && status.toLowerCase() === "completed";
+}
+
+/**
+ * Yield so React can paint between SSE chunks. A single fetch read() often
+ * contains many lines; sync setState in a loop still collapses to one frame
+ * without an async boundary (and batching can hide intermediate strings).
+ */
+async function deferToMain(): Promise<void> {
+  const sch = globalThis.scheduler;
+  if (sch && typeof sch.yield === "function") {
+    await sch.yield();
+    return;
+  }
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
+function assertNotAborted(signal: AbortSignal | undefined): void {
+  if (signal?.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+}
+
+/** Treat as stream delta unless explicitly ``delta: false`` (snapshots use that). */
+function isStreamingTextDelta(msg: Record<string, unknown>): boolean {
+  if (msg.object !== "content" || msg.type !== "text") return false;
+  if (msg.delta === false) return false;
+  const text = msg.text;
+  return typeof text === "string" && text.length > 0;
+}
+
 export const chatApi = {
   listChats: () => apiRequest<ChatSpec[]>("/chats"),
 
@@ -200,11 +244,11 @@ export const chatApi = {
             ? trimmed.slice(6)
             : trimmed;
           try {
-            const msg = JSON.parse(jsonStr);
+            const msg = JSON.parse(jsonStr) as Record<string, unknown>;
 
             // ── Message phase start ──────────────────────────────────────
-            if (msg.object === "message" && msg.status === "in_progress") {
-              const msgType: string = msg.type ?? "";
+            if (msg.object === "message" && isLiveMessageStatus(msg.status)) {
+              const msgType: string = (msg.type as string) ?? "";
               if (msgType === "reasoning") {
                 subType = "reasoning";
                 onThinkingStart?.();
@@ -219,19 +263,20 @@ export const chatApi = {
             }
 
             // ── Streaming text delta ─────────────────────────────────────
-            if (
-              msg.object === "content" &&
-              msg.delta === true &&
-              msg.type === "text" &&
-              msg.text
-            ) {
+            if (isStreamingTextDelta(msg)) {
+              const piece = msg.text as string;
               if (subType === "reasoning") {
-                fullThinking += msg.text;
+                fullThinking += piece;
                 onThinkingChunk?.(fullThinking);
-              } else if (subType === "text") {
+                assertNotAborted(signal);
+                await deferToMain();
+              } else if (subType === "text" || subType === null) {
+                if (subType === null) subType = "text";
                 hasTextDelta = true;
-                fullContent += msg.text;
+                fullContent += piece;
                 onChunk(fullContent);
+                assertNotAborted(signal);
+                await deferToMain();
               }
               continue;
             }
@@ -277,7 +322,7 @@ export const chatApi = {
             }
 
             // ── Message phase end ────────────────────────────────────────
-            if (msg.object === "message" && msg.status === "completed") {
+            if (msg.object === "message" && isCompletedStatus(msg.status)) {
               if (subType === "reasoning") {
                 onThinkingEnd?.();
               } else if (
@@ -285,18 +330,38 @@ export const chatApi = {
                 !hasTextDelta &&
                 Array.isArray(msg.content)
               ) {
-                // Non-streaming fallback: no text deltas, use completed content
-                for (const part of msg.content) {
-                  if (part.type === "text" && part.text && !part.delta) {
-                    fullContent += part.text;
+                const parts = msg.content as Array<{
+                  type?: string;
+                  text?: string;
+                  delta?: boolean;
+                }>;
+                for (const part of parts) {
+                  if (
+                    part.type !== "text" ||
+                    typeof part.text !== "string" ||
+                    !part.text ||
+                    part.delta === true
+                  ) {
+                    continue;
+                  }
+                  const fragment = part.text;
+                  const step =
+                    fragment.length <= 80
+                      ? fragment.length
+                      : Math.max(6, Math.ceil(fragment.length / 36));
+                  for (let i = 0; i < fragment.length; i += step) {
+                    fullContent += fragment.slice(i, i + step);
                     onChunk(fullContent);
+                    assertNotAborted(signal);
+                    await deferToMain();
                   }
                 }
               }
               subType = null;
               continue;
             }
-          } catch {
+          } catch (e) {
+            if (e instanceof DOMException && e.name === "AbortError") throw e;
             /* ignore unparseable lines */
           }
         }

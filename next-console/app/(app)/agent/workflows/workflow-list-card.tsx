@@ -1,8 +1,10 @@
 "use client";
 
+import { LayoutGridIcon, TagIcon } from "lucide-react";
 import { formatWorkflowTimestamp, type WorkflowInfo } from "@/lib/workflow-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Card,
   CardContent,
@@ -12,13 +14,13 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
-  formatSize,
   TAGS_VISIBLE,
   WORKFLOW_STATUS_BADGE,
   workflowDisplayTitle,
   workflowStatusTone,
   workflowTags,
 } from "./workflow-domain";
+import { WorkflowRunsDailyChart } from "./workflow-runs-daily-chart";
 
 export function WorkflowListCard({
   w,
@@ -46,96 +48,122 @@ export function WorkflowListCard({
       className="cursor-pointer text-base shadow-none transition-[background-color,box-shadow] hover:bg-muted/35 hover:ring-foreground/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <CardHeader className="gap-0 border-b border-border/60 pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-lg font-semibold leading-snug">
-              {workflowDisplayTitle(w)}
-            </CardTitle>
-            <p
-              className="mt-1 truncate font-mono text-sm text-muted-foreground"
-              title={w.path}
-            >
-              {w.filename}
-            </p>
-          </div>
-          {w.status?.trim() ? (
-            <Badge
-              variant="outline"
-              className={cn(
-                "shrink-0 px-2 py-0.5 text-sm font-normal tabular-nums",
-                WORKFLOW_STATUS_BADGE[statusTone],
-              )}
-            >
-              {w.status.trim()}
-            </Badge>
-          ) : null}
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2 pb-0">
-        {w.description?.trim() ? (
-          <p className="line-clamp-2 text-base leading-snug text-muted-foreground">
-            {w.description.trim()}
-          </p>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {w.category?.trim() ? (
-            <Badge
-              variant="secondary"
-              className="max-w-40 truncate px-2 py-0.5 text-sm font-normal"
-            >
-              {w.category.trim()}
-            </Badge>
-          ) : null}
-          {w.version?.trim() ? (
-            <span className="text-sm tabular-nums text-muted-foreground">
-              v{w.version.trim()}
-            </span>
-          ) : null}
-        </div>
-        {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {tags.slice(0, TAGS_VISIBLE).map((t) => (
-              <Badge
-                key={t}
-                variant="outline"
-                className="max-w-28 truncate px-2 py-0.5 text-sm font-normal leading-snug"
-              >
-                {t}
-              </Badge>
-            ))}
-            {restTags > 0 ? (
-              <span className="self-center text-sm text-muted-foreground">
-                +{restTags}
+        <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-1">
+          <CardTitle className="col-start-1 row-start-1 block min-w-0 max-w-full text-lg font-semibold leading-snug">
+            <span className="inline-flex min-w-0 max-w-full items-center gap-2">
+              <span className="min-w-0 truncate">
+                {workflowDisplayTitle(w)}
               </span>
+              {w.version?.trim() ? (
+                <>
+                  <Separator
+                    orientation="vertical"
+                    className="h-7 shrink-0"
+                    decorative
+                  />
+                  <span className="shrink-0 whitespace-nowrap font-normal text-sm tabular-nums text-muted-foreground">
+                    (v{w.version.trim()})
+                  </span>
+                </>
+              ) : null}
+            </span>
+          </CardTitle>
+          <div className="col-start-2 row-start-1 flex justify-end self-start">
+            {w.status?.trim() ? (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "shrink-0 px-2 py-0.5 text-sm font-normal tabular-nums",
+                  WORKFLOW_STATUS_BADGE[statusTone],
+                )}
+              >
+                {w.status.trim()}
+              </Badge>
             ) : null}
           </div>
-        ) : null}
-      </CardContent>
-      <CardFooter className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="tabular-nums">{formatSize(w.size)}</span>
-          <span aria-hidden className="text-border">
-            ·
-          </span>
-          <span className="min-w-0 truncate">
+          <p
+            className="col-start-1 row-start-2 min-w-0 truncate font-mono text-sm text-muted-foreground"
+            title={w.path}
+          >
+            {w.filename}
+          </p>
+          <span className="col-start-2 row-start-2 shrink-0 justify-self-end text-right text-sm tabular-nums text-muted-foreground">
             更新 {formatWorkflowTimestamp(w.modified_time)}
           </span>
+          <div className="col-span-2 col-start-1 row-start-3 min-w-0">
+            <WorkflowRunsDailyChart filename={w.filename} />
+          </div>
         </div>
-        {onExecute ? (
-          <Button
-            type="button"
-            variant="secondary"
-            className="pointer-events-auto shrink-0 text-base"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              void onExecute(w);
-            }}
+      </CardHeader>
+      {w.description?.trim() ? (
+        <CardContent className="min-w-0 max-w-full overflow-hidden pb-0">
+          <p
+            className="line-clamp-2 max-h-11 min-w-0 overflow-hidden wrap-break-word text-base leading-snug text-muted-foreground"
+            title={w.description.trim()}
           >
-            执行
-          </Button>
-        ) : null}
-      </CardFooter>
+            {w.description.trim()}
+          </p>
+        </CardContent>
+      ) : null}
+      {(Boolean(w.category?.trim()) || tags.length > 0 || onExecute) && (
+        <CardFooter className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-muted-foreground">
+            {w.category?.trim() ? (
+              <div className="flex min-w-0 max-w-full items-center gap-1.5">
+                <LayoutGridIcon
+                  className="size-3.5 shrink-0 text-muted-foreground"
+                  aria-hidden
+                />
+                <Badge
+                  variant="secondary"
+                  className="max-w-[min(10rem,100%)] truncate px-2 py-0.5 text-sm font-normal"
+                >
+                  {w.category.trim()}
+                </Badge>
+              </div>
+            ) : null}
+            {w.category?.trim() && tags.length > 0 ? (
+              <Separator orientation="vertical" className="h-4" decorative />
+            ) : null}
+            {tags.length > 0 ? (
+              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                <TagIcon
+                  className="size-3.5 shrink-0 text-muted-foreground"
+                  aria-hidden
+                />
+                {tags.slice(0, TAGS_VISIBLE).map((t) => (
+                  <Badge
+                    key={t}
+                    variant="outline"
+                    className="max-w-28 truncate px-2 py-0.5 text-sm font-normal leading-snug"
+                  >
+                    {t}
+                  </Badge>
+                ))}
+                {restTags > 0 ? (
+                  <span className="text-sm text-muted-foreground">
+                    +{restTags}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+          {onExecute ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="pointer-events-auto shrink-0 text-base"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                void onExecute(w);
+              }}
+            >
+              执行
+            </Button>
+          ) : null}
+        </CardFooter>
+      )}
     </Card>
   );
 }

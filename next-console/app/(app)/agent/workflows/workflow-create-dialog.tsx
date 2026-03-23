@@ -14,6 +14,23 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2Icon } from "lucide-react";
 
+/** 新建工作流时 Textarea 的初始正文, 用户可直接在此基础上修改. */
+export const DEFAULT_NEW_WORKFLOW_MARKDOWN = `---
+name: 显示名称
+description: 简短说明
+category: 分类
+status: draft
+version: "1.0"
+tags:
+  - 运维
+  - 自动化
+---
+
+# 标题
+
+在此编写工作流说明与步骤.
+`;
+
 export function WorkflowCreateDialog({
   open,
   onOpenChange,
@@ -41,16 +58,17 @@ export function WorkflowCreateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] text-base sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>新建 workflow</DialogTitle>
+          <DialogTitle>新建工作流</DialogTitle>
           <DialogDescription>
-            文件名须以 .md 或 .markdown 结尾, 内容为完整 Markdown (可含 YAML 头信息).
+            文件名无需写后缀, 未以 .md / .markdown 结尾时将自动补全为 .md. 内容为完整
+            Markdown (可含 YAML 头信息).
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 py-2">
           <div className="grid gap-1.5">
             <label className="font-medium text-muted-foreground">文件名</label>
             <Input
-              placeholder="example.md"
+              placeholder="example"
               value={newName}
               onChange={(e) => onNewNameChange(e.target.value)}
             />
@@ -64,7 +82,6 @@ export function WorkflowCreateDialog({
               onChange={(e) => onNewContentChange(e.target.value)}
               spellCheck={false}
               className="min-h-[200px] font-mono"
-              placeholder={`---\nname: 显示名称\ndescription: 简短说明\ncategory: 分类\nstatus: draft\nversion: "1.0"\ntags: [运维, 自动化]\n---\n\n# 正文`}
             />
           </div>
           {createMutation.isError && (

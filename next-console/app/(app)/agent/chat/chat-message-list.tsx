@@ -2,6 +2,8 @@
 
 import {
   Message,
+  MessageAction,
+  MessageActions,
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message";
@@ -26,7 +28,7 @@ import {
 import type { ToolCallInfo } from "@/lib/chat-api";
 import type { ChatStatus } from "ai";
 import { BotIcon, CopyIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { LocalMessage } from "./types";
 
 // ── Avatar helpers ───────────────────────────────────────────────────────────
@@ -156,21 +158,22 @@ export function ChatMessageList({
             ) : (
               AVATAR_PLACEHOLDER
             )}
-            <div className="flex min-w-0 flex-1 items-start gap-2">
+            <div className="group flex min-w-0 flex-1 items-start gap-2">
               <Message from={msg.role} className="max-w-full">
                 <MessageContent>
                   <MessageResponse>{msg.content}</MessageResponse>
                 </MessageContent>
               </Message>
               {msg.role === "assistant" && (
-                <button
-                  onClick={() => navigator.clipboard.writeText(msg.content)}
-                  className="mt-1 opacity-0 transition-opacity group-hover:opacity-100"
-                  title="复制"
-                  aria-label="复制消息"
-                >
-                  <CopyIcon className="size-4 text-muted-foreground hover:text-foreground" />
-                </button>
+                <MessageActions className="mt-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <MessageAction
+                    tooltip="复制"
+                    label="复制"
+                    onClick={() => void navigator.clipboard.writeText(msg.content)}
+                  >
+                    <CopyIcon className="size-4" />
+                  </MessageAction>
+                </MessageActions>
               )}
             </div>
           </div>
@@ -211,82 +214,102 @@ function StreamingBlock({
   streamingTools: ToolCallInfo[];
 }) {
   const prevIsAssistant = messages.at(-1)?.role === "assistant";
-  const [avatarUsed, setAvatarUsed] = useState(prevIsAssistant);
-  
-  // Reset avatarUsed when component remounts or prevIsAssistant changes
-  useEffect(() => {
-    setAvatarUsed(prevIsAssistant);
-  }, [prevIsAssistant]);
-  
   const showThinking = isThinkingStreaming || !!streamingThinking;
   const showShimmer =
     status === "submitted" && !showThinking && streamingTools.length === 0 && !streamingContent;
+  // Do not gate text on !isThinkingStreaming: answer tokens often overlap reasoning in time.
+  // Hiding MessageResponse until thinking ends makes streamingContent jump in as one block.
   const showText =
-    !isThinkingStreaming &&
     !showShimmer &&
-    (!!streamingContent || (streamingTools.length === 0 && !streamingThinking));
+    (!!streamingContent ||
+      (streamingTools.length === 0 && !streamingThinking && !isThinkingStreaming));
 
-  const nextAvatar = (center = false) => {
-    if (avatarUsed) return AVATAR_PLACEHOLDER;
-    setAvatarUsed(true);
-    return <BotAvatar center={center} />;
+  type StreamRow = {
+    key: string;
+    align: "items-start" | "items-center";
+    centerAvatar?: boolean;
+    body: ReactNode;
   };
+  const rows: StreamRow[] = [];
+  if (showShimmer) {
+    rows.push({
+      key: "shimmer",
+      align: "items-start",
+      body: (
+        <Message from="assistant" className="max-w-[calc(100%-2.5rem)]">
+          <MessageContent>
+            <Shimmer>思考中...</Shimmer>
+          </MessageContent>
+        </Message>
+      ),
+    });
+  }
+  if (showThinking) {
+    rows.push({
+      key: "thinking",
+      align: "items-center",
+      centerAvatar: true,
+      body: (
+        <Reasoning isStreaming={isThinkingStreaming} className="min-w-0 flex-1">
+          <ReasoningTrigger />
+          <ReasoningContent>{streamingThinking || " "}</ReasoningContent>
+        </Reasoning>
+      ),
+    });
+  }
+  for (const tool of streamingTools) {
+    rows.push({
+      key: `tool-${tool.callId}`,
+      align: "items-start",
+      body: <ToolBlock tool={tool} />,
+    });
+  }
+  if (showText) {
+    rows.push({
+      key: "text",
+      align: "items-start",
+      body: (
+        <div className="group flex min-w-0 flex-1 items-start gap-2">
+          <Message from="assistant" className="max-w-full">
+            <MessageContent>
+              <MessageResponse isAnimating={status === "streaming"}>
+                {streamingContent || " "}
+              </MessageResponse>
+            </MessageContent>
+          </Message>
+          <MessageActions className="mt-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <MessageAction
+              tooltip="复制"
+              label="复制"
+              disabled={!streamingContent}
+              onClick={() => void navigator.clipboard.writeText(streamingContent)}
+            >
+              <CopyIcon className="size-4" />
+            </MessageAction>
+          </MessageActions>
+        </div>
+      ),
+    });
+  }
 
   return (
     <>
-      {showShimmer && (
-        <div className={`${prevIsAssistant ? "mt-1" : "mt-6"} flex flex-row items-start gap-3`}>
-          {nextAvatar()}
-          <Message from="assistant" className="max-w-[calc(100%-2.5rem)]">
-            <MessageContent>
-              <Shimmer>思考中...</Shimmer>
-            </MessageContent>
-          </Message>
-        </div>
-      )}
-
-      {showThinking && (
-        <div className={`${prevIsAssistant ? "mt-1" : "mt-6"} flex flex-row items-center gap-3`}>
-          {nextAvatar(true)}
-          <Reasoning isStreaming={isThinkingStreaming} className="min-w-0 flex-1">
-            <ReasoningTrigger />
-            <ReasoningContent>{streamingThinking || " "}</ReasoningContent>
-          </Reasoning>
-        </div>
-      )}
-
-      {streamingTools.map((tool) => (
-        <div key={tool.callId} className="mt-1 flex flex-row items-start gap-3">
-          {nextAvatar()}
-          <ToolBlock tool={tool} />
-        </div>
-      ))}
-
-      {showText && (
-        <div
-          className={`${prevIsAssistant || showThinking || streamingTools.length > 0 ? "mt-1" : "mt-6"} flex flex-row items-start gap-3`}
-        >
-          {nextAvatar()}
-          <div className="flex min-w-0 flex-1 items-start gap-2">
-            <Message from="assistant" className="max-w-full">
-              <MessageContent>
-                <MessageResponse isAnimating={status === "streaming"}>
-                  {streamingContent || " "}
-                </MessageResponse>
-              </MessageContent>
-            </Message>
-            <button
-              onClick={() => navigator.clipboard.writeText(streamingContent)}
-              className="mt-1 opacity-0 transition-opacity group-hover:opacity-100"
-              title="复制"
-              aria-label="复制消息"
-              disabled={!streamingContent}
-            >
-              <CopyIcon className="size-4 text-muted-foreground hover:text-foreground" />
-            </button>
+      {rows.map((row, i) => {
+        const mt = i === 0 ? (prevIsAssistant ? "mt-1" : "mt-6") : "mt-1";
+        return (
+          <div
+            key={row.key}
+            className={`${mt} flex flex-row ${row.align} gap-3`}
+          >
+            {i === 0 ? (
+              <BotAvatar center={row.centerAvatar} />
+            ) : (
+              AVATAR_PLACEHOLDER
+            )}
+            {row.body}
           </div>
-        </div>
-      )}
+        );
+      })}
     </>
   );
 }

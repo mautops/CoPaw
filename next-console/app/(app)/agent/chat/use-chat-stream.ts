@@ -56,9 +56,15 @@ export function useChatStream({
   // Load messages from history (currentChatId ensures re-run after deep-link refetch, etc.)
   useEffect(() => {
     if (!currentChatId || !chatHistory) return;
-    setMessages(
-      parseHistory(chatHistory.messages as Parameters<typeof parseHistory>[0]),
+    const parsed = parseHistory(
+      chatHistory.messages as Parameters<typeof parseHistory>[0],
     );
+    // New chat + workflow handoff: optimistic user message exists before getChat lists it.
+    // Empty history refetch must not wipe local rows.
+    if (parsed.length === 0 && messagesRef.current.length > 0) {
+      return;
+    }
+    setMessages(parsed);
   }, [currentChatId, chatHistory, setMessages]);
 
   const resetStreaming = useCallback(() => {

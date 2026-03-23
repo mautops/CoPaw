@@ -182,8 +182,8 @@ function ChatPageInner() {
         onSelect={handleSelectSession}
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <ContentTopbar
             showLeftSidebar={showLeftSidebar}
             onToggleLeftSidebar={toggleLeftSidebar}
@@ -193,8 +193,11 @@ function ChatPageInner() {
             searchPlaceholder="搜索对话..."
           />
 
-          <Conversation className="flex-1">
-            <ConversationContent className="px-0 pb-70 pt-15">
+          <Conversation className="min-h-0 flex-1">
+            <ConversationContent
+              className="px-0 pt-15 pb-[max(18rem,calc(11rem+28vh))]"
+              scrollClassName="scroll-pb-[max(18rem,calc(11rem+28vh))]"
+            >
               {messages.length === 0 && !isGenerating ? (
                 <ConversationEmptyState title="开始对话" description="发送消息，与 AI 智能体开始聊天">
                   <div className="mt-2">
@@ -221,7 +224,7 @@ function ChatPageInner() {
                 />
               )}
             </ConversationContent>
-            <ConversationScrollButton />
+            <ConversationScrollButton className="z-30 bottom-[calc(11rem+env(safe-area-inset-bottom,0px))]" />
           </Conversation>
 
           <ChatInput status={status} onSubmit={handleSubmit} onStop={handleStop} />

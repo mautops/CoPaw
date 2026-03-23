@@ -305,7 +305,9 @@ def _resolve_console_static_dir() -> str:
 
     fallback = cwd / "console" / "dist"
     logger.warning(
-        f"Console static directory not found. Falling back to '{fallback}'.",
+        "Bundled SPA static dir not found (expected for API-only images). "
+        "Falling back to %r - use next-console for the web UI.",
+        str(fallback),
     )
     return str(fallback)
 
@@ -323,11 +325,10 @@ def read_root():
         return FileResponse(_CONSOLE_INDEX)
     return {
         "message": (
-            "CoPaw Web Console is not available. "
-            "If you installed CoPaw from source code, please run "
-            "`npm ci && npm run build` in CoPaw's `console/` "
-            "directory, and restart CoPaw to enable the "
-            "web console."
+            "CoPaw web UI is not bundled with this API process. "
+            "Run the `next-console` app (see `next-console/` and "
+            "`docker-compose.yml`) and open it in the browser; "
+            "set `COPAW_API_URL` to this server's base URL."
         ),
     }
 
