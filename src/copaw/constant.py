@@ -145,6 +145,11 @@ CUSTOM_CHANNELS_DIR = WORKING_DIR / "custom_channels"
 # Local models directory
 MODELS_DIR = WORKING_DIR / "models"
 
+# Workflows directory (user-level, supports multi-agent orchestration)
+WORKFLOWS_DIR = WORKING_DIR / "workflows"
+# Per-workflow run history: one JSON list file per workflow basename
+WORKFLOW_RUNS_DIR = WORKFLOWS_DIR / ".runs"
+
 MEMORY_COMPACT_KEEP_RECENT = EnvVarLoader.get_int(
     "COPAW_MEMORY_COMPACT_KEEP_RECENT",
     3,
