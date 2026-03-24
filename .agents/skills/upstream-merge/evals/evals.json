@@ -18,6 +18,18 @@
       "prompt": "After cherry-picking three commits from upstream, `git cherry-pick` stopped with conflicts in next-console/package.json. I do not want to lose our pnpm overrides. What should I check before continuing the cherry-pick?",
       "expected_output": "Open conflicted file, preserve downstream overrides while taking upstream dependency changes intentionally, git add and cherry-pick --continue, or abort path",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Upstream added a new FastAPI route for feature X. We already have something similar in our fork. What should we do before merging?",
+      "expected_output": "Compare behavior with Integration principles: skip duplicate and tell user if equivalent; otherwise understand intent, check next-console usage, verify multi-user isolation and auth, full-stack update if needed",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "We merged upstream main with no conflicts. Can we ship immediately?",
+      "expected_output": "No: merging is transport only; still read upstream changes, refactor into local codebase if needed, full-stack and multi-user verification before ship",
+      "files": []
     }
   ]
 }

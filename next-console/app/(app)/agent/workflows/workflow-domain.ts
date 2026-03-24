@@ -9,7 +9,7 @@ export const PAGE_SIZE = 12;
 export const TAGS_VISIBLE = 5;
 
 /** 列表卡片执行趋势图的时间跨度 (天, 含当日). */
-export const WORKFLOW_RUNS_CHART_DAYS = 14;
+export const WORKFLOW_RUNS_CHART_DAYS = 7;
 
 export function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;

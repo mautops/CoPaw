@@ -1,7 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import {
+  CartesianGrid,
+  LabelList,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -43,6 +50,7 @@ export function WorkflowRunsDailyChart({ filename }: { filename: string }) {
   }
 
   const data = dailyRunCountsForChart(query.data ?? [], WORKFLOW_RUNS_CHART_DAYS);
+  const lastIdx = data.length > 0 ? data.length - 1 : -1;
 
   return (
     <div className="mt-2 w-full">
@@ -86,13 +94,67 @@ export function WorkflowRunsDailyChart({ filename }: { filename: string }) {
             }
           />
           <Line
+            key={`runs-line-${filename}`}
             type="monotone"
             dataKey="count"
             stroke="var(--color-count)"
             strokeWidth={2}
-            dot={false}
+            dot={(props) => {
+              const { cx, cy, index } = props;
+              const dotKey =
+                typeof index === "number"
+                  ? `run-dot-${index}`
+                  : `run-dot-${String(cx)}-${String(cy)}`;
+              if (index !== lastIdx || cx == null || cy == null) {
+                return <g key={`${dotKey}-slot`} />;
+              }
+              return (
+                <circle
+                  key={dotKey}
+                  cx={cx}
+                  cy={cy}
+                  r={3.5}
+                  fill="var(--color-count)"
+                  stroke="hsl(var(--background))"
+                  strokeWidth={1}
+                />
+              );
+            }}
             activeDot={{ r: 4, strokeWidth: 1 }}
-          />
+          >
+            <LabelList
+              key="run-count-labels"
+              dataKey="count"
+              position="top"
+              content={(props) => {
+                const { index, x, y, value } = props;
+                const labelKey =
+                  typeof index === "number"
+                    ? `run-label-${index}`
+                    : `run-label-${String(x)}-${String(y)}`;
+                if (index !== lastIdx || x == null || y == null) {
+                  return <g key={`${labelKey}-slot`} />;
+                }
+                const xn = typeof x === "number" ? x : Number(x);
+                const yn = typeof y === "number" ? y : Number(y);
+                if (Number.isNaN(xn) || Number.isNaN(yn)) {
+                  return <g key={`${labelKey}-nan`} />;
+                }
+                return (
+                  <text
+                    key={labelKey}
+                    x={xn}
+                    y={yn}
+                    dy={-8}
+                    textAnchor="middle"
+                    className="fill-foreground text-[10px] font-medium tabular-nums"
+                  >
+                    {String(value ?? "")}
+                  </text>
+                );
+              }}
+            />
+          </Line>
         </LineChart>
       </ChartContainer>
     </div>

@@ -57,6 +57,10 @@ class SkillSpec(SkillInfo):
 class CreateSkillRequest(BaseModel):
     name: str = Field(..., description="Skill name")
     content: str = Field(..., description="Skill content (SKILL.md)")
+    overwrite: bool = Field(
+        default=False,
+        description="Replace existing customized skill with the same directory name",
+    )
     references: dict[str, Any] | None = Field(
         None,
         description="Optional tree structure for references/. "
@@ -580,6 +584,7 @@ async def create_skill(
         result = skill_service.create_skill(
             name=request_body.name,
             content=request_body.content,
+            overwrite=request_body.overwrite,
             references=request_body.references,
             scripts=request_body.scripts,
         )

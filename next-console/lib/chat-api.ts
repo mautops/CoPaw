@@ -103,7 +103,10 @@ function isCompletedStatus(status: unknown): boolean {
  * without an async boundary (and batching can hide intermediate strings).
  */
 async function deferToMain(): Promise<void> {
-  const sch = globalThis.scheduler;
+  const root = globalThis as unknown as {
+    scheduler?: { yield?: () => void | Promise<void> };
+  };
+  const sch = root.scheduler;
   if (sch && typeof sch.yield === "function") {
     await sch.yield();
     return;

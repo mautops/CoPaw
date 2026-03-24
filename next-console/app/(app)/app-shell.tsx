@@ -31,9 +31,11 @@ const LEFT_WIDTH = 224;
 export function AppShell({
   children,
   user,
+  appVersion,
 }: {
   children: React.ReactNode;
   user?: AppShellUser | null;
+  appVersion?: string;
 }) {
   const [showLeftSidebar, setShowLeftSidebar] = useState(true);
   const toggleLeftSidebar = useCallback(
@@ -48,7 +50,7 @@ export function AppShell({
           className="shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out"
           style={{ width: showLeftSidebar ? LEFT_WIDTH : 0 }}
         >
-          <LeftSidebar user={user} />
+          <LeftSidebar user={user} appVersion={appVersion} />
         </div>
         <div className="flex flex-1 overflow-hidden">{children}</div>
       </div>

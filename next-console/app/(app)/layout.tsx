@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import pkg from "../../package.json";
 import { auth } from "@/lib/auth";
 import { AppShell } from "./app-shell";
 
@@ -24,5 +25,9 @@ export default async function AppLayout({
       .username,
   };
 
-  return <AppShell user={user}>{children}</AppShell>;
+  return (
+    <AppShell user={user} appVersion={pkg.version}>
+      {children}
+    </AppShell>
+  );
 }
