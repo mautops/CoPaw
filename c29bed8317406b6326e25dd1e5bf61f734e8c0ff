@@ -1,0 +1,559 @@
+src/copaw/cli/message_cmd.py
+  243a7218809a11b8 3
+src/copaw/utils/logging.py
+  243a7218809a11b8 3
+next-console/app/(app)/settings/agents/agents-client.tsx
+  243a7218809a11b8 97-99,107,194-195,209-211,261,367-370,414,442-443
+next-console/components/ui/switch.tsx
+  243a7218809a11b8 1,3-4,6,13,21,30,33
+src/copaw/app/runner/repo/json_repo.py
+  243a7218809a11b8 3
+src/copaw/app/runner/session.py
+  243a7218809a11b8 9
+src/copaw/app/channels/dingtalk/handler.py
+  243a7218809a11b8 141-144
+next-console/components/ui/dropdown-menu.tsx
+  243a7218809a11b8 1,3-4,6-7,12,20,31,46-49,53,61,70-71,80,84,94,102,112,117,128,137,145,154,159,167,175,179,192,204,208,214,223,231,238,248-251,254,273
+next-console/components/ui/chart.tsx
+  243a7218809a11b8 1,3-4,6,9,13-14,18-19,22-23,25,28,31,34,44,47,49-50,59,69,74-75,78,92-93,97,102-103,105,123-127,129,133,136-138,142,149,153,156,165,168,171,177,185-187,194,214,228,246,250,253,263-264,266,269,277,283-284,290,305,308,314,317,325,327,333,341,346,356
+src/copaw/app/channels/utils.py
+  243a7218809a11b8 7
+next-console/components/ai-elements/suggestion.tsx
+  243a7218809a11b8 4
+src/copaw/app/channels/dingtalk/__init__.py
+  243a7218809a11b8 3
+next-console/app/(app)/settings/security/security-client.tsx
+  243a7218809a11b8 54-58,167,303-305,314,338-340,354-356,373-375,381-383,473-476,511-513,555-557,578-580,598-600,610-612,620-622,659-661,807-809,858-859
+next-console/components/ai-elements/artifact.tsx
+  243a7218809a11b8 21,36,54,113
+next-console/components/ai-elements/commit.tsx
+  243a7218809a11b8 44,87,155,240,252,304,352,394
+src/copaw/cli/desktop_cmd.py
+  243a7218809a11b8 3
+next-console/app/(app)/settings/environments/environments-domain.ts
+  243a7218809a11b8 28
+next-console/components/ui/card.tsx
+  243a7218809a11b8 1,3,16,20,29,33,42,46,56,65,69,79,88,92,103
+src/copaw/app/routers/voice.py
+  243a7218809a11b8 7
+next-console/app/(app)/settings/token-usage/token-usage-client.tsx
+  243a7218809a11b8 80-81
+next-console/components/ai-elements/sandbox.tsx
+  243a7218809a11b8 8,22,44,66,87,114
+src/copaw/security/tool_guard/guardians/rule_guardian.py
+  243a7218809a11b8 23,367
+tests/unit/channels/test_qq_channel.py
+  243a7218809a11b8 4
+next-console/components/ai-elements/mic-selector.tsx
+  243a7218809a11b8 65,101,137,197,315
+src/copaw/app/multi_agent_manager.py
+  243a7218809a11b8 7,243
+src/copaw/app/workflow/run_store.py
+  243a7218809a11b8 29,138-140
+src/copaw/app/channels/qq/__init__.py
+  243a7218809a11b8 3
+src/copaw/app/routers/console.py
+  243a7218809a11b8 3,71,177-179
+next-console/components/ai-elements/model-selector.tsx
+  243a7218809a11b8 47,200
+src/copaw/cli/channels_cmd.py
+  243a7218809a11b8 3
+README_zh.md
+  243a7218809a11b8 11,19
+CONTRIBUTING_zh.md
+  243a7218809a11b8 74,76-81,83,85
+src/copaw/agents/utils/copaw_token_counter.py
+  243a7218809a11b8 7
+src/copaw/app/routers/envs.py
+  243a7218809a11b8 3
+src/copaw/cli/skills_cmd.py
+  243a7218809a11b8 3
+src/copaw/app/runner/repo/base.py
+  243a7218809a11b8 3
+next-console/app/(app)/agent/workflows/workflow-list-content.tsx
+  243a7218809a11b8 8,23-26,41,48-51,54,72,78
+src/copaw/cli/chats_cmd.py
+  243a7218809a11b8 3
+tests/integrated/test_app_startup.py
+  243a7218809a11b8 3,80,108-110
+src/copaw/agents/skills_manager.py
+  243a7218809a11b8 329
+next-console/app/(app)/settings/agents/agents-domain.ts
+  243a7218809a11b8 12
+.github/PULL_REQUEST_TEMPLATE.md
+  243a7218809a11b8 31,44,47
+next-console/app/(app)/agent/chat/page.tsx
+  243a7218809a11b8 18-20,49-51,207-210,213-228,250-254
+README.md
+  243a7218809a11b8 11,19
+next-console/components/ui/badge.tsx
+  243a7218809a11b8 1-3,5,27-28,37,46,49
+next-console/components/ui/popover.tsx
+  243a7218809a11b8 1,3-4,6,11,17,34,39,45,55,65,78,89
+next-console/lib/mcp-api.ts
+  243a7218809a11b8 89-91,94-96
+src/copaw/agents/utils/setup_utils.py
+  243a7218809a11b8 7
+src/copaw/app/channels/qq/channel.py
+  243a7218809a11b8 788
+src/copaw/config/config.py
+  243a7218809a11b8 276,688
+src/copaw/tunnel/__init__.py
+  243a7218809a11b8 3
+next-console/app/(app)/agent/mcp/mcp-toolbar.tsx
+  243a7218809a11b8 5-8
+src/copaw/app/runner/query_error_dump.py
+  243a7218809a11b8 3
+next-console/components/ai-elements/tool.tsx
+  243a7218809a11b8 89,109,165
+tests/unit/workspace/test_prompt.py
+  243a7218809a11b8 3
+next-console/app/(app)/control/heartbeat/heartbeat-toolbar.tsx
+  243a7218809a11b8 4-7
+src/copaw/app/channels/telegram/format_html.py
+  243a7218809a11b8 12
+next-console/components/ai-elements/test-results.tsx
+  243a7218809a11b8 53,279,423,454,472,490
+tests/integrated/test_version.py
+  243a7218809a11b8 3
+next-console/app/(app)/control/sessions/sessions-client.tsx
+  243a7218809a11b8 125-127
+next-console/app/(app)/agent/chat/chat-message-list.tsx
+  243a7218809a11b8 23,34-37,45-52,66-71,82-87,89-91,93-96,139-144,156-159,171-174,188-192,210-212,259-262,268-270,330-332
+next-console/app/(app)/agent/config/config-domain.ts
+  243a7218809a11b8 42-43
+.pre-commit-config.yaml
+  243a7218809a11b8 1,4,9,16,19,21,24-26,28-31,33,55,58-60,62
+next-console/components/ai-elements/controls.tsx
+  243a7218809a11b8 14
+src/copaw/app/runner/api.py
+  243a7218809a11b8 3,69-71,76-79
+src/copaw/providers/ollama_provider.py
+  243a7218809a11b8 131-132
+next-console/app/(app)/agent/workflows/workflow-create-dialog.tsx
+  243a7218809a11b8 63-64
+next-console/app/(app)/settings/token-usage/token-usage-toolbar.tsx
+  243a7218809a11b8 4-7
+src/copaw/utils/telemetry.py
+  243a7218809a11b8 3,71
+src/copaw/app/runner/__init__.py
+  243a7218809a11b8 3
+next-console/app/(app)/settings/models/provider-settings-panel.tsx
+  243a7218809a11b8 119,186-188,278-282,314,439
+src/copaw/agents/memory/agent_md_manager.py
+  243a7218809a11b8 4
+next-console/components/ai-elements/conversation.tsx
+  243a7218809a11b8 54,89,128-129,157
+website/src/components/QuickStart.tsx
+  243a7218809a11b8 425-426,436-437
+src/copaw/agents/utils/tool_message_utils.py
+  243a7218809a11b8 7
+src/copaw/security/tool_guard/guardians/__init__.py
+  243a7218809a11b8 9
+src/copaw/app/_app.py
+  243a7218809a11b8 264-265
+src/copaw/app/workspace/workspace.py
+  243a7218809a11b8 13
+next-console/components/ui/tabs.tsx
+  243a7218809a11b8 1,3-5,7,20,24,39-40,55,70,74,87,90
+src/copaw/app/channels/mattermost/channel.py
+  243a7218809a11b8 4
+next-console/components/ai-elements/web-preview.tsx
+  243a7218809a11b8 64,74,82,170,244,252,265
+src/copaw/app/channels/discord_/__init__.py
+  243a7218809a11b8 3
+src/copaw/app/channels/feishu/__init__.py
+  243a7218809a11b8 3
+src/copaw/cli/agents_cmd.py
+  243a7218809a11b8 3
+src/copaw/providers/retry_chat_model.py
+  243a7218809a11b8 130
+next-console/components/ai-elements/transcription.tsx
+  243a7218809a11b8 19,26,55,63,101,113
+next-console/components/ai-elements/package-info.tsx
+  243a7218809a11b8 89,117,154
+src/copaw/agents/hooks/bootstrap.py
+  243a7218809a11b8 7
+src/copaw/agents/utils/message_processing.py
+  243a7218809a11b8 9
+src/copaw/app/channels/registry.py
+  243a7218809a11b8 3
+next-console/components/ui/select.tsx
+  243a7218809a11b8 1,3-4,6-7,12,25,31,40,48,57,72-77,87,95,108,121,132,145,157,161,163,175,179,181,195
+src/copaw/cli/utils.py
+  243a7218809a11b8 7
+src/copaw/security/tool_guard/approval.py
+  243a7218809a11b8 3
+src/copaw/app/runner/utils.py
+  243a7218809a11b8 7,412-414,422,434,437,442
+next-console/app/(app)/agent/mcp/mcp-client-sheet.tsx
+  243a7218809a11b8 118
+next-console/components/ui/alert.tsx
+  243a7218809a11b8 1-2,4,19-20,34,43,47,59,63,73,76
+next-console/lib/security-api.ts
+  243a7218809a11b8 90
+next-console/components/ai-elements/shimmer.tsx
+  243a7218809a11b8 42,47,56
+src/copaw/app/channels/wecom/utils.py
+  243a7218809a11b8 3
+src/copaw/security/tool_guard/models.py
+  243a7218809a11b8 8
+src/copaw/security/tool_guard/engine.py
+  243a7218809a11b8 18
+next-console/components/layout/left-sidebar.tsx
+  243a7218809a11b8 24-26
+src/copaw/app/channels/mqtt/__init__.py
+  243a7218809a11b8 3
+src/copaw/app/routers/auth.py
+  243a7218809a11b8 3
+src/copaw/app/routers/skills.py
+  243a7218809a11b8 62-64,483
+next-console/app/(app)/settings/environments/environments-client.tsx
+  243a7218809a11b8 29-34,142-143,167-169,253-255,279,298
+src/copaw/app/runner/task_tracker.py
+  243a7218809a11b8 7
+src/copaw/app/routers/messages.py
+  243a7218809a11b8 3
+src/copaw/security/skill_scanner/scanner.py
+  243a7218809a11b8 18
+next-console/components/ui/command.tsx
+  243a7218809a11b8 1,3-4,6,13-15,26,30,41-44,51,62,76,85,97,101,114,126,130,143,156,163,175,179,192
+src/copaw/app/approvals/service.py
+  243a7218809a11b8 8
+next-console/app/page.tsx
+  243a7218809a11b8 15-16,22-23,29-30,36-37,54-56,74-75
+src/copaw/agents/react_agent.py
+  243a7218809a11b8 815
+tests/unit/workspace/test_agent_id.py
+  243a7218809a11b8 3
+next-console/components/ai-elements/agent.tsx
+  243a7218809a11b8 37,51,59,76,115,132
+src/copaw/__main__.py
+  243a7218809a11b8 3
+next-console/components/ai-elements/speech-input.tsx
+  243a7218809a11b8 192,311
+src/copaw/cli/uninstall_cmd.py
+  243a7218809a11b8 3
+src/copaw/security/tool_guard/utils.py
+  243a7218809a11b8 7
+next-console/components/ai-elements/panel.tsx
+  243a7218809a11b8 11
+src/copaw/app/runner/models.py
+  243a7218809a11b8 3
+src/copaw/agents/tool_guard_mixin.py
+  243a7218809a11b8 11,742-744
+next-console/lib/tools-api.ts
+  243a7218809a11b8 35-37
+src/copaw/agents/command_handler.py
+  243a7218809a11b8 6,382,458
+src/copaw/envs/__init__.py
+  243a7218809a11b8 3
+next-console/components/ai-elements/persona.tsx
+  243a7218809a11b8 162,175,185,233,237,247,267,273,303
+src/copaw/app/channels/console/__init__.py
+  243a7218809a11b8 3
+next-console/app/(app)/settings/voice/voice-client.tsx
+  243a7218809a11b8 55-57,214-216,302
+next-console/components/ui/accordion.tsx
+  243a7218809a11b8 1,3-4,6-7,19,32,46,51-58,61,78,84,87
+src/copaw/providers/gemini_provider.py
+  243a7218809a11b8 69
+src/copaw/app/channels/renderer.py
+  243a7218809a11b8 7
+next-console/app/(app)/agent/mcp/mcp-client.tsx
+  243a7218809a11b8 118-119,165
+next-console/components/ui/carousel.tsx
+  243a7218809a11b8 1,3,6,8-10,12-15,18-22,25-31,33,36,39,42,59-62,65-68,71-72,75-76,81-82,84-85,88-89,92-94,97-100,103-105,132,136,148,153,157,167,171,180,192,201,210,222,231,242
+next-console/components/ui/avatar.tsx
+  243a7218809a11b8 1,3-4,6,13,21,25,37,41,53,57,69,73,82,86,98,102,112
+src/copaw/security/skill_scanner/analyzers/pattern_analyzer.py
+  243a7218809a11b8 8
+tests/unit/workspace/test_cli_agent_id.py
+  243a7218809a11b8 3
+src/copaw/agents/memory/memory_manager.py
+  243a7218809a11b8 11
+next-console/app/(app)/agent/workflows/workflow-runs-daily-chart.tsx
+  243a7218809a11b8 52-55,60-62,71-75
+next-console/components/ai-elements/checkpoint.tsx
+  243a7218809a11b8 25
+next-console/components/ai-elements/inline-citation.tsx
+  243a7218809a11b8 120,144,187,290
+next-console/components/ai-elements/prompt-input.tsx
+  243a7218809a11b8 202,207,210,217,231,319,335,343,356,381,405,428,473,510,575,626,638,682,697,702,800,811,823,841,875,889,976,998,1025,1234,1270,1320,1359,1383
+next-console/app/(app)/control/cron-jobs/cron-jobs-client.tsx
+  243a7218809a11b8 211-215,226-228,313-314,337-339,556,649-650
+next-console/app/(app)/control/channels/channels-client.tsx
+  243a7218809a11b8 233-235,247-249,254-256,341,381-382
+src/copaw/security/skill_scanner/data/default_policy.yaml
+  243a7218809a11b8 37
+src/copaw/app/routers/agents.py
+  243a7218809a11b8 6
+next-console/components/ui/button.tsx
+  243a7218809a11b8 1-3,5,41-42,52,54,64,67
+next-console/components/ai-elements/toolbar.tsx
+  243a7218809a11b8 11
+next-console/components/ai-elements/attachments.tsx
+  243a7218809a11b8 55,91,168,199,218,269,331,355,387,420
+src/copaw/security/skill_scanner/__init__.py
+  243a7218809a11b8 30,400
+src/copaw/security/skill_scanner/scan_policy.py
+  243a7218809a11b8 24
+next-console/components/ai-elements/edge.tsx
+  243a7218809a11b8 42,48,91,118
+next-console/components/ai-elements/task.tsx
+  243a7218809a11b8 22,79
+next-console/components/ui/scroll-area.tsx
+  243a7218809a11b8 1,3-4,6,28,43,52,55
+src/copaw/cli/env_cmd.py
+  243a7218809a11b8 3
+next-console/components/ai-elements/confirmation.tsx
+  243a7218809a11b8 44
+src/copaw/app/runner/daemon_commands.py
+  243a7218809a11b8 8
+next-console/components/ai-elements/schema-display.tsx
+  243a7218809a11b8 103,130,244,404,412,465
+src/copaw/tunnel/binary_manager.py
+  243a7218809a11b8 3
+src/copaw/app/crons/heartbeat.py
+  243a7218809a11b8 7
+next-console/components/ai-elements/node.tsx
+  243a7218809a11b8 25
+src/copaw/app/runner/repo/__init__.py
+  243a7218809a11b8 3
+src/copaw/agents/skills_hub.py
+  243a7218809a11b8 3,30-31,1313,1472,1603
+src/copaw/app/agent_context.py
+  243a7218809a11b8 6
+next-console/app/(app)/control/sessions/sessions-toolbar.tsx
+  243a7218809a11b8 12-15
+src/copaw/app/channels/voice/twiml.py
+  243a7218809a11b8 3
+next-console/components/ui/separator.tsx
+  243a7218809a11b8 1,3-4,6,21,25,28
+src/copaw/security/tool_guard/__init__.py
+  243a7218809a11b8 34
+src/copaw/app/channels/mqtt/channel.py
+  243a7218809a11b8 3
+src/copaw/app/channels/telegram/__init__.py
+  243a7218809a11b8 3
+tests/unit/workspace/test_agent_model.py
+  243a7218809a11b8 3
+src/copaw/app/channels/voice/twilio_manager.py
+  243a7218809a11b8 3
+src/copaw/app/migration.py
+  243a7218809a11b8 6
+src/copaw/app/runner/chat_access.py
+  243a7218809a11b8 2-3,14,22-23,25
+next-console/components/ai-elements/terminal.tsx
+  243a7218809a11b8 41,138,147,176,208,243,251
+next-console/components/ui/textarea.tsx
+  243a7218809a11b8 1,3,11,15,18
+src/copaw/app/channels/feishu/channel.py
+  243a7218809a11b8 18,1269-1270,1274,1284-1285
+src/copaw/app/channels/xiaoyi/channel.py
+  243a7218809a11b8 454
+next-console/components/ui/button-group.tsx
+  243a7218809a11b8 1-2,4-5,21-22,37,45,47,53,57,71,75,83
+next-console/lib/envs-api.ts
+  243a7218809a11b8 41-43
+next-console/components/ai-elements/environment-variables.tsx
+  243a7218809a11b8 57,62,87,200,228,296
+src/copaw/app/console_push_store.py
+  243a7218809a11b8 7
+next-console/app/(app)/agent/workspace/workspace-domain.ts
+  243a7218809a11b8 3-6,31-33
+next-console/components/ui/input.tsx
+  243a7218809a11b8 1,3,12,16,19
+next-console/app/(app)/agent/config/config-toolbar.tsx
+  243a7218809a11b8 4-7
+next-console/components/ai-elements/sources.tsx
+  243a7218809a11b8 54
+tests/unit/workspace/test_agent_creation.py
+  243a7218809a11b8 3
+src/copaw/agents/prompt.py
+  243a7218809a11b8 8
+src/copaw/app/routers/token_usage.py
+  243a7218809a11b8 29,33,37,41
+next-console/components/ai-elements/voice-selector.tsx
+  243a7218809a11b8 46,53,89,499
+src/copaw/app/runner/manager.py
+  243a7218809a11b8 3
+src/copaw/app/channels/schema.py
+  243a7218809a11b8 6
+next-console/app/(app)/agent/chat/chat-history-sidebar.tsx
+  243a7218809a11b8 7-13,29-36,51-60,71-74,98-103,114-121,136-142,144-150,191,199-202,238-243,254-255,260-263,304-314,320-323,353-358
+next-console/app/(app)/agent/chat/chat-input.tsx
+  243a7218809a11b8 33-37
+tests/unit/providers/test_kimi_provider.py
+  243a7218809a11b8 4
+src/copaw/agents/hooks/memory_compaction.py
+  243a7218809a11b8 8
+CONTRIBUTING.md
+  243a7218809a11b8 74,76-81,83,85
+next-console/app/(app)/settings/models/models-client.tsx
+  243a7218809a11b8 144-145,237,342
+tests/unit/cli/test_cli_update.py
+  243a7218809a11b8 896
+next-console/app/(app)/settings/security/security-toolbar.tsx
+  243a7218809a11b8 4-7
+next-console/components/ui/hover-card.tsx
+  243a7218809a11b8 1,3-4,6,11,19,36,41,44
+src/copaw/app/workflow/router.py
+  243a7218809a11b8 2,208,210,310
+src/copaw/app/channels/base.py
+  243a7218809a11b8 7
+tests/unit/workspace/test_workspace.py
+  243a7218809a11b8 3
+tests/unit/memory/test_copaw_token_counter.py
+  243a7218809a11b8 10
+src/copaw/tunnel/cloudflare.py
+  243a7218809a11b8 7
+next-console/app/(app)/agent/workflows/workflow-detail-sheet.tsx
+  243a7218809a11b8 79,88
+src/copaw/app/channels/voice/conversation_relay.py
+  243a7218809a11b8 3
+src/copaw/app/channels/dingtalk/constants.py
+  243a7218809a11b8 28-30
+.github/workflows/pre-commit.yml
+  243a7218809a11b8 21,23-25,29,33,36
+next-console/components/ai-elements/queue.tsx
+  243a7218809a11b8 40,61,82,103,130,173,219,270
+next-console/components/ai-elements/snippet.tsx
+  243a7218809a11b8 116,128
+src/copaw/app/channels/console/channel.py
+  243a7218809a11b8 12,433
+src/copaw/cli/cron_cmd.py
+  243a7218809a11b8 253
+next-console/lib/utils.ts
+  243a7218809a11b8 1-2,5
+src/copaw/app/runner/command_dispatch.py
+  243a7218809a11b8 6
+next-console/app/(app)/control/heartbeat/heartbeat-client.tsx
+  243a7218809a11b8 141-142
+src/copaw/agents/tools/get_current_time.py
+  243a7218809a11b8 34,81
+src/copaw/security/skill_scanner/analyzers/__init__.py
+  243a7218809a11b8 9
+src/copaw/cli/daemon_cmd.py
+  243a7218809a11b8 6
+next-console/app/(app)/agent/mcp/mcp-domain.ts
+  243a7218809a11b8 38
+src/copaw/app/download_task_store.py
+  243a7218809a11b8 7
+next-console/components/ui/progress.tsx
+  243a7218809a11b8 1,3-4,6,18,28,31
+src/copaw/security/skill_scanner/models.py
+  243a7218809a11b8 2
+next-console/app/(app)/agent/workspace/workspace-client.tsx
+  243a7218809a11b8 59,64
+src/copaw/cli/update_cmd.py
+  243a7218809a11b8 334,509,531,585,597,623
+src/copaw/app/routers/agent_scoped.py
+  243a7218809a11b8 7
+next-console/components/ai-elements/jsx-preview.tsx
+  243a7218809a11b8 157,181,191,236,262,273,293,307
+src/copaw/app/workspace/service_manager.py
+  243a7218809a11b8 7,101
+next-console/components/ui/input-group.tsx
+  243a7218809a11b8 1,3-4,6-9,18,22,43-44,59,61,65,83-84,102,110,114,126,130,142,146,156
+next-console/lib/cron-jobs-api.ts
+  243a7218809a11b8 85,94-97
+next-console/components/ai-elements/stack-trace.tsx
+  243a7218809a11b8 192,200,208,223,231,241,248,265,279,302,336,347,363,380,385,409,418,430,441,450,461,486,516
+src/copaw/agents/tools/memory_search.py
+  243a7218809a11b8 3
+src/copaw/app/channels/voice/session.py
+  243a7218809a11b8 3
+src/copaw/config/context.py
+  243a7218809a11b8 8
+pyproject.toml
+  243a7218809a11b8 70,86-96,98-104
+next-console/components/ui/dialog.tsx
+  243a7218809a11b8 1,3-4,6-8,13,19,25,31,43,47,56,65,77,84,94,103,110,121,134,146,150,164
+src/copaw/config/utils.py
+  243a7218809a11b8 10,432,436-439,442-447
+next-console/components/ai-elements/code-block.tsx
+  243a7218809a11b8 90,151,179,188,263,268,275,282-283,300,314,334,390,484,496,517,531,543,562
+next-console/app/(app)/settings/voice/voice-domain.ts
+  243a7218809a11b8 6-8
+next-console/components/ai-elements/audio-player.tsx
+  243a7218809a11b8 4
+next-console/components/ai-elements/reasoning.tsx
+  243a7218809a11b8 124,129,144,176,187,194,211,217
+next-console/components/ui/tooltip.tsx
+  243a7218809a11b8 1,3-4,6,18,24,30,46,54,57
+src/copaw/agents/schema.py
+  243a7218809a11b8 5
+next-console/app/(app)/app-shell.tsx
+  243a7218809a11b8 43,47-49
+next-console/components/ai-elements/context.tsx
+  243a7218809a11b8 54,218
+src/copaw/app/routers/skills_stream.py
+  243a7218809a11b8 6
+src/copaw/app/channels/voice/channel.py
+  243a7218809a11b8 3
+src/copaw/app/channels/imessage/__init__.py
+  243a7218809a11b8 3
+next-console/app/(app)/agent/chat/chat-search-dialog.tsx
+  243a7218809a11b8 31
+src/copaw/config/timezone.py
+  243a7218809a11b8 55
+next-console/components/layout/sidebar-nav.tsx
+  243a7218809a11b8 62,71
+next-console/lib/token-usage-api.ts
+  243a7218809a11b8 15
+next-console/components/ai-elements/file-tree.tsx
+  243a7218809a11b8 73,78,86,160,175,186,252,263
+next-console/components/ui/collapsible.tsx
+  243a7218809a11b8 1,3,8,19,30,33
+next-console/components/ai-elements/message.tsx
+  243a7218809a11b8 4,39,57,123,131,157,181,203,217,244,310,323-335,350
+next-console/app/(app)/agent/workflows/workflows-client.tsx
+  243a7218809a11b8 193-195
+src/copaw/cli/providers_cmd.py
+  243a7218809a11b8 3,445
+next-console/components/ai-elements/chain-of-thought.tsx
+  243a7218809a11b8 22,29,58,68,84,95,101,132,148,159,173,190,198,213
+next-console/app/(app)/agent/config/config-client.tsx
+  243a7218809a11b8 107,174,469,562-563
+src/copaw/agents/utils/file_handling.py
+  243a7218809a11b8 9
+next-console/app/(app)/settings/voice/voice-toolbar.tsx
+  243a7218809a11b8 4-7
+next-console/components/ai-elements/image.tsx
+  243a7218809a11b8 20
+src/copaw/app/auth.py
+  243a7218809a11b8 458,527-529
+src/copaw/envs/store.py
+  243a7218809a11b8 11
+next-console/components/layout/user-profile-menu.tsx
+  243a7218809a11b8 51-55,63-67,78-82
+next-console/components/ui/sheet.tsx
+  243a7218809a11b8 120-123
+next-console/components/ui/spinner.tsx
+  243a7218809a11b8 1-2,6-12,15
+src/copaw/constant.py
+  243a7218809a11b8 6-7,45-47,78-80
+src/copaw/security/tool_guard/guardians/file_guardian.py
+  243a7218809a11b8 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.18",
+  "base_commit_sha": "c29bed8317406b6326e25dd1e5bf61f734e8c0ff",
+  "prompts": {
+    "243a7218809a11b8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a80c17d1-dd44-4674-9493-ea3fee0f3998",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 1893,
+      "total_deletions": 1916,
+      "accepted_lines": 1665,
+      "overriden_lines": 1
+    }
+  }
+}
