@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ConsoleMirrorScrollPadding,
@@ -25,12 +25,14 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import { resolvedWorkflowUsernameFromSessionUser } from "@/lib/copaw-access-jwt";
 import type { ChatSpec } from "@/lib/sessions-api";
 import { sessionsApi } from "@/lib/sessions-api";
 import { useAppShell } from "../../app-shell";
 import { SessionsToolbar } from "./sessions-toolbar";
 import {
   chatDetailKey,
+  chatRowBelongsToCurrentUser,
   chatsQueryKey,
   formatSessionTime,
   rowMatchesSearch,
@@ -41,32 +43,31 @@ import { Loader2Icon, Trash2Icon } from "lucide-react";
 
 export function SessionsClient() {
   const queryClient = useQueryClient();
-  const { showLeftSidebar, toggleLeftSidebar } = useAppShell();
+  const { user, showLeftSidebar, toggleLeftSidebar } = useAppShell();
   const [searchQuery, setSearchQuery] = useState("");
   const [channelFilter, setChannelFilter] = useState("");
-  const [userIdInput, setUserIdInput] = useState("");
-  const [debouncedUserId, setDebouncedUserId] = useState("");
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selected, setSelected] = useState<ChatSpec | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedUserId(userIdInput.trim()), 400);
-    return () => clearTimeout(t);
-  }, [userIdInput]);
+  const scopeUserId = useMemo(
+    () => (user ? resolvedWorkflowUsernameFromSessionUser(user) : null),
+    [user],
+  );
 
   const filters = useMemo(
     () => ({
       channel: channelFilter || undefined,
-      user_id: debouncedUserId || undefined,
+      user_id: scopeUserId ?? undefined,
     }),
-    [channelFilter, debouncedUserId],
+    [channelFilter, scopeUserId],
   );
 
   const listQuery = useQuery({
     queryKey: chatsQueryKey(filters),
     queryFn: () => sessionsApi.list(filters),
+    enabled: Boolean(scopeUserId),
   });
 
   const detailQuery = useQuery({
@@ -95,8 +96,11 @@ export function SessionsClient() {
 
   const displayRows = useMemo(() => {
     const rows = listQuery.data ?? [];
-    return rows.filter((r) => rowMatchesSearch(r, searchQuery));
-  }, [listQuery.data, searchQuery]);
+    return rows.filter(
+      (r) =>
+        chatRowBelongsToCurrentUser(r, user) && rowMatchesSearch(r, searchQuery),
+    );
+  }, [listQuery.data, searchQuery, user]);
 
   const openDetail = useCallback((row: ChatSpec) => {
     setSelected(row);
@@ -116,8 +120,6 @@ export function SessionsClient() {
         onSearchQueryChange={setSearchQuery}
         channelFilter={channelFilter}
         onChannelFilterChange={setChannelFilter}
-        userIdInput={userIdInput}
-        onUserIdInputChange={setUserIdInput}
         channelOptions={channelOptions}
         onRefresh={refresh}
         listLoading={listQuery.isFetching}
@@ -127,8 +129,17 @@ export function SessionsClient() {
         <ConsoleMirrorScrollPadding className="space-y-4">
           <ConsoleMirrorSectionHeader
             title="会话"
-            description="列表来自当前活动智能体的 Chat 注册表. 服务端可按用户 ID 过滤; 搜索框仅在当前页结果内匹配. 删除仅移除 Chat 记录, 会话状态文件可能仍存在."
+            description="仅展示当前登录账号在 CoPaw 中的工作流用户所对应的会话. 搜索框仅在当前列表内匹配. 删除仅移除 Chat 记录, 会话状态文件可能仍存在."
           />
+
+          {user && !scopeUserId ? (
+            <Alert variant="destructive">
+              <AlertTitle>无法加载会话列表</AlertTitle>
+              <AlertDescription>
+                当前账号没有可用于会话隔离的用户名或非 UUID 标识, 请完善个人资料中的用户名或邮箱后重试.
+              </AlertDescription>
+            </Alert>
+          ) : null}
 
           {listQuery.isError ? (
             <Alert variant="destructive">
@@ -137,11 +148,12 @@ export function SessionsClient() {
             </Alert>
           ) : null}
 
-          {listQuery.isLoading ? (
+          {listQuery.isLoading && scopeUserId ? (
             <p className="text-sm text-muted-foreground">加载中...</p>
           ) : null}
 
-          {!listQuery.isLoading &&
+          {scopeUserId &&
+            !listQuery.isLoading &&
             !listQuery.isError &&
             displayRows.length === 0 && (
               <p className="text-sm text-muted-foreground">暂无会话.</p>
@@ -161,9 +173,9 @@ export function SessionsClient() {
                 </tr>
               </thead>
               <tbody>
-                {displayRows.map((row) => (
+                {displayRows.map((row, rowIndex) => (
                   <tr
-                    key={row.id}
+                    key={`${row.id}:${row.updated_at}:${rowIndex}`}
                     className="border-b border-border last:border-0 hover:bg-muted/30"
                   >
                     <td className="max-w-[160px] truncate px-3 py-2 font-medium">

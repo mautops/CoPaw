@@ -234,7 +234,10 @@ export function ProviderSummaryCard({
       </div>
 
       <Dialog open={panelOpen} onOpenChange={setPanelOpen}>
-        <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 text-base">
+        <DialogContent
+          aria-describedby={undefined}
+          className="flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 text-base"
+        >
           <DialogHeader className="shrink-0 border-b border-border px-6 py-4 text-left">
             <DialogTitle className="text-lg">
               {p.name}

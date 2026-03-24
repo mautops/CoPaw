@@ -3,12 +3,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  consolePrimaryButtonClass,
   ConsoleMirrorScrollPadding,
-  ConsoleMirrorSectionHeader,
 } from "@/components/console-mirror";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -18,14 +16,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { MCPClientCreateBody, MCPClientInfo } from "@/lib/mcp-api";
 import { mcpApi } from "@/lib/mcp-api";
 import { useAppShell } from "../../app-shell";
+import { McpClientCard } from "./mcp-client-card";
 import { McpClientSheet } from "./mcp-client-sheet";
-import { mcpClientKey, QK_MCP_LIST, transportLabel } from "./mcp-domain";
+import { mcpClientKey, QK_MCP_LIST } from "./mcp-domain";
 import { McpToolbar } from "./mcp-toolbar";
-import { Loader2Icon, PencilIcon, Trash2Icon } from "lucide-react";
+import { FilePlusIcon, Loader2Icon } from "lucide-react";
 
 export function McpClientsView() {
   const queryClient = useQueryClient();
@@ -36,6 +35,7 @@ export function McpClientsView() {
   const [editing, setEditing] = useState<MCPClientInfo | null>(null);
   const [deleteKey, setDeleteKey] = useState<string | null>(null);
   const [toggleKey, setToggleKey] = useState<string | null>(null);
+  const [hoverKey, setHoverKey] = useState<string | null>(null);
 
   const listQuery = useQuery({
     queryKey: QK_MCP_LIST,
@@ -113,101 +113,81 @@ export function McpClientsView() {
         onToggleLeftSidebar={toggleLeftSidebar}
         filterQuery={filterQuery}
         onFilterQueryChange={setFilterQuery}
-        onCreateClick={openCreate}
       />
 
       <ScrollArea className="min-h-0 flex-1">
         <ConsoleMirrorScrollPadding className="space-y-4">
-          <ConsoleMirrorSectionHeader
-            title="MCP 客户端"
-            description="配置保存在当前活动智能体中; 启用表示加载该客户端, 实时连接状态由运行时决定."
-          />
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="mb-1 text-2xl font-semibold tracking-tight text-[#1a1a1a] dark:text-white/90">
+                MCP 客户端
+              </h1>
+              <p className="m-0 text-sm text-[#999] dark:text-white/40">
+                配置保存在当前活动智能体中; 启用表示加载该客户端, 实时连接状态由运行时决定.
+              </p>
+            </div>
+            <Button
+              className={consolePrimaryButtonClass("shrink-0 text-base")}
+              onClick={openCreate}
+            >
+              <FilePlusIcon className="size-4" />
+              新建客户端
+            </Button>
+          </div>
+
           {listQuery.isError && (
             <p className="text-destructive">
               {(listQuery.error as Error).message}
             </p>
           )}
           {listQuery.isLoading && (
-            <div className="flex justify-center py-16">
-              <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
+            <div className="py-16 text-center text-sm text-[#999] dark:text-white/35">
+              <Loader2Icon className="mx-auto mb-3 size-8 animate-spin" />
+              <p className="m-0">加载中</p>
             </div>
           )}
           {!listQuery.isLoading &&
             !listQuery.isError &&
             sorted.length === 0 && (
-              <p className="py-12 text-center text-muted-foreground">
+              <p className="py-12 text-center text-sm text-[#999] dark:text-white/35">
                 暂无 MCP 客户端, 点击「新建客户端」添加.
               </p>
             )}
           {!listQuery.isLoading &&
             sorted.length > 0 &&
             filtered.length === 0 && (
-              <p className="py-12 text-center text-muted-foreground">
+              <p className="py-12 text-center text-sm text-[#999] dark:text-white/35">
                 无匹配项.
               </p>
             )}
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((c) => (
-              <Card key={c.key} className="shadow-none">
-                <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
-                  <div className="min-w-0">
-                    <h3 className="font-mono text-base font-semibold leading-snug">
-                      {c.key}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{c.name}</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      <Badge variant="outline">
-                        {transportLabel(c.transport)}
-                      </Badge>
-                      <Badge variant={c.enabled ? "default" : "secondary"}>
-                        {c.enabled ? "配置启用" : "配置关闭"}
-                      </Badge>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={c.enabled}
-                    disabled={toggleMutation.isPending && toggleKey === c.key}
-                    onCheckedChange={() => {
+          {!listQuery.isLoading && !listQuery.isError && filtered.length > 0 && (
+            <TooltipProvider delayDuration={300}>
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-5">
+                {filtered.map((c) => (
+                  <McpClientCard
+                    key={c.key}
+                    client={c}
+                    isHovered={hoverKey === c.key}
+                    toggling={
+                      toggleMutation.isPending && toggleKey === c.key
+                    }
+                    onMouseEnter={() => setHoverKey(c.key)}
+                    onMouseLeave={() => setHoverKey(null)}
+                    onOpen={() => openEdit(c)}
+                    onToggleEnabled={(e) => {
+                      e.stopPropagation();
                       setToggleKey(c.key);
                       toggleMutation.mutate(c.key);
                     }}
+                    onRequestDelete={(e) => {
+                      e.stopPropagation();
+                      setDeleteKey(c.key);
+                    }}
                   />
-                </CardHeader>
-                <CardContent className="space-y-3 pt-0">
-                  <p className="line-clamp-3 text-sm text-muted-foreground">
-                    {c.description || "—"}
-                  </p>
-                  <p className="break-all font-mono text-xs text-muted-foreground">
-                    {c.transport === "stdio"
-                      ? c.command
-                        ? `${c.command} ${c.args.join(" ")}`.trim()
-                        : "—"
-                      : c.url || "—"}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-base"
-                      onClick={() => openEdit(c)}
-                    >
-                      <PencilIcon className="size-4" />
-                      编辑
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-base text-destructive hover:text-destructive"
-                      onClick={() => setDeleteKey(c.key)}
-                    >
-                      <Trash2Icon className="size-4" />
-                      删除
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                ))}
+              </div>
+            </TooltipProvider>
+          )}
         </ConsoleMirrorScrollPadding>
       </ScrollArea>
 

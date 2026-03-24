@@ -3,6 +3,13 @@ import { nextCookies } from "better-auth/next-js";
 import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { Pool } from "pg";
 
+const isProduction = process.env.NODE_ENV === "production";
+const databaseUrl = process.env.DATABASE_URL?.trim();
+
+if (isProduction && !databaseUrl) {
+  throw new Error("DATABASE_URL is required when NODE_ENV is production");
+}
+
 function stripTrailingSlash(s: string): string {
   return s.replace(/\/+$/, "");
 }
@@ -25,9 +32,13 @@ function trustedOriginsFromEnv(): string[] | undefined {
 
 export const auth = betterAuth({
   trustedOrigins: trustedOriginsFromEnv(),
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
+  ...(isProduction
+    ? {
+        database: new Pool({
+          connectionString: databaseUrl,
+        }),
+      }
+    : {}),
   user: {
     additionalFields: {
       username: { type: "string", required: false, defaultValue: "" },

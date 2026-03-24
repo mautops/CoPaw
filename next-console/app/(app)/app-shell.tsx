@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useState } from "react";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 
 interface AppShellUser {
+  id: string;
   name: string;
   email: string;
   image?: string | null;

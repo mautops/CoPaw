@@ -154,7 +154,7 @@ export function ChatMessageList({
         if (msg.type === "thinking") {
           return (
             <div
-              key={msg.id}
+              key={`${msg.id}-${idx}`}
               className={`${marginTop} flex flex-row items-center gap-3`}
             >
               {showAvatar ? <BotAvatar center /> : AVATAR_PLACEHOLDER}
@@ -169,7 +169,7 @@ export function ChatMessageList({
         if (msg.type === "tool" && msg.tool) {
           return (
             <div
-              key={msg.id}
+              key={`${msg.id}-${idx}`}
               className={`${marginTop} flex flex-row items-start gap-3`}
             >
               {showAvatar ? <BotAvatar /> : AVATAR_PLACEHOLDER}
@@ -180,7 +180,7 @@ export function ChatMessageList({
 
         return (
           <div
-            key={msg.id}
+            key={`${msg.id}-${idx}`}
             className={`${marginTop} ${isUser ? "flex flex-row-reverse items-start gap-3" : "flex flex-row items-start gap-3"}`}
           >
             {showAvatar ? (

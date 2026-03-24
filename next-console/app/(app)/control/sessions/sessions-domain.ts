@@ -1,4 +1,29 @@
 import type { ChatSpec } from "@/lib/sessions-api";
+import { resolvedWorkflowUsernameFromSessionUser } from "@/lib/copaw-access-jwt";
+
+export type SessionsShellUser = {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  username?: string | null;
+};
+
+/** True when ``row.user_id`` matches the CoPaw workflow user derived from the console session (JWT / chat 创建逻辑一致). */
+export function chatRowBelongsToCurrentUser(
+  row: ChatSpec,
+  user: SessionsShellUser | null | undefined,
+): boolean {
+  if (!user) return false;
+  const scope = resolvedWorkflowUsernameFromSessionUser(user);
+  if (scope && row.user_id === scope) return true;
+  if (user.email && row.user_id === user.email) return true;
+  if (user.username && row.user_id === user.username) return true;
+  if (user.email) {
+    const local = user.email.split("@")[0]?.trim();
+    if (local && row.user_id === local) return true;
+  }
+  return false;
+}
 
 export function chatsQueryKey(filters: { channel?: string; user_id?: string }) {
   return [

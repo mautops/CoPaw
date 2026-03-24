@@ -1,28 +1,17 @@
 "use client";
 
-import { consolePrimaryButtonClass } from "@/components/console-mirror";
 import { Button } from "@/components/ui/button";
-import {
-  Loader2Icon,
-  PanelLeftCloseIcon,
-  PanelLeftOpenIcon,
-} from "lucide-react";
+import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 
 export function HeartbeatToolbar({
   showLeftSidebar,
   onToggleLeftSidebar,
-  onSave,
-  saving,
-  saveDisabled,
 }: {
   showLeftSidebar: boolean;
   onToggleLeftSidebar: () => void;
-  onSave: () => void;
-  saving: boolean;
-  saveDisabled: boolean;
 }) {
   return (
-    <header className="sticky top-0 z-20 flex h-[52px] shrink-0 items-center gap-3 border-b border-border bg-muted/90 px-4 backdrop-blur-md backdrop-saturate-150 supports-backdrop-filter:bg-muted/75">
+    <header className="sticky top-0 z-20 flex min-h-[52px] shrink-0 flex-wrap items-center gap-2 border-b border-border bg-muted/90 px-4 py-2 backdrop-blur-md backdrop-saturate-150 supports-backdrop-filter:bg-muted/75 sm:gap-3 sm:py-0">
       <Button
         size="icon"
         variant="ghost"
@@ -36,20 +25,7 @@ export function HeartbeatToolbar({
           <PanelLeftOpenIcon className="size-4" />
         )}
       </Button>
-      <h1 className="text-base font-semibold tracking-tight">心跳</h1>
-      <div className="flex-1" />
-      <Button
-        className={consolePrimaryButtonClass(
-          "inline-flex shrink-0 gap-2 text-base",
-        )}
-        disabled={saveDisabled || saving}
-        onClick={onSave}
-      >
-        {saving ? (
-          <Loader2Icon className="size-4 shrink-0 animate-spin" />
-        ) : null}
-        保存
-      </Button>
+      <div className="min-w-[120px] flex-1" />
     </header>
   );
 }

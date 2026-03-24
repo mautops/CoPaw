@@ -39,7 +39,7 @@ export function SkillCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] text-base sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] text-base sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>新建 Skill</DialogTitle>
           <DialogDescription>
@@ -55,7 +55,7 @@ export function SkillCreateDialog({
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               spellCheck={false}
-              className="font-mono"
+              className="h-10 rounded-lg font-mono text-sm"
             />
           </div>
           <div className="grid gap-1.5">
@@ -64,7 +64,7 @@ export function SkillCreateDialog({
               value={content}
               onChange={(e) => onContentChange(e.target.value)}
               spellCheck={false}
-              className="min-h-[220px] font-mono text-sm"
+              className="min-h-[220px] rounded-md border-[#d9d9d9] font-mono text-sm dark:border-white/10"
             />
           </div>
           {createMutation.isError && (
@@ -78,6 +78,7 @@ export function SkillCreateDialog({
             取消
           </Button>
           <Button
+            className="bg-[#615ced] text-white hover:bg-[#615ced]/90"
             disabled={!canSubmit || createMutation.isPending}
             onClick={() =>
               createMutation.mutate({

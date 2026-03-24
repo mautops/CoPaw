@@ -4,11 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ConsoleMirrorPanel,
   ConsoleMirrorScrollPadding,
-  ConsoleMirrorSectionHeader,
+  consolePrimaryButtonClass,
 } from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +23,7 @@ import {
   validateHeartbeatEvery,
   validateTimeHm,
 } from "./heartbeat-domain";
+import { Loader2Icon } from "lucide-react";
 
 export function HeartbeatClient() {
   const queryClient = useQueryClient();
@@ -127,17 +129,16 @@ export function HeartbeatClient() {
       <HeartbeatToolbar
         showLeftSidebar={showLeftSidebar}
         onToggleLeftSidebar={toggleLeftSidebar}
-        onSave={() => void handleSave()}
-        saving={putMutation.isPending}
-        saveDisabled={!dirty || !draft}
       />
 
       <ScrollArea className="min-h-0 flex-1">
         <ConsoleMirrorScrollPadding className="space-y-4">
-          <ConsoleMirrorSectionHeader
-            title="心跳"
-            description={
-              <>
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="mb-1 text-2xl font-semibold tracking-tight text-[#1a1a1a] dark:text-white/90">
+                心跳
+              </h1>
+              <p className="m-0 text-sm leading-relaxed text-[#999] dark:text-white/40">
                 心跳按间隔读取工作区中的{" "}
                 <Link
                   href="/agent/workspace"
@@ -147,9 +148,22 @@ export function HeartbeatClient() {
                 </Link>{" "}
                 等内容触发代理运行. 保存后会尝试重调度 Cron 中的心跳任务 (需
                 CronManager 可用).
-              </>
-            }
-          />
+              </p>
+            </div>
+            <Button
+              type="button"
+              className={consolePrimaryButtonClass(
+                "inline-flex shrink-0 gap-2 text-base",
+              )}
+              disabled={!dirty || !draft || putMutation.isPending}
+              onClick={() => void handleSave()}
+            >
+              {putMutation.isPending ? (
+                <Loader2Icon className="size-4 shrink-0 animate-spin" />
+              ) : null}
+              保存
+            </Button>
+          </div>
 
           {heartbeatQuery.isError ? (
             <Alert variant="destructive">
@@ -175,67 +189,74 @@ export function HeartbeatClient() {
           ) : null}
 
           {heartbeatQuery.isLoading || !draft ? (
-            <p className="text-sm text-muted-foreground">加载中...</p>
+            <div className="py-16 text-center text-sm text-[#999] dark:text-white/35">
+              <Loader2Icon className="mx-auto mb-3 size-8 animate-spin" />
+              <p className="m-0">加载中</p>
+            </div>
           ) : null}
 
           {server && heartbeatQuery.isSuccess ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">当前服务端配置</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <ConsoleMirrorPanel>
+              <h2 className="mb-4 text-lg font-semibold text-[#1a1a1a] dark:text-white/90">
+                当前服务端配置
+              </h2>
+              <div className="space-y-2 text-sm text-[#666] dark:text-white/55">
                 <div>
                   启用:{" "}
-                  <span className="text-foreground">
+                  <span className="text-[#1a1a1a] dark:text-white/90">
                     {server.enabled ? "是" : "否"}
                   </span>
                 </div>
                 <div>
                   间隔 every:{" "}
-                  <span className="font-mono text-foreground">
+                  <span className="font-mono text-[#1a1a1a] dark:text-white/90">
                     {server.every}
                   </span>
                 </div>
                 <div>
                   目标 target:{" "}
-                  <span className="font-mono text-foreground">
+                  <span className="font-mono text-[#1a1a1a] dark:text-white/90">
                     {server.target}
                   </span>
                 </div>
                 <div>
                   活跃时段:{" "}
                   {server.activeHours ? (
-                    <span className="font-mono text-foreground">
+                    <span className="font-mono text-[#1a1a1a] dark:text-white/90">
                       {server.activeHours.start} – {server.activeHours.end}{" "}
                       (用户时区下判断)
                     </span>
                   ) : (
-                    <span className="text-foreground">未限制 (全天)</span>
+                    <span className="text-[#1a1a1a] dark:text-white/90">
+                      未限制 (全天)
+                    </span>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </ConsoleMirrorPanel>
           ) : null}
 
           {draft ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">编辑</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            <ConsoleMirrorPanel>
+              <h2 className="mb-6 text-lg font-semibold text-[#1a1a1a] dark:text-white/90">
+                编辑
+              </h2>
+              <div className="space-y-6">
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={draft.enabled}
                     onCheckedChange={(v) => patch({ enabled: v })}
                   />
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-[#666] dark:text-white/55">
                     启用心跳调度
                   </span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <div className="text-sm font-medium">间隔 (every)</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-sm font-medium text-[#1a1a1a] dark:text-white/90">
+                    间隔 (every)
+                  </div>
+                  <p className="text-xs text-[#999] dark:text-white/40">
                     例如 30m, 1h, 2h30m, 90s
                   </p>
                   <Input
@@ -246,8 +267,10 @@ export function HeartbeatClient() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <div className="text-sm font-medium">目标 (target)</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-sm font-medium text-[#1a1a1a] dark:text-white/90">
+                    目标 (target)
+                  </div>
+                  <p className="text-xs text-[#999] dark:text-white/40">
                     通常为 main 或 last, 与后端 HEARTBEAT 解析一致
                   </p>
                   <Input
@@ -263,14 +286,16 @@ export function HeartbeatClient() {
                       checked={useWindow}
                       onCheckedChange={setUseActiveWindow}
                     />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-[#666] dark:text-white/55">
                       仅在每日时段内运行 (activeHours)
                     </span>
                   </div>
                   {draft.activeHours ? (
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1.5">
-                        <div className="text-sm font-medium">开始 (HH:MM)</div>
+                        <div className="text-sm font-medium text-[#1a1a1a] dark:text-white/90">
+                          开始 (HH:MM)
+                        </div>
                         <Input
                           className="font-mono text-sm"
                           value={draft.activeHours.start}
@@ -281,7 +306,9 @@ export function HeartbeatClient() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <div className="text-sm font-medium">结束 (HH:MM)</div>
+                        <div className="text-sm font-medium text-[#1a1a1a] dark:text-white/90">
+                          结束 (HH:MM)
+                        </div>
                         <Input
                           className="font-mono text-sm"
                           value={draft.activeHours.end}
@@ -294,8 +321,8 @@ export function HeartbeatClient() {
                     </div>
                   ) : null}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </ConsoleMirrorPanel>
           ) : null}
         </ConsoleMirrorScrollPadding>
       </ScrollArea>

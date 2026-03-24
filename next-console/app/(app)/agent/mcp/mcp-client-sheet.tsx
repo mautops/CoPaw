@@ -150,19 +150,19 @@ export function McpClientSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto sm:max-w-lg">
-        <SheetHeader className="text-left">
-          <SheetTitle>
+      <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto sm:max-w-[600px]">
+        <SheetHeader className="border-b border-[#f1f2f6] px-6 py-4 text-left dark:border-white/8">
+          <SheetTitle className="text-lg font-semibold text-[#1a1a1a] dark:text-white/90">
             {mode === "create" ? "新建 MCP 客户端" : "编辑 MCP 客户端"}
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-[#999] dark:text-white/40">
             {remote
               ? "远程传输需填写 URL, 可选请求头."
               : "stdio 需填写启动命令与工作目录等."}
             {" 列表中的 env 可能已脱敏, 仅修改需变更的行再保存."}
           </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-1 flex-col gap-4 px-4 pb-4">
+        <div className="flex flex-1 flex-col gap-4 px-6 py-4 pb-4">
           {mode === "create" && (
             <div className="grid gap-2">
               <label htmlFor="mcp-key" className="text-sm font-medium">
@@ -173,7 +173,7 @@ export function McpClientSheet({
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
                 placeholder="my_mcp"
-                className="font-mono"
+                className="h-10 rounded-lg font-mono text-sm"
                 spellCheck={false}
               />
             </div>
@@ -311,13 +311,17 @@ export function McpClientSheet({
           </div>
         </div>
         {errorMessage ? (
-          <p className="px-4 text-sm text-destructive">{errorMessage}</p>
+          <p className="px-6 text-sm text-destructive">{errorMessage}</p>
         ) : null}
-        <SheetFooter className="border-t border-border px-4 py-3">
+        <SheetFooter className="border-t border-[#f1f2f6] bg-transparent px-6 py-3 dark:border-white/8">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button disabled={!canSubmit || isPending} onClick={handleSubmit}>
+          <Button
+            className="bg-[#615ced] text-white hover:bg-[#615ced]/90"
+            disabled={!canSubmit || isPending}
+            onClick={handleSubmit}
+          >
             {isPending && <Loader2Icon className="animate-spin" />}
             {mode === "create" ? "创建" : "保存"}
           </Button>

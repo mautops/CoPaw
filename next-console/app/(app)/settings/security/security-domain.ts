@@ -1,4 +1,30 @@
-import type { ToolGuardConfig } from "@/lib/security-api";
+import type { ToolGuardConfig, ToolGuardRuleConfig } from "@/lib/security-api";
+
+/** Merged builtin + custom rule row (legacy console MergedRule). */
+export type MergedToolGuardRule = ToolGuardRuleConfig & {
+  source: "builtin" | "custom";
+  disabled: boolean;
+};
+
+export function mergeToolGuardRules(
+  builtin: ToolGuardRuleConfig[],
+  custom: ToolGuardRuleConfig[],
+  disabledRuleIds: string[],
+): MergedToolGuardRule[] {
+  const disabled = new Set(disabledRuleIds);
+  return [
+    ...builtin.map((r) => ({
+      ...r,
+      source: "builtin" as const,
+      disabled: disabled.has(r.id),
+    })),
+    ...custom.map((r) => ({
+      ...r,
+      source: "custom" as const,
+      disabled: disabled.has(r.id),
+    })),
+  ];
+}
 
 export const QK_TOOL_GUARD = ["security", "tool-guard"] as const;
 export const QK_BUILTIN_RULES = ["security", "builtin-rules"] as const;

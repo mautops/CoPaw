@@ -22,8 +22,6 @@ export function SessionsToolbar({
   onSearchQueryChange,
   channelFilter,
   onChannelFilterChange,
-  userIdInput,
-  onUserIdInputChange,
   channelOptions,
   onRefresh,
   listLoading,
@@ -34,8 +32,6 @@ export function SessionsToolbar({
   onSearchQueryChange: (v: string) => void;
   channelFilter: string;
   onChannelFilterChange: (v: string) => void;
-  userIdInput: string;
-  onUserIdInputChange: (v: string) => void;
   channelOptions: string[];
   onRefresh: () => void;
   listLoading: boolean;
@@ -81,12 +77,6 @@ export function SessionsToolbar({
           ))}
         </SelectContent>
       </Select>
-      <Input
-        placeholder="用户 ID (服务端筛选)"
-        value={userIdInput}
-        onChange={(e) => onUserIdInputChange(e.target.value)}
-        className="h-9 w-[180px] shrink-0 text-base"
-      />
       <Button
         variant="outline"
         size="sm"
