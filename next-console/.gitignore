@@ -43,6 +43,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Local documentation (not versioned; do not commit)
+/docs/
+
 # External reference projects
 CoPaw/
 !app/api/copaw/

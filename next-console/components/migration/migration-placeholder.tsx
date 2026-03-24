@@ -32,7 +32,7 @@ export function MigrationPlaceholder({
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              功能将按 docs/MIGRATION_FROM_CONSOLE.md 阶段 B/C/D 逐步实现.
+              功能将按迁移计划分阶段逐步实现.
             </p>
           </CardContent>
         </Card>
