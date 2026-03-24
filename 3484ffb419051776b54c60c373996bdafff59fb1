@@ -1,0 +1,31 @@
+src/copaw/config/config.py
+  243a7218809a11b8 243,257,308,329,331,341-343
+src/copaw/agents/memory/memory_manager.py
+  243a7218809a11b8 11,15,21,216,218,223-224,226,235-236,239-274,293,306
+src/copaw/agents/command_handler.py
+  243a7218809a11b8 138-147
+src/copaw/agents/hooks/memory_compaction.py
+  243a7218809a11b8 183-195,197-200
+pyproject.toml
+  243a7218809a11b8 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.18",
+  "base_commit_sha": "3484ffb419051776b54c60c373996bdafff59fb1",
+  "prompts": {
+    "243a7218809a11b8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a80c17d1-dd44-4674-9493-ea3fee0f3998",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 88,
+      "total_deletions": 17,
+      "accepted_lines": 88,
+      "overriden_lines": 0
+    }
+  }
+}
