@@ -12,6 +12,38 @@ from ..config.utils import write_last_api
 from ..utils.logging import setup_logger, SuppressPathAccessLogFilter
 
 
+def _parse_listen_port(value: object) -> int:
+    """Accept plain int or Kubernetes-style ``tcp://ip:port`` in ``COPAW_PORT``."""
+    if isinstance(value, int):
+        p = value
+    else:
+        s = str(value).strip()
+        if s.startswith("tcp://"):
+            s = s.rsplit(":", 1)[-1]
+            s = s.split("/")[0]
+        try:
+            p = int(s)
+        except ValueError as e:
+            raise click.BadParameter(f"{value!r} is not a valid port") from e
+    if not 1 <= p <= 65535:
+        raise click.BadParameter(f"{p} is not in 1..65535")
+    return p
+
+
+class _ListenPortParamType(click.ParamType):
+    name = "port"
+
+    def convert(self, value, param, ctx):
+        return _parse_listen_port(value)
+
+
+def _default_listen_port() -> int:
+    raw = os.environ.get("COPAW_PORT", "").strip()
+    if not raw:
+        return 8088
+    return _parse_listen_port(raw)
+
+
 @click.command("app")
 @click.option(
     "--host",
@@ -21,10 +53,10 @@ from ..utils.logging import setup_logger, SuppressPathAccessLogFilter
 )
 @click.option(
     "--port",
-    default=8088,
-    type=int,
+    default=lambda: _default_listen_port(),
+    type=_ListenPortParamType(),
     show_default=True,
-    help="Bind port",
+    help="Bind port (also reads COPAW_PORT; supports tcp://host:port from k8s)",
 )
 @click.option("--reload", is_flag=True, help="Enable auto-reload (dev only)")
 @click.option(

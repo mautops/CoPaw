@@ -40,7 +40,7 @@ Apply **Integration rules** below to changes under these roots only.
 
 ### Out-of-scope paths (auxiliary)
 
-Everything **outside** `src/`, `console/`, and `next-console/` (e.g. `deploy/`, `docker-compose.yml`, `.github/`, `website/`, root configs, docs, scripts) is **fork-specific auxiliary**. It often **diverges** from upstream’s release layout.
+Everything **outside** `src/copaw`, `console/`, and `next-console/` (e.g. `src/Dockerfile`, `.github/`, `website/`, root configs, docs, scripts) is **fork-specific auxiliary**. It often **diverges** from upstream’s release layout.
 
 - **Do not** adopt upstream updates in these paths as part of sync.
 - **Merge conflicts:** keep **downstream** (`ours`) or **drop** upstream hunks.
@@ -157,7 +157,7 @@ Ask for **upstream branch**, **time range** or **PR number**, then:
 1. Show `git log --oneline` for that range and propose a **minimal** pick list.
 2. **Filter** by path: commits **only** out-of-scope → **skip** (Repository policy).
 3. For each in-scope candidate: duplicate? backend/frontend/both? multi-user notes?
-4. On conflicts: which files, rename vs delete vs logic; for **deploy/CI/docs** conflicts, default **keep local**.
+4. On conflicts: which files, rename vs delete vs logic; for **container/CI/docs** conflicts, default **keep local**.
 
 ---
 

@@ -47,6 +47,9 @@ config.json
 jobs.json
 sessions_mount_dir
 
+# Container packaging (not part of Python package)
+src/Dockerfile
+
 # Misc
 .env
 .env.*

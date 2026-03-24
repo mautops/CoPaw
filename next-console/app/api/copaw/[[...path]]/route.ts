@@ -9,8 +9,13 @@ export const dynamic = "force-dynamic";
 /** CoPaw HTTP base (no trailing slash). Read per request so Docker / PM2 env injection works without stale build-time values. */
 function copawBackendBase(): string {
   const raw = process.env.COPAW_API_URL?.trim();
-  const base = raw && raw.length > 0 ? raw : "http://localhost:8088";
-  return base.replace(/\/+$/, "");
+  let base = raw && raw.length > 0 ? raw : "http://localhost:8088";
+  base = base.replace(/\/+$/, "");
+  // Node fetch() requires an absolute URL; values like "copaw.hi-ops:8088" must have a scheme.
+  if (!/^https?:\/\//i.test(base)) {
+    base = `http://${base}`;
+  }
+  return base;
 }
 
 async function proxy(req: NextRequest): Promise<Response> {

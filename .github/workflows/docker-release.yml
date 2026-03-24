@@ -83,6 +83,6 @@ jobs:
             TAGS="${TAGS} -t ${ACR_REGISTRY}/${IMAGE}:latest -t docker.io/${IMAGE}:latest"
           fi
           docker buildx build --platform linux/amd64,linux/arm64 \
-            -f deploy/Dockerfile \
+            -f src/Dockerfile \
             --build-arg COPAW_DISABLED_CHANNELS="${COPAW_DISABLED_CHANNELS}" \
             ${TAGS} --push .

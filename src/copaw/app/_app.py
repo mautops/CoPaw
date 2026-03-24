@@ -327,9 +327,9 @@ def read_root():
     return {
         "message": (
             "CoPaw web UI is not bundled with this API process. "
-            "Run the `next-console` app (see `next-console/` and "
-            "`docker-compose.yml`) and open it in the browser; "
-            "set `COPAW_API_URL` to this server's base URL."
+            "Deploy or run the `next-console` app (see `next-console/`) "
+            "and open it in the browser; set `COPAW_API_URL` to this "
+            "server's base URL."
         ),
     }
 

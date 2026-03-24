@@ -3,8 +3,8 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "We forked CoPaw from agentscope-ai/CoPaw and ship our own release. I want to merge upstream main into our local main but I have never set upstream. Walk me through the exact git commands and what to do if merge conflicts appear in deploy/Dockerfile.",
-      "expected_output": "Adds upstream remote, fetches, merges upstream/<default-branch>; for deploy/Dockerfile (outside src/console/next-console) prefer keeping local version per directory scope, do not adopt upstream packaging blindly; then verify only scoped dirs for product integration",
+      "prompt": "We forked CoPaw from agentscope-ai/CoPaw and ship our own release. I want to merge upstream main into our local main but I have never set upstream. Walk me through the exact git commands and what to do if merge conflicts appear in src/Dockerfile.",
+      "expected_output": "Adds upstream remote, fetches, merges upstream/<default-branch>; for src/Dockerfile (outside src/copaw/console/next-console) prefer keeping local version per directory scope, do not adopt upstream packaging blindly; then verify only scoped dirs for product integration",
       "files": []
     },
     {

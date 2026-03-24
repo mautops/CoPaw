@@ -24,7 +24,7 @@ bash scripts/website_build.sh
 bash scripts/docker_build.sh [IMAGE_TAG] [EXTRA_ARGS...]
 ```
 
-- Default tag: `copaw:latest`. Uses `deploy/Dockerfile` (multi-stage: builds console then Python app).
+- Default tag: `copaw:latest`. Uses `src/Dockerfile` (API image only; web UI is `next-console/` separately).
 - Example: `bash scripts/docker_build.sh myreg/copaw:v1 --no-cache`.
 
 ## Run Test

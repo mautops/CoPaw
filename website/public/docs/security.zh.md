@@ -241,23 +241,6 @@ docker run -e COPAW_AUTH_ENABLED=true \
 
 > 如果希望首次访问时通过网页注册，移除 `COPAW_AUTH_USERNAME` 和 `COPAW_AUTH_PASSWORD` 即可。
 
-#### docker-compose.yml
-
-```yaml
-services:
-  copaw:
-    image: agentscope/copaw:latest
-    ports:
-      - "127.0.0.1:8088:8088"
-    environment:
-      - COPAW_AUTH_ENABLED=true
-      - COPAW_AUTH_USERNAME=admin
-      - COPAW_AUTH_PASSWORD=mypassword
-    volumes:
-      - copaw-data:/app/working
-      - copaw-secrets:/app/working.secret
-```
-
 #### 环境文件 (.env)
 
 也可以使用 `.env` 文件：

@@ -241,23 +241,6 @@ docker run -e COPAW_AUTH_ENABLED=true \
 
 > Remove the `COPAW_AUTH_USERNAME` and `COPAW_AUTH_PASSWORD` lines if you prefer to register through the web UI on first visit.
 
-#### docker-compose.yml
-
-```yaml
-services:
-  copaw:
-    image: agentscope/copaw:latest
-    ports:
-      - "127.0.0.1:8088:8088"
-    environment:
-      - COPAW_AUTH_ENABLED=true
-      - COPAW_AUTH_USERNAME=admin
-      - COPAW_AUTH_PASSWORD=mypassword
-    volumes:
-      - copaw-data:/app/working
-      - copaw-secrets:/app/working.secret
-```
-
 #### Environment file (.env)
 
 You can also use a `.env` file:
