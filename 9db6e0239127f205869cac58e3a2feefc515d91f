@@ -1,0 +1,87 @@
+next-console/app/(app)/agent/skills/skill-card.tsx
+  206b75383953d590 1-212
+next-console/app/(app)/settings/agents/agents-client.tsx
+  206b75383953d590 6-7,46-48,66,174-189,210-233,243-246,249-255,257-314,316-386,391,393-396,404,411,427,442,461-463,468,487,496,527,534
+next-console/app/(app)/settings/models/provider-summary-card.tsx
+  206b75383953d590 237-240
+next-console/app/(app)/agent/tools/tool-card.tsx
+  206b75383953d590 1-75
+next-console/app/(app)/agent/skills/skills-client.tsx
+  206b75383953d590 5,19,22,31,53-57,152-168,175-179,185,193,197-204,207-209,211-214,216-224,226-229
+next-console/app/(app)/agent/skills/skill-create-dialog.tsx
+  206b75383953d590 42,58,67,81
+next-console/app/(app)/agent/chat/chat-message-list.tsx
+  206b75383953d590 157,172,183
+next-console/app/(app)/control/sessions/sessions-domain.ts
+  206b75383953d590 2-26
+next-console/app/(app)/agent/mcp/mcp-client-card.tsx
+  206b75383953d590 1-137
+next-console/app/(app)/agent/skills/skills-toolbar.tsx
+  206b75383953d590 5
+next-console/lib/auth-client.ts
+  206b75383953d590 4-9,11
+next-console/app/(app)/settings/security/security-domain.ts
+  243a7218809a11b8 1-27
+next-console/app/(app)/app-shell.tsx
+  206b75383953d590 7
+next-console/app/(app)/settings/security/security-client.tsx
+  243a7218809a11b8 4,7,9,12,33,35-37,39-40,54,61,64-65,68-70,249-286,292-294,297-310,323-338,340-366,368-393,395-399,401-454,456,458-461,463,467-520,522-528,530-546,548-609,611-612,614-615,617-619,621-623,626-642,644-647,649-666,668-669,671-685,687-700,702-716,805,812,877-879,1066-1132
+  206b75383953d590 38,313-314,1133-1134
+next-console/app/(app)/control/heartbeat/heartbeat-client.tsx
+  206b75383953d590 7,9,12,26,136-141,151-166,192-195,199-203,206,212,218,225,230-232,235-236,240-244,250,256-259,270-273,289,296-298,309-311,324-325
+next-console/app/(app)/layout.tsx
+  206b75383953d590 21
+next-console/app/(app)/agent/mcp/mcp-toolbar.tsx
+  206b75383953d590 5
+next-console/app/(app)/control/sessions/sessions-client.tsx
+  206b75383953d590 3,28,35,46,54-57,62,64,70,99-103,132,135-142,151,155-156,176,178
+next-console/app/(app)/control/heartbeat/heartbeat-toolbar.tsx
+  206b75383953d590 4,14,28
+next-console/app/(app)/agent/mcp/mcp-client-sheet.tsx
+  206b75383953d590 153-155,158,165,176,314,316,320-324
+next-console/app/(app)/agent/tools/tools-toolbar.tsx
+  206b75383953d590 5,19,37,39
+next-console/app/(app)/agent/mcp/mcp-client.tsx
+  206b75383953d590 6,19,23,25,27,38,120-137,144-146,152,159,163-178,182-184,187-190
+next-console/app/(app)/agent/skills/skill-detail-sheet.tsx
+  206b75383953d590 42-44,47-58,62-86,88-93,95,102,113,130-134
+next-console/app/(app)/agent/tools/tools-client.tsx
+  206b75383953d590 6,9,11,21,71-72,84-89,98-133,140-142,148,155,159-174
+next-console/app/(app)/settings/agents/agents-toolbar.tsx
+  206b75383953d590 5
+next-console/lib/auth.ts
+  206b75383953d590 6-12,35-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.18",
+  "base_commit_sha": "9db6e0239127f205869cac58e3a2feefc515d91f",
+  "prompts": {
+    "206b75383953d590": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "1c77e30a-961c-40ee-92ce-46cf0088b6ff",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 676,
+      "total_deletions": 545,
+      "accepted_lines": 1049,
+      "overriden_lines": 0
+    },
+    "243a7218809a11b8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a80c17d1-dd44-4674-9493-ea3fee0f3998",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 556,
+      "total_deletions": 316,
+      "accepted_lines": 551,
+      "overriden_lines": 0
+    }
+  }
+}
