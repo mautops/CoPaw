@@ -1,0 +1,58 @@
+src/copaw/cli/channels_cmd.py
+  243a7218809a11b8 8,31,1120-1224
+website/public/docs/cli.zh.md
+  243a7218809a11b8 210,213-214,218,251-340,553-554
+src/copaw/cli/chats_cmd.py
+  243a7218809a11b8 12,68,105,179,232,280
+src/copaw/agents/react_agent.py
+  243a7218809a11b8 25-29,220-221,225,227-239,299,303-304,603,625,656,678
+src/copaw/cli/main.py
+  243a7218809a11b8 102-106,109,134
+src/copaw/app/routers/agents.py
+  243a7218809a11b8 82-118,134-145,150
+src/copaw/cli/agents_cmd.py
+  243a7218809a11b8 2,5-9,13-57,59-89,91-101,104-108,110-112,114-116,118-122,124-181,186,188-191,193-196,220-232,234,239-414
+src/copaw/agents/prompt.py
+  243a7218809a11b8 313-368,372-374
+.github/workflows/pr-welcome.yml
+  243a7218809a11b8 37-49,129-136,138-139,193-198,200,247-250
+.github/workflows/issue-welcome.yml
+  243a7218809a11b8 36-39,41-51,99-106,108-109,148-153,155,184-187
+src/copaw/agents/skills/cron/SKILL.md
+  243a7218809a11b8 3-4,7,9,11-36,38,41-42,44-49,51-53,61-62,67,71,75,79-81,83-91,93,95,99,107,109,111,121,123-125,127,129,132-140,145-149,152-173,175-178,182-189,191-201
+src/copaw/__version__.py
+  243a7218809a11b8 2
+src/copaw/agents/skills/multi_agent_collaboration/SKILL.md
+  243a7218809a11b8 1-228
+src/copaw/agents/tools/view_image.py
+  243a7218809a11b8 38
+src/copaw/cli/http.py
+  243a7218809a11b8 5,25-43
+website/public/docs/cli.en.md
+  243a7218809a11b8 222,225-226,230,263-298,300-353,448,568-569
+src/copaw/agents/skills/channel_message/SKILL.md
+  243a7218809a11b8 1-247
+src/copaw/app/routers/console.py
+  243a7218809a11b8 227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.18",
+  "base_commit_sha": "632b52748397d693f85de488d31891b5d499580f",
+  "prompts": {
+    "243a7218809a11b8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a80c17d1-dd44-4674-9493-ea3fee0f3998",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 1057,
+      "total_deletions": 1036,
+      "accepted_lines": 1532,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/88f52f5ed7f89edae689f9df5061435197b732083d182dd3ba843917bf4b90bd"
+    }
+  }
+}
