@@ -2,6 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -376,11 +380,11 @@ export function ChannelsClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            通道配置绑定当前活动智能体. 修改后服务端会尝试热加载; 若失败请查看
-            CoPaw 日志.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="通道"
+            description="通道配置绑定当前活动智能体. 修改后服务端会尝试热加载; 若失败请查看 CoPaw 日志."
+          />
 
           {listQuery.isError ? (
             <Alert variant="destructive">
@@ -461,7 +465,7 @@ export function ChannelsClient() {
               );
             })}
           </div>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
 
       <Sheet

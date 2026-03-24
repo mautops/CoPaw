@@ -1,16 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PanelLeftCloseIcon, PanelLeftOpenIcon, PlusIcon } from "lucide-react";
+import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 
 export function ModelsToolbar({
   showLeftSidebar,
   onToggleLeftSidebar,
-  onCreateCustom,
 }: {
   showLeftSidebar: boolean;
   onToggleLeftSidebar: () => void;
-  onCreateCustom: () => void;
 }) {
   return (
     <header className="sticky top-0 z-20 flex h-[52px] shrink-0 items-center gap-3 border-b border-border bg-muted/90 px-4 backdrop-blur-md backdrop-saturate-150 supports-backdrop-filter:bg-muted/75">
@@ -28,15 +26,6 @@ export function ModelsToolbar({
         )}
       </Button>
       <h1 className="text-base font-semibold tracking-tight">模型</h1>
-      <div className="flex-1" />
-      <Button
-        variant="outline"
-        className="shrink-0 text-base"
-        onClick={onCreateCustom}
-      >
-        <PlusIcon className="size-4" />
-        自定义 Provider
-      </Button>
     </header>
   );
 }

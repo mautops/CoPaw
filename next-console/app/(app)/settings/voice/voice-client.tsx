@@ -2,6 +2,10 @@
 
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -106,11 +110,11 @@ export function VoiceClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            配置入站语音消息的转写方式与音频处理模式, 与模型侧能力及已配置的
-            Provider 相关.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="语音转写"
+            description="配置入站语音消息的转写方式与音频处理模式, 与模型侧能力及已配置的 Provider 相关."
+          />
 
           {audioQuery.isError || typeQuery.isError ? (
             <Alert variant="destructive">
@@ -306,7 +310,7 @@ export function VoiceClient() {
               </CardContent>
             </Card>
           ) : null}
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
     </div>
   );

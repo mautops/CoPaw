@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -258,14 +262,22 @@ export function SecurityClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            Tool Guard, File Guard 与 Skill 扫描与{" "}
-            <Link href="/agent/tools" className="text-primary underline">
-              内置工具
-            </Link>{" "}
-            协同, 规则变更后保存生效.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="安全"
+            description={
+              <>
+                Tool Guard, File Guard 与 Skill 扫描与{" "}
+                <Link
+                  href="/agent/tools"
+                  className="font-medium text-[#615ced] underline underline-offset-2 hover:underline dark:text-[#8b84f5]"
+                >
+                  内置工具
+                </Link>{" "}
+                协同, 规则变更后保存生效.
+              </>
+            }
+          />
 
           {toolGuardQuery.isError ? (
             <Alert variant="destructive">
@@ -716,7 +728,7 @@ export function SecurityClient() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
 
       <Dialog open={ruleOpen} onOpenChange={setRuleOpen}>

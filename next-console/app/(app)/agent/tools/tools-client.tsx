@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
@@ -81,17 +85,22 @@ export function ToolsClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="p-4">
-          <p className="mb-4 text-sm text-muted-foreground">
-            内置工具开关由当前活动智能体配置保存. 工具调用拦截与文件防护见{" "}
-            <Link
-              href="/settings/security"
-              className="font-medium text-primary underline underline-offset-2"
-            >
-              安全
-            </Link>
-            页.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="内置工具"
+            description={
+              <>
+                内置工具开关由当前活动智能体配置保存. 工具调用拦截与文件防护见{" "}
+                <Link
+                  href="/settings/security"
+                  className="font-medium text-[#615ced] underline underline-offset-2 hover:underline dark:text-[#8b84f5]"
+                >
+                  安全
+                </Link>
+                页.
+              </>
+            }
+          />
           {listQuery.isError && (
             <p className="text-destructive">
               {(listQuery.error as Error).message}
@@ -151,7 +160,7 @@ export function ToolsClient() {
               </Card>
             ))}
           </div>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
     </div>
   );

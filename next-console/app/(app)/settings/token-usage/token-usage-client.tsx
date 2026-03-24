@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+  consolePrimaryButtonClass,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,11 +80,11 @@ export function TokenUsageClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            数据来自 CoPaw 本地聚合; 默认最近 30 天. 可按模型名或 Provider ID
-            过滤.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="Token 用量"
+            description="数据来自 CoPaw 本地聚合; 默认最近 30 天. 可按模型名或 Provider ID 过滤."
+          />
 
           <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:flex-wrap sm:items-end">
             <div className="space-y-1.5">
@@ -126,7 +131,10 @@ export function TokenUsageClient() {
                 className="font-mono text-sm"
               />
             </div>
-            <Button className="text-base" onClick={applyFilters}>
+            <Button
+              className={consolePrimaryButtonClass("text-base")}
+              onClick={applyFilters}
+            >
               查询
             </Button>
           </div>
@@ -345,7 +353,7 @@ export function TokenUsageClient() {
               </div>
             </>
           ) : null}
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
     </div>
   );

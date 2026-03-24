@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { consolePrimaryButtonClass } from "@/components/console-mirror";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -275,6 +276,7 @@ export function WorkspaceClient() {
                 </Button>
                 <Button
                   size="sm"
+                  className={consolePrimaryButtonClass()}
                   disabled={!dirty || saveMutation.isPending}
                   onClick={() =>
                     saveMutation.mutate({

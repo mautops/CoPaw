@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -189,11 +193,11 @@ export function AgentsSettingsClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            此处管理根配置中的智能体注册表. 控制台当前会话使用哪一智能体由网关 /
-            JWT / 请求头决定, 与下表无直接绑定.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="智能体注册"
+            description="此处管理根配置中的智能体注册表. 控制台当前会话使用哪一智能体由网关 / JWT / 请求头决定, 与下表无直接绑定."
+          />
 
           {listQuery.isError ? (
             <Alert variant="destructive">
@@ -271,7 +275,7 @@ export function AgentsSettingsClient() {
               </tbody>
             </table>
           </div>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

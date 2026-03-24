@@ -1,5 +1,6 @@
 "use client";
 
+import { consolePrimaryButtonClass } from "@/components/console-mirror";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PanelLeftCloseIcon, PanelLeftOpenIcon, PlusIcon } from "lucide-react";
@@ -42,7 +43,10 @@ export function AgentsToolbar({
         className="h-9 max-w-md flex-1 text-base"
       />
       <div className="flex-1" />
-      <Button className="shrink-0 text-base" onClick={onCreateClick}>
+      <Button
+        className={consolePrimaryButtonClass("shrink-0 text-base")}
+        onClick={onCreateClick}
+      >
         <PlusIcon className="size-4" />
         新建智能体
       </Button>

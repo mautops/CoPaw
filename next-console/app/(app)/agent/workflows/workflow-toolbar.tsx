@@ -1,5 +1,6 @@
 "use client";
 
+import { consolePrimaryButtonClass } from "@/components/console-mirror";
 import { Button } from "@/components/ui/button";
 import {
   FilePlusIcon,
@@ -24,7 +25,7 @@ export function WorkflowToolbar({
   modifierKeyPrefix: string;
 }) {
   return (
-    <header className="sticky top-0 z-20 grid h-[52px] shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-muted/90 px-4 backdrop-blur-md backdrop-saturate-150 supports-backdrop-filter:bg-muted/75">
+    <header className="sticky top-0 z-20 grid h-[52px] shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-muted/90 px-6 backdrop-blur-md backdrop-saturate-150 supports-backdrop-filter:bg-muted/75">
       <div className="flex justify-start">
         <Button
           size="icon"
@@ -59,7 +60,10 @@ export function WorkflowToolbar({
         </Button>
       </div>
       <div className="flex justify-end">
-        <Button className="text-base" onClick={onCreateClick}>
+        <Button
+          className={consolePrimaryButtonClass("text-base")}
+          onClick={onCreateClick}
+        >
           <FilePlusIcon />
           新建
         </Button>

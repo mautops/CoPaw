@@ -17,7 +17,7 @@ function trustedOriginsFromEnv(): string[] | undefined {
     process.env.BETTER_AUTH_URL?.trim(),
     process.env.NEXT_PUBLIC_APP_URL?.trim(),
   ]
-    .filter(Boolean)
+    .filter((u): u is string => Boolean(u))
     .map(stripTrailingSlash);
   const merged = [...new Set([...single, ...fromList])];
   return merged.length > 0 ? merged : undefined;

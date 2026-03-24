@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
@@ -141,7 +145,11 @@ export function SkillsClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="p-4">
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="Skills"
+            description="管理自定义与内置 skill, 可启用/禁用, 编辑 Markdown 内容."
+          />
           {listQuery.isError && (
             <p className="text-destructive">
               {(listQuery.error as Error).message}
@@ -228,7 +236,7 @@ export function SkillsClient() {
               </li>
             ))}
           </ul>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
 
       <SkillCreateDialog

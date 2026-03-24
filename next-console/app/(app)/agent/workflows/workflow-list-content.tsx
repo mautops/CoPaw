@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { WorkflowInfo } from "@/lib/workflow-api";
 import { Loader2Icon } from "lucide-react";
@@ -36,7 +40,11 @@ export function WorkflowListContent({
   onExecuteWorkflow?: (w: WorkflowInfo) => void | Promise<void>;
 }) {
   return (
-    <div className="p-4">
+    <ConsoleMirrorScrollPadding className="space-y-4">
+      <ConsoleMirrorSectionHeader
+        title="Workflows"
+        description="管理 Markdown workflow, 支持搜索, 分类标签与执行."
+      />
       {listQuery.isError && (
         <p className="text-destructive">{(listQuery.error as Error).message}</p>
       )}
@@ -102,6 +110,6 @@ export function WorkflowListContent({
           })}
         </Tabs>
       )}
-    </div>
+    </ConsoleMirrorScrollPadding>
   );
 }

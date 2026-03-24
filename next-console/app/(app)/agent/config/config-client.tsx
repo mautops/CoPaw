@@ -5,6 +5,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -156,17 +160,22 @@ export function AgentConfigClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            以下配置作用于当前活动智能体. 对话使用的 LLM 与 Provider 在{" "}
-            <Link
-              href="/settings/models"
-              className="text-primary underline-offset-4 hover:underline"
-            >
-              设置 / 模型
-            </Link>{" "}
-            中维护, 与本页运行参数相互独立.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="智能体配置"
+            description={
+              <>
+                以下配置作用于当前活动智能体. 对话使用的 LLM 与 Provider 在{" "}
+                <Link
+                  href="/settings/models"
+                  className="font-medium text-[#615ced] underline-offset-4 hover:underline dark:text-[#8b84f5]"
+                >
+                  设置 / 模型
+                </Link>{" "}
+                中维护, 与本页运行参数相互独立.
+              </>
+            }
+          />
 
           {runningQuery.isError ? (
             <Alert variant="destructive">
@@ -601,7 +610,7 @@ export function AgentConfigClient() {
               <Separator className="my-2" />
             </>
           ) : null}
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
     </div>
   );

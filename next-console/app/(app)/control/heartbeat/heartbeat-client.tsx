@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -129,18 +133,23 @@ export function HeartbeatClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            心跳按间隔读取工作区中的{" "}
-            <Link
-              href="/agent/workspace"
-              className="text-primary underline-offset-4 hover:underline"
-            >
-              HEARTBEAT.md
-            </Link>{" "}
-            等内容触发代理运行. 保存后会尝试重调度 Cron 中的心跳任务 (需
-            CronManager 可用).
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="心跳"
+            description={
+              <>
+                心跳按间隔读取工作区中的{" "}
+                <Link
+                  href="/agent/workspace"
+                  className="font-medium text-[#615ced] underline-offset-4 hover:underline dark:text-[#8b84f5]"
+                >
+                  HEARTBEAT.md
+                </Link>{" "}
+                等内容触发代理运行. 保存后会尝试重调度 Cron 中的心跳任务 (需
+                CronManager 可用).
+              </>
+            }
+          />
 
           {heartbeatQuery.isError ? (
             <Alert variant="destructive">
@@ -288,7 +297,7 @@ export function HeartbeatClient() {
               </CardContent>
             </Card>
           ) : null}
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
     </div>
   );

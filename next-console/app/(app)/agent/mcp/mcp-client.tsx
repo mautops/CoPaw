@@ -2,6 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -113,11 +117,11 @@ export function McpClientsView() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="p-4">
-          <p className="mb-4 text-sm text-muted-foreground">
-            MCP 客户端配置保存在当前活动智能体中; 启用状态表示加载该客户端,
-            实时连接状态由运行时决定.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="MCP 客户端"
+            description="配置保存在当前活动智能体中; 启用表示加载该客户端, 实时连接状态由运行时决定."
+          />
           {listQuery.isError && (
             <p className="text-destructive">
               {(listQuery.error as Error).message}
@@ -204,7 +208,7 @@ export function McpClientsView() {
               </Card>
             ))}
           </div>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
 
       <McpClientSheet

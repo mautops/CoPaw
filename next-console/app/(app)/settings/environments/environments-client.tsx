@@ -2,6 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -135,7 +139,11 @@ export function EnvironmentsClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="环境变量"
+            description="当前活动智能体的服务端键值; 下方提醒涉及全量保存与多终端协作风险."
+          />
           <Alert>
             <AlertTitle>全量保存</AlertTitle>
             <AlertDescription>
@@ -243,7 +251,7 @@ export function EnvironmentsClient() {
               </tbody>
             </table>
           </div>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>

@@ -1,5 +1,6 @@
 "use client";
 
+import { consolePrimaryButtonClass } from "@/components/console-mirror";
 import { Button } from "@/components/ui/button";
 import {
   Loader2Icon,
@@ -38,7 +39,9 @@ export function AgentConfigToolbar({
       <h1 className="text-base font-semibold tracking-tight">智能体运行配置</h1>
       <div className="flex-1" />
       <Button
-        className="inline-flex shrink-0 gap-2 text-base"
+        className={consolePrimaryButtonClass(
+          "inline-flex shrink-0 gap-2 text-base",
+        )}
         disabled={saveDisabled || saving}
         onClick={onSave}
       >

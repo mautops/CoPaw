@@ -1,5 +1,6 @@
 "use client";
 
+import { consolePrimaryButtonClass } from "@/components/console-mirror";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -71,7 +72,11 @@ export function WorkspaceToolbar({
           <UploadIcon className="size-4" />
           上传 ZIP
         </Button>
-        <Button size="sm" className="text-base" onClick={onNewClick}>
+        <Button
+          size="sm"
+          className={consolePrimaryButtonClass("text-base")}
+          onClick={onNewClick}
+        >
           <FilePlusIcon className="size-4" />
           新建 MD
         </Button>

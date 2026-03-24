@@ -2,6 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ConsoleMirrorScrollPadding,
+  ConsoleMirrorSectionHeader,
+} from "@/components/console-mirror";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -308,11 +312,11 @@ export function CronJobsClient() {
       />
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 p-4">
-          <p className="text-sm text-muted-foreground">
-            Cron 为 5 段 (分 时 日 月 周). 启用关闭会写入任务配置并重新调度;
-            「暂停/恢复」仅作用于调度器任务, 与 enabled 不同.
-          </p>
+        <ConsoleMirrorScrollPadding className="space-y-4">
+          <ConsoleMirrorSectionHeader
+            title="定时任务"
+            description="Cron 为 5 段 (分 时 日 月 周). 启用关闭会写入任务配置并重新调度; 「暂停/恢复」仅作用于调度器任务, 与 enabled 不同."
+          />
 
           {listQuery.isError ? (
             <Alert variant="destructive">
@@ -449,7 +453,7 @@ export function CronJobsClient() {
               </tbody>
             </table>
           </div>
-        </div>
+        </ConsoleMirrorScrollPadding>
       </ScrollArea>
 
       <Sheet
