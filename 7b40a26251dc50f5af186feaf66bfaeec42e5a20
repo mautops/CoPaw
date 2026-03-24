@@ -1,0 +1,55 @@
+website/public/release-notes/v0.1.0.md
+  243a7218809a11b8 47
+.github/workflows/docker-release.yml
+  243a7218809a11b8 86
+scripts/docker_build.sh
+  243a7218809a11b8 16
+README_zh.md
+  243a7218809a11b8 3,5,7,11,13,17,19,21,24,29,31,34-36,38,41,44-49,52,56,58,60-62,68
+next-console/lib/auth.ts
+  243a7218809a11b8 6-25,27
+src/copaw/cli/app_cmd.py
+  243a7218809a11b8 15-46,56-57,59
+README.md
+  243a7218809a11b8 3,5,7,11,13,17,19,21,24,29,31,34-38,41,44-49,52,56,58,60-62,68
+scripts/README.md
+  243a7218809a11b8 27
+website/public/release-notes/v0.1.0.zh.md
+  243a7218809a11b8 47
+src/copaw/app/_app.py
+  243a7218809a11b8 330-332
+src/Dockerfile
+  243a7218809a11b8 1-53
+next-console/Dockerfile
+  243a7218809a11b8 21,23,35
+.agents/skills/upstream-merge/SKILL.md
+  243a7218809a11b8 43,160
+.agents/skills/upstream-merge/evals/evals.json
+  243a7218809a11b8 6-7
+next-console/app/api/copaw/[[...path]]/route.ts
+  243a7218809a11b8 12-18
+.dockerignore
+  243a7218809a11b8 50-52
+Makefile
+  243a7218809a11b8 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.18",
+  "base_commit_sha": "7b40a26251dc50f5af186feaf66bfaeec42e5a20",
+  "prompts": {
+    "243a7218809a11b8": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "a80c17d1-dd44-4674-9493-ea3fee0f3998",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 396,
+      "total_deletions": 2818,
+      "accepted_lines": 405,
+      "overriden_lines": 7
+    }
+  }
+}
