@@ -1,206 +1,166 @@
 ---
 name: upstream-merge
 description: >
-  Bring upstream changes (e.g. agentscope-ai/CoPaw) into a fork by reading and understanding
-  upstream first, then refactoring into the local codebase, not by mechanically merging or
-  pasting patches. Git merge/cherry-pick is optional transport; full-stack and multi-user checks
-  apply. Triggers: fork sync, upstream merge, cherry-pick, pull upstream PR, git remote upstream.
+  Sync a CoPaw fork with agentscope-ai/CoPaw: treat merge/cherry-pick as transport, integrate by
+  reading upstream and refactoring in-tree. Only src/, console/, and next-console/ are in scope;
+  ignore upstream changes elsewhere. Fork ships UI in next-console. Triggers: upstream merge,
+  cherry-pick, PR import, remote upstream.
 ---
 
 # Upstream merge (fork maintenance)
 
-Help the user bring selected changes from **upstream** into their **downstream** fork without
-throwing away local work. Prefer small, reviewable steps; never rewrite published history unless
-they explicitly ask.
+Bring **upstream** (e.g. `agentscope-ai/CoPaw`) into **downstream** without discarding local intent.
+Use **small, reviewable** steps. Do **not** rewrite published history unless the user explicitly asks.
 
-**Git merge or cherry-pick is only an optional transport layer** (to get blobs into a branch or
-to compare trees). **Do not mechanically apply upstream code** as if the goal were line-level
-reconciliation. **Read upstream commits and PRs until the behavior and rationale are clear**,
-then **re-implement or refactor on top of the current downstream code** (structure, naming, and
-local features stay authoritative). Treat upstream diff as **specification and reference**, not
-as the final shape of your patch.
+## Philosophy
 
-Downstream work must follow the integration principles below (understand, adapt, full-stack,
-multi-user).
+| Idea                   | Practice                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Git is **transport**   | `merge` / `rebase` / `cherry-pick` move commits or expose diffs. They are not the integration deliverable.                                                          |
+| Upstream is **spec**   | Read commits and PRs until **intent, invariants, and edge cases** are clear. Then **implement or refactor on the local tree**; downstream structure and naming win. |
+| **No mechanical port** | The goal is not a conflict-free replay of upstream lines. **Skip** work if behavior already exists downstream and **say so** to the user.                           |
 
-## Integration principles (required)
+After any Git step, **finish integration** in code: scoped directories only, full-stack where needed, **multi-user** checks (see Integration rules).
 
-These rules apply to every upstream-derived change in this fork (CoPaw backend + next-console).
+---
 
-1. **Understand before you port (no mechanical merge)**
-   - Read upstream commits/PRs for **intent, invariants, and edge cases**, not only the diff.
-   - **Default outcome** is **new or adjusted code written against the local tree**, not a
-     conflict-free carry-over of upstream lines. Prefer **re-implementing or refactoring** into
-     downstream patterns so existing behavior and local conventions stay coherent.
-   - If the capability **already exists downstream** (same behavior), **skip** the port and
-     **tell the user** explicitly so they do not duplicate work.
+## Repository policy (this fork)
 
-2. **Backend changes → check frontend**
-   - If the new or changed behavior is in **backend** code, search whether **next-console** (or
-     other clients) **already uses** the API or should.
-   - If the UI does not use it yet, plan **frontend updates in the same integration** (routes,
-     `lib/*-api`, proxy/auth headers) so the feature is actually reachable.
+### In-scope roots (product code)
 
-3. **Frontend changes → check backend**
-   - If the port is **frontend-only** in upstream, verify the **downstream backend already exposes**
-     the required APIs, auth, and data shapes.
-   - If not, extend **CoPaw** (routers, models, multi-agent semantics) in the same effort so the UI
-     is not dead or inconsistent.
+Paths are relative to the repo root. **All intentional integration work happens here:**
 
-4. **Multi-user system (critical)**
-   - This product is **multi-user**. Every integrated feature must be reviewed for:
-     **tenant/user isolation**, **authn/z** (e.g. JWT, agent scoping), **shared mutable state**,
-     **rate limits**, **session/chat ownership**, and **safe defaults** when multiple users act in
-     parallel.
-   - Do not assume single-operator console behavior; call out gaps and fix or document mitigations.
+| Path            | Role                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| `src/`          | CoPaw backend and runtime                                                                             |
+| `console/`      | Legacy SPA, upstream-aligned; **reference only** for behavior—do not grow it as the fork’s primary UI |
+| `next-console/` | **Maintained** web console; prefer porting **console/** UX ideas here                                 |
 
-**Suggested workflow:** read upstream change (message, PR description, tests) → summarize **what
-must become true** in the product → map to **local** modules → decide **skip / adapt / full-stack**
-→ **refactor or implement locally** (upstream patch is input, not the patch you ship) → run tests
-and smoke **multi-user** paths where relevant.
+Apply **Integration rules** below to changes under these roots only.
+
+### Out-of-scope paths (auxiliary)
+
+Everything **outside** `src/`, `console/`, and `next-console/` (e.g. `deploy/`, `docker-compose.yml`, `.github/`, `website/`, root configs, docs, scripts) is **fork-specific auxiliary**. It often **diverges** from upstream’s release layout.
+
+- **Do not** adopt upstream updates in these paths as part of sync.
+- **Merge conflicts:** keep **downstream** (`ours`) or **drop** upstream hunks.
+- **Cherry-pick:** skip commits that touch **only** out-of-scope files, or **exclude** those files from the change.
+- **Upstream still has a path downstream deleted** (and that path is **outside** the three roots): **do not** restore it—treat as intentional drift.
+
+A full `git merge` may still modify out-of-scope files; **resolve** using the rules above, then spend integration effort **only** inside the three roots.
+
+---
+
+## Integration rules (in-scope only)
+
+1. **Understand, then implement locally**  
+   Default outcome: **new or adjusted code** matching downstream patterns. If capability already matches downstream, **skip** and **tell the user**.
+
+2. **Backend (`src/`) → frontend**  
+   Check whether **next-console** (or other clients) should call new or changed APIs. If not, extend **next-console** in the same effort (`lib/*-api`, routes, proxy/auth).
+
+3. **Frontend → backend**  
+   Ensure **CoPaw** exposes required APIs, auth, and shapes. If upstream only changed **`console/`**, treat it as **spec for `next-console/`**, not a reason to expand **`console/`** as product UI.
+
+4. **Multi-user**  
+   Review isolation, **authn/z** (JWT, agent scope), shared mutable state, rate limits, session/chat ownership, and safe defaults under concurrency. Do not assume a single-operator console.
+
+---
+
+## Recommended workflow
+
+1. **Triage** upstream commits: list touched paths; **discard** or **skip** anything **only** out-of-scope (see Repository policy).
+2. **Read** messages, PR description, tests for in-scope changes; note **skip-if-duplicate**, **backend / frontend / both**, **multi-user** impact.
+3. **Transport** (optional): merge, rebase, or cherry-pick; resolve conflicts in out-of-scope files per policy.
+4. **Integrate** in-scope: refactor or rewrite locally; wire **next-console** and **`src/`** together as needed.
+5. **Verify:** tests, smoke, multi-user paths for touched behavior.
+
+---
 
 ## Prerequisites
 
-- Git working tree clean enough to merge or cherry-pick (stash or commit WIP first).
-- Optional: `gh` (GitHub CLI) for listing PR commits and inspecting diffs without leaving the terminal.
+- Working tree clean enough to merge or cherry-pick (stash or commit WIP first).
+- Optional: **GitHub CLI** (`gh`) for PR metadata and diffs.
 
-## Concepts
+---
 
-| Goal                                    | Typical approach                                                                               |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Broad sync with upstream default branch | Merge or rebase for **comparison / starting point**; still **refactor locally** per principles |
-| One upstream feature (commit range)     | `cherry-pick` the commits onto a branch cut from downstream                                    |
-| Upstream PR not merged yet              | Fetch PR head as a local ref, then cherry-pick or merge that ref                               |
+## Git cookbook
 
-Default branch name may be `main` or `master`. Resolve with:
+**Default branch name** (`main` vs `master`):
 
 ```bash
 git remote show upstream | sed -n '/HEAD branch/s/.*: //p'
 ```
 
-## 1. Ensure `upstream` remote exists
+### 1. Ensure `upstream` remote
 
 ```bash
 git remote -v
-```
-
-If missing:
-
-```bash
+# If missing:
 git remote add upstream git@github.com:agentscope-ai/CoPaw.git
+# or: https://github.com/agentscope-ai/CoPaw.git
 ```
 
-HTTPS is fine if the user prefers:
-
-```bash
-git remote add upstream https://github.com/agentscope-ai/CoPaw.git
-```
-
-## 2. Fetch upstream
+### 2. Fetch
 
 ```bash
 git fetch upstream --prune
 ```
 
-## 3. Merge upstream default branch (full sync)
-
-This is a **Git step** (bring trees together). Resolving conflicts to a green build is **not** the
-end state: **re-read what upstream changed**, then **refactor or replace merged hunks** so the
-result matches local architecture and **Integration principles** (full-stack, multi-user).
-
-From the branch that tracks downstream development (example: `main` or `local`):
+### 3. Merge or rebase default branch
 
 ```bash
 git checkout <branch>
 git merge upstream/<default-branch>
+# or: git rebase upstream/<default-branch>
 ```
 
-If the project policy is rebase instead:
+Resolve conflicts; for **out-of-scope** paths prefer **local**. `git add`, then `merge --continue` / `rebase --continue`. Run tests before pushing to **origin**.
 
-```bash
-git rebase upstream/<default-branch>
-```
-
-Resolve conflicts file by file, `git add`, then `git merge --continue` or `git rebase --continue`.
-After a successful merge, run tests; only then push to **downstream** `origin`.
-
-## 4. Cherry-pick specific upstream commits
-
-Prefer **bounded cherry-picks** when wholesale merge is too risky. After each pick, treat picked
-code as **input to understand**, then **fold into local style** per **Integration principles**,
-not as finished integration.
-
-List recent upstream commits (optional):
+### 4. Cherry-pick a range
 
 ```bash
 git log --oneline upstream/<default-branch> -n 30
-```
-
-Create a safety branch from downstream:
-
-```bash
 git checkout -b sync/upstream-<topic> <branch>
-git cherry-pick <sha1>^..<sha2>   # inclusive range
-# or single commit:
-git cherry-pick <sha1>
+git cherry-pick <sha1>^..<sha2>   # inclusive, or single <sha1>
 ```
 
-If a pick fails, fix conflicts, `git add`, `git cherry-pick --continue`, or abort with
-`git cherry-pick --abort`.
+On failure: fix, `git add`, `cherry-pick --continue`, or `cherry-pick --abort`. Treat picked **in-scope** code as input for local refactor (Integration rules).
 
-## 5. Pull commits from an upstream PR (not merged)
-
-GitHub exposes PR heads as refs. Fetch PR number `N` into a local branch:
+### 5. Upstream PR `N` (not merged)
 
 ```bash
 git fetch upstream pull/N/head:pr-upstream-N
-```
-
-Inspect:
-
-```bash
 git log --oneline pr-upstream-N -n 20
 git diff <branch>...pr-upstream-N
+# Then cherry-pick selected SHAs, or: git merge pr-upstream-N
+git branch -d pr-upstream-N   # when done
 ```
 
-Then either:
+Optional: `gh pr view N --repo agentscope-ai/CoPaw` / `gh pr diff N`. See `references/github-pr.md`.
 
-- **Cherry-pick** selected SHAs onto downstream, or
-- **Merge** the PR branch once: `git merge pr-upstream-N` (creates a merge commit if not fast-forward).
+---
 
-Delete the local ref when done:
+## Safety and hygiene
 
-```bash
-git branch -d pr-upstream-N
-```
+- Prefer a **topic branch** (`sync/upstream-...`) before shared mainline.
+- No **`git push --force`** to shared branches unless the user requests it.
+- Heavy divergence: prefer **bounded cherry-picks** or a **single merge** of a topic branch over repeated blind merges.
+- After integration: tests, smoke, and **full-stack + multi-user** sanity for changed behavior.
 
-With **GitHub CLI** (repo explicit):
+---
 
-```bash
-gh pr view N --repo agentscope-ai/CoPaw
-gh pr diff N --repo agentscope-ai/CoPaw
-```
+## If the user is unsure what to take
 
-See `references/github-pr.md` for edge cases (force-push, closed PRs).
+Ask for **upstream branch**, **time range** or **PR number**, then:
 
-## 6. Safety and hygiene
+1. Show `git log --oneline` for that range and propose a **minimal** pick list.
+2. **Filter** by path: commits **only** out-of-scope → **skip** (Repository policy).
+3. For each in-scope candidate: duplicate? backend/frontend/both? multi-user notes?
+4. On conflicts: which files, rename vs delete vs logic; for **deploy/CI/docs** conflicts, default **keep local**.
 
-- Work on a **topic branch** (`sync/upstream-...`) before touching shared mainline.
-- Do **not** run `git push --force` to shared branches unless the user asks.
-- If upstream and downstream diverged heavily, prefer **cherry-pick** or **merge** of a
-  bounded topic branch over blind wholesale merge.
-- After integrating, run the project test suite and smoke the areas touched by conflict resolution.
-- Re-verify **full-stack** (API + next-console) and **multi-user** assumptions per **Integration
-  principles** before calling the work done.
-
-## 7. When the user is unsure what to take
-
-1. Ask which **upstream branch** and **time range** or **PR number**.
-2. Show `git log --oneline` for that range and propose a minimal cherry-pick set.
-3. If conflicts appear, summarize **which files** conflicted and why (rename, delete, or logic).
-4. For each candidate change, note **skip-if-duplicate**, **backend-only / frontend-only / both**,
-   and **multi-user** impact.
+---
 
 ## Bundled resources
 
-- `references/github-pr.md` — PR ref fetch, `gh` usage, and troubleshooting
+- `references/github-pr.md` — PR refs, `gh`, troubleshooting

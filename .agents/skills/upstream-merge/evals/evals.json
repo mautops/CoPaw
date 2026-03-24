@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "We forked CoPaw from agentscope-ai/CoPaw and ship our own release. I want to merge upstream main into our local main but I have never set upstream. Walk me through the exact git commands and what to do if merge conflicts appear in deploy/Dockerfile.",
-      "expected_output": "Adds upstream remote, fetches, merges upstream/<default-branch>, explains conflict resolution for Dockerfile, suggests running tests after merge",
+      "expected_output": "Adds upstream remote, fetches, merges upstream/<default-branch>; for deploy/Dockerfile (outside src/console/next-console) prefer keeping local version per directory scope, do not adopt upstream packaging blindly; then verify only scoped dirs for product integration",
       "files": []
     },
     {
@@ -29,6 +29,12 @@
       "id": 5,
       "prompt": "We merged upstream main with no conflicts. Can we ship immediately?",
       "expected_output": "No: merging is transport only; still read upstream changes, refactor into local codebase if needed, full-stack and multi-user verification before ship",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Upstream main has 5 commits; 4 only touch .github/workflows and README.md, 1 fixes a bug in src/copaw/foo.py. What should we take?",
+      "expected_output": "Focus on src/ change; skip or ignore workflow and README upstream updates per directory convention unless user explicitly wants them; port foo.py under integration principles",
       "files": []
     }
   ]
