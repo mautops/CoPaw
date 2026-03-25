@@ -61,6 +61,9 @@ Do **not** bind-mount a host directory onto the next-console image app directory
 | `COPAW_DISABLED_CHANNELS` | Comma-separated channel types to disable (default includes `imessage` in the image). |
 | `COPAW_ENABLED_CHANNELS`  | If set, only these channels are enabled (whitelist).                                 |
 
+
+---
+
 ---
 
 ## License
