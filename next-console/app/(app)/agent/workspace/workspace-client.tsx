@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ConsoleMirrorScrollPadding,
-} from "@/components/console-mirror";
+import { ConsoleMirrorScrollPadding } from "@/components/console-mirror";
 import { agentConfigApi } from "@/lib/agent-config-api";
 import { agentsRegistryApi } from "@/lib/agents-registry-api";
 import { workspaceApi, type WorkingMdFile } from "@/lib/workspace-api";
@@ -157,8 +155,7 @@ export function WorkspaceClient() {
     return selectedMeta;
   }, [selected, memoryMeta, selectedMeta]);
 
-  const tooLarge =
-    activeMeta != null && activeMeta.size > MAX_EDITOR_BYTES;
+  const tooLarge = activeMeta != null && activeMeta.size > MAX_EDITOR_BYTES;
 
   const fileQuery = useQuery({
     queryKey:
@@ -172,8 +169,7 @@ export function WorkspaceClient() {
       }
       return workspaceApi.getWorkingFile(selectedAgentId, selected);
     },
-    enabled:
-      Boolean(selectedAgentId) && Boolean(selected) && !tooLarge,
+    enabled: Boolean(selectedAgentId) && Boolean(selected) && !tooLarge,
   });
 
   useEffect(() => {
@@ -192,8 +188,7 @@ export function WorkspaceClient() {
     setSavedContent(fileQuery.data.content);
   }, [selected, tooLarge, fileQuery.data]);
 
-  const dirty =
-    selected != null && !tooLarge && editorContent !== savedContent;
+  const dirty = selected != null && !tooLarge && editorContent !== savedContent;
 
   const invalidateList = useCallback(() => {
     if (!selectedAgentId) return;
@@ -253,13 +248,8 @@ export function WorkspaceClient() {
   });
 
   const updateSystemPromptMutation = useMutation({
-    mutationFn: ({
-      agentId,
-      files,
-    }: {
-      agentId: string;
-      files: string[];
-    }) => agentConfigApi.putSystemPromptFiles(files, agentId),
+    mutationFn: ({ agentId, files }: { agentId: string; files: string[] }) =>
+      agentConfigApi.putSystemPromptFiles(files, agentId),
     onSuccess: async (_, vars) => {
       await queryClient.invalidateQueries({
         queryKey: qkWorkspaceSystemPrompt(vars.agentId),
@@ -360,9 +350,8 @@ export function WorkspaceClient() {
     if (!selectedAgentId) return;
     try {
       setZipBusy(true);
-      const { blob, filename } = await workspaceApi.downloadZip(
-        selectedAgentId,
-      );
+      const { blob, filename } =
+        await workspaceApi.downloadZip(selectedAgentId);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -407,13 +396,7 @@ export function WorkspaceClient() {
     void listQuery.refetch();
     void systemPromptQuery.refetch();
     if (expandedMemory) void memoryQuery.refetch();
-  }, [
-    agentsQuery,
-    listQuery,
-    systemPromptQuery,
-    memoryQuery,
-    expandedMemory,
-  ]);
+  }, [agentsQuery, listQuery, systemPromptQuery, memoryQuery, expandedMemory]);
 
   const busy =
     zipBusy ||
@@ -488,11 +471,13 @@ export function WorkspaceClient() {
             ) : null}
             {selected && tooLarge && activeMeta ? (
               <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-amber-500/40 bg-amber-500/10 p-6 text-sm">
-                <p className="m-0 font-mono font-medium">{activeMeta.filename}</p>
+                <p className="m-0 font-mono font-medium">
+                  {activeMeta.filename}
+                </p>
                 <p className="mt-2 text-muted-foreground">
                   该文件约 {(activeMeta.size / (1024 * 1024)).toFixed(2)} MB,
-                  超过在线编辑上限 ({MAX_EDITOR_BYTES / 1024} KB). 请使用「下载」ZIP
-                  在本地编辑后再上传.
+                  超过在线编辑上限 ({MAX_EDITOR_BYTES / 1024} KB).
+                  请使用「下载」ZIP 在本地编辑后再上传.
                 </p>
               </div>
             ) : (
@@ -527,7 +512,8 @@ export function WorkspaceClient() {
       <ConsoleMirrorScrollPadding className="pb-3">
         <p className="m-0 text-right text-[11px] text-[#bbb] dark:text-white/20">
           工作区文件用于构建 Agent 系统提示; 与 legacy 控制台一致, 支持 ZIP
-          导入导出与 MEMORY 日记忆文件. 切换工具栏中的 Agent 可编辑不同实例的工作区.
+          导入导出与 MEMORY 日记忆文件. 切换工具栏中的 Agent
+          可编辑不同实例的工作区.
         </p>
       </ConsoleMirrorScrollPadding>
 

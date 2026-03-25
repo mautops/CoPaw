@@ -3,6 +3,7 @@
 
 # Feature: multimodal-model-support, Property 1: ModelInfo 默认值不变量
 """
+
 from __future__ import annotations
 
 from hypothesis import given, settings

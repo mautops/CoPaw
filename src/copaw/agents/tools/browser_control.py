@@ -542,9 +542,9 @@ async def _ensure_browser(
                     )
                     _attach_context_listeners(state, context)
                     state["playwright"] = pw
-                    state[
-                        "browser"
-                    ] = None  # not needed for persistent context
+                    state["browser"] = (
+                        None  # not needed for persistent context
+                    )
                     state["context"] = context
                 else:
                     launch_kwargs: dict[str, Any] = {
@@ -686,9 +686,9 @@ async def _action_start(
                     # launch_persistent_context returns context directly; no separate browser object
                     _attach_context_listeners(state, context)
                     state["playwright"] = pw
-                    state[
-                        "browser"
-                    ] = None  # not needed for persistent context
+                    state["browser"] = (
+                        None  # not needed for persistent context
+                    )
                     state["context"] = context
                 else:
                     launch_kwargs = {"headless": state["headless"]}

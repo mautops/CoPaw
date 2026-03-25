@@ -712,6 +712,6 @@ async def test_probe_model_multimodal_no_warning_when_matching(
     discrepancy_warnings = [
         m for m in warning_messages if "Probe discrepancy" in m
     ]
-    assert (
-        len(discrepancy_warnings) == 0
-    ), f"Expected no discrepancy warnings, got: {discrepancy_warnings}"
+    assert len(discrepancy_warnings) == 0, (
+        f"Expected no discrepancy warnings, got: {discrepancy_warnings}"
+    )

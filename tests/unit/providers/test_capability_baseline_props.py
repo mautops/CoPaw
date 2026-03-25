@@ -353,9 +353,9 @@ class TestProperty1BaselineCompleteness:
         provider_id, model_id = pair
         registry = ExpectedCapabilityRegistry()
         cap = registry.get_expected(provider_id, model_id)
-        assert (
-            cap is not None
-        ), f"Missing ExpectedCapability for {provider_id}/{model_id}"
+        assert cap is not None, (
+            f"Missing ExpectedCapability for {provider_id}/{model_id}"
+        )
 
     @given(pair=_builtin_pair_st)
     @settings(max_examples=200)
@@ -501,13 +501,16 @@ class TestProperty8OllamaProbeInvariant:
             return_value=(image_supported, "mock probe msg"),
         )
 
-        with patch(
-            "copaw.providers.openai_provider.OpenAIProvider.__init__",
-            return_value=None,
-        ) as mock_init, patch(
-            "copaw.providers.openai_provider.OpenAIProvider"
-            "._probe_image_support",
-            mock_probe,
+        with (
+            patch(
+                "copaw.providers.openai_provider.OpenAIProvider.__init__",
+                return_value=None,
+            ) as mock_init,
+            patch(
+                "copaw.providers.openai_provider.OpenAIProvider"
+                "._probe_image_support",
+                mock_probe,
+            ),
         ):
             provider = OllamaProvider(
                 id="ollama",
@@ -521,9 +524,9 @@ class TestProperty8OllamaProbeInvariant:
         mock_init.assert_called_once()
         expected_url = base_url.rstrip("/") + "/v1"
         called_url = mock_init.call_args.kwargs.get("base_url")
-        assert (
-            called_url == expected_url
-        ), f"Expected probe URL {expected_url!r}, got {called_url!r}"
+        assert called_url == expected_url, (
+            f"Expected probe URL {expected_url!r}, got {called_url!r}"
+        )
 
     @given(
         base_url=_ollama_base_url_st,
@@ -582,13 +585,16 @@ class TestProperty8OllamaProbeInvariant:
         """When provider has no api_key, proxy uses 'ollama' as default."""
         mock_probe = AsyncMock(return_value=(True, "msg"))
 
-        with patch(
-            "copaw.providers.openai_provider.OpenAIProvider.__init__",
-            return_value=None,
-        ) as mock_init, patch(
-            "copaw.providers.openai_provider.OpenAIProvider"
-            "._probe_image_support",
-            mock_probe,
+        with (
+            patch(
+                "copaw.providers.openai_provider.OpenAIProvider.__init__",
+                return_value=None,
+            ) as mock_init,
+            patch(
+                "copaw.providers.openai_provider.OpenAIProvider"
+                "._probe_image_support",
+                mock_probe,
+            ),
         ):
             provider = OllamaProvider(
                 id="ollama",
@@ -649,7 +655,8 @@ def expected_cap_with_known_values_st(
 
 
 class TestProperty9DefaultAnnotationOverride:
-    """Feature: multimodal-probe-validation, Property 9: 默认标注与实际探测的覆盖机制
+    """Feature: multimodal-probe-validation, Property 9:
+    默认标注与实际探测的覆盖机制
 
     *For any* 未配置 API Key 的渠道模型，其 ModelInfo 的 supports_image 和
     supports_video 应等于 ExpectedCapability 中的预期值，且 probe_source 为
@@ -1105,7 +1112,8 @@ _non_media_message_st = st.text(
 
 
 class TestProperty3ErrorTypeDistinction:
-    """Feature: multimodal-probe-validation, Property 3: 错误类型区分——网络错误 vs 不支持
+    """Feature: multimodal-probe-validation, Property 3:
+    错误类型区分——网络错误 vs 不支持
 
     *For any* 探测过程中发生的异常，如果异常是网络超时（TimeoutException）或
     连接错误（ConnectionError），则探测消息应包含 "failed" 或 "timed out" 等

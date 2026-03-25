@@ -123,7 +123,8 @@ export function McpClientsView() {
                 MCP 客户端
               </h1>
               <p className="m-0 text-sm text-[#999] dark:text-white/40">
-                配置保存在当前活动智能体中; 启用表示加载该客户端, 实时连接状态由运行时决定.
+                配置保存在当前活动智能体中; 启用表示加载该客户端,
+                实时连接状态由运行时决定.
               </p>
             </div>
             <Button
@@ -160,34 +161,34 @@ export function McpClientsView() {
                 无匹配项.
               </p>
             )}
-          {!listQuery.isLoading && !listQuery.isError && filtered.length > 0 && (
-            <TooltipProvider delayDuration={300}>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-5">
-                {filtered.map((c) => (
-                  <McpClientCard
-                    key={c.key}
-                    client={c}
-                    isHovered={hoverKey === c.key}
-                    toggling={
-                      toggleMutation.isPending && toggleKey === c.key
-                    }
-                    onMouseEnter={() => setHoverKey(c.key)}
-                    onMouseLeave={() => setHoverKey(null)}
-                    onOpen={() => openEdit(c)}
-                    onToggleEnabled={(e) => {
-                      e.stopPropagation();
-                      setToggleKey(c.key);
-                      toggleMutation.mutate(c.key);
-                    }}
-                    onRequestDelete={(e) => {
-                      e.stopPropagation();
-                      setDeleteKey(c.key);
-                    }}
-                  />
-                ))}
-              </div>
-            </TooltipProvider>
-          )}
+          {!listQuery.isLoading &&
+            !listQuery.isError &&
+            filtered.length > 0 && (
+              <TooltipProvider delayDuration={300}>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-5">
+                  {filtered.map((c) => (
+                    <McpClientCard
+                      key={c.key}
+                      client={c}
+                      isHovered={hoverKey === c.key}
+                      toggling={toggleMutation.isPending && toggleKey === c.key}
+                      onMouseEnter={() => setHoverKey(c.key)}
+                      onMouseLeave={() => setHoverKey(null)}
+                      onOpen={() => openEdit(c)}
+                      onToggleEnabled={(e) => {
+                        e.stopPropagation();
+                        setToggleKey(c.key);
+                        toggleMutation.mutate(c.key);
+                      }}
+                      onRequestDelete={(e) => {
+                        e.stopPropagation();
+                        setDeleteKey(c.key);
+                      }}
+                    />
+                  ))}
+                </div>
+              </TooltipProvider>
+            )}
         </ConsoleMirrorScrollPadding>
       </ScrollArea>
 

@@ -7,6 +7,7 @@ This file tests via OpenAIProvider instance methods.
 
 Validates: Requirements 4.1, 4.2, 4.3, 4.9
 """
+
 from __future__ import annotations
 
 from types import SimpleNamespace

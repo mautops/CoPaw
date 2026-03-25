@@ -72,7 +72,9 @@ export function ChatPromptTextareaWithMentions({
   const [highlight, setHighlight] = useState(0);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
-  const [mentionAnchor, setMentionAnchor] = useState<MentionAnchor | null>(null);
+  const [mentionAnchor, setMentionAnchor] = useState<MentionAnchor | null>(
+    null,
+  );
 
   const updateMentionAnchor = useCallback(() => {
     const el = taRef.current;
@@ -108,9 +110,7 @@ export function ChatPromptTextareaWithMentions({
     if (!mention || mention.kind !== "skill") return [];
     const all = skillsQuery.data ?? [];
     const q = mention.query;
-    return all
-      .filter((s) => matchesSkillFilter(s, q))
-      .slice(0, MAX_ITEMS);
+    return all.filter((s) => matchesSkillFilter(s, q)).slice(0, MAX_ITEMS);
   }, [mention, skillsQuery.data]);
 
   const workflowItems = useMemo(() => {
@@ -173,11 +173,7 @@ export function ChatPromptTextareaWithMentions({
   const pickSkill = useCallback(
     (s: SkillSpec) => {
       if (!mention || mention.kind !== "skill") return;
-      const next = applyMentionReplace(
-        controller.textInput.value,
-        mention,
-        "",
-      );
+      const next = applyMentionReplace(controller.textInput.value, mention, "");
       controller.textInput.setInput(next);
       setRefTags((prev) => [
         ...prev,
@@ -198,11 +194,7 @@ export function ChatPromptTextareaWithMentions({
   const pickWorkflow = useCallback(
     (w: WorkflowInfo) => {
       if (!mention || mention.kind !== "workflow") return;
-      const next = applyMentionReplace(
-        controller.textInput.value,
-        mention,
-        "",
-      );
+      const next = applyMentionReplace(controller.textInput.value, mention, "");
       controller.textInput.setInput(next);
       setRefTags((prev) => [
         ...prev,
@@ -336,9 +328,7 @@ export function ChatPromptTextareaWithMentions({
                     onMouseDown={(ev) => ev.preventDefault()}
                     onClick={() => pickSkill(s)}
                   >
-                    <span className="font-mono font-medium">
-                      /{s.name}
-                    </span>
+                    <span className="font-mono font-medium">/{s.name}</span>
                     {s.description ? (
                       <span className="line-clamp-1 text-muted-foreground">
                         {s.description}
@@ -358,9 +348,7 @@ export function ChatPromptTextareaWithMentions({
                     onMouseDown={(ev) => ev.preventDefault()}
                     onClick={() => pickWorkflow(w)}
                   >
-                    <span className="font-mono font-medium">
-                      @{w.filename}
-                    </span>
+                    <span className="font-mono font-medium">@{w.filename}</span>
                     {(w.name ?? w.description) ? (
                       <span className="line-clamp-1 text-muted-foreground">
                         {w.name ?? w.description}
@@ -375,9 +363,7 @@ export function ChatPromptTextareaWithMentions({
 
   return (
     <div className={cn("w-full min-w-0", className)}>
-      {mentionPanel
-        ? createPortal(mentionPanel, document.body)
-        : null}
+      {mentionPanel ? createPortal(mentionPanel, document.body) : null}
 
       <PromptInputTextarea
         placeholder="发送消息… 输入 / 选择 Skill，输入 @ 选择 Workflow"

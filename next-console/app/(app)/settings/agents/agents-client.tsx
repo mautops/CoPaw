@@ -214,8 +214,9 @@ export function AgentsSettingsClient() {
                 智能体注册
               </h1>
               <p className="m-0 text-sm text-[#999] dark:text-white/40">
-                此处管理根配置中的智能体注册表. 控制台当前会话使用哪一智能体由网关 /
-                JWT / 请求头决定, 与下表无直接绑定.
+                此处管理根配置中的智能体注册表.
+                控制台当前会话使用哪一智能体由网关 / JWT / 请求头决定,
+                与下表无直接绑定.
               </p>
             </div>
             <Button

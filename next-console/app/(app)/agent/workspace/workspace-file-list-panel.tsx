@@ -17,9 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { WorkingMdFile } from "@/lib/workspace-api";
 import { Loader2Icon, RefreshCwIcon } from "lucide-react";
 import { WorkspaceFileItem } from "./workspace-file-item";
@@ -99,7 +97,8 @@ export function WorkspaceFileListPanel({
             className="h-9 font-mono text-sm"
           />
           <p className="m-0 shrink-0 text-xs leading-snug text-[#999] dark:text-white/35">
-            开关控制是否纳入系统提示; 已启用项可拖拽排序, 与 legacy 控制台行为一致.
+            开关控制是否纳入系统提示; 已启用项可拖拽排序, 与 legacy
+            控制台行为一致.
           </p>
           <div className="h-px shrink-0 bg-[#e8e8e8] dark:bg-white/10" />
           <ScrollArea className="min-h-0 flex-1 pr-2">

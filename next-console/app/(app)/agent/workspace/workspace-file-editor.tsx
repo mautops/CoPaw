@@ -9,12 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { WorkingMdFile } from "@/lib/workspace-api";
 import { stripFrontmatter } from "./workspace-domain";
-import {
-  CopyIcon,
-  Loader2Icon,
-  RotateCcwIcon,
-  SaveIcon,
-} from "lucide-react";
+import { CopyIcon, Loader2Icon, RotateCcwIcon, SaveIcon } from "lucide-react";
 
 export function WorkspaceFileEditor({
   selectedFile,
@@ -131,7 +126,10 @@ export function WorkspaceFileEditor({
               </div>
               {showPreview && isMd ? (
                 <div className="min-h-[min(280px,50vh)] flex-1 overflow-auto rounded-lg border border-[#e8e8e8] bg-background px-4 py-3 text-sm dark:border-white/10 dark:bg-white/3">
-                  <MessageResponse mode="static" parseIncompleteMarkdown={false}>
+                  <MessageResponse
+                    mode="static"
+                    parseIncompleteMarkdown={false}
+                  >
                     {previewBody}
                   </MessageResponse>
                 </div>

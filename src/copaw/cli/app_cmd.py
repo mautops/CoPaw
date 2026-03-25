@@ -13,7 +13,7 @@ from ..utils.logging import setup_logger, SuppressPathAccessLogFilter
 
 
 def _parse_listen_port(value: object) -> int:
-    """Accept plain int or Kubernetes-style ``tcp://ip:port`` in ``COPAW_PORT``."""
+    """Parse ``COPAW_PORT``: int or Kubernetes-style ``tcp://ip:port``."""
     if isinstance(value, int):
         p = value
     else:
@@ -56,7 +56,7 @@ def _default_listen_port() -> int:
     default=lambda: _default_listen_port(),
     type=_ListenPortParamType(),
     show_default=True,
-    help="Bind port (also reads COPAW_PORT; supports tcp://host:port from k8s)",
+    help=("Bind port; reads COPAW_PORT; tcp://host:port form ok (e.g. k8s)"),
 )
 @click.option("--reload", is_flag=True, help="Enable auto-reload (dev only)")
 @click.option(

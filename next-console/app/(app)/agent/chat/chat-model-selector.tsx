@@ -99,9 +99,7 @@ export function ChatModelSelector() {
             <Loader2Icon className="size-3.5 shrink-0 animate-spin" />
           ) : null}
           <span className="min-w-0 flex-1 truncate text-left">
-            {providersQuery.isLoading && !providersQuery.data
-              ? "加载…"
-              : label}
+            {providersQuery.isLoading && !providersQuery.data ? "加载…" : label}
           </span>
           <ChevronDownIcon className="size-3.5 shrink-0 opacity-60" />
         </Button>
@@ -110,9 +108,7 @@ export function ChatModelSelector() {
         <DropdownMenuLabel>对话模型</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {providersQuery.isError ? (
-          <div className="px-2 py-2 text-destructive">
-            无法加载模型列表
-          </div>
+          <div className="px-2 py-2 text-destructive">无法加载模型列表</div>
         ) : providersQuery.isLoading ? (
           <div className="px-2 py-3 text-center text-muted-foreground">
             加载中…

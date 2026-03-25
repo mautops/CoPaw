@@ -67,7 +67,9 @@ function UserAvatar({
 
 const AVATAR_PLACEHOLDER = <div className="size-8 shrink-0" />;
 
-function deriveDynamicToolState(tool: ToolCallInfo): DynamicToolUIPart["state"] {
+function deriveDynamicToolState(
+  tool: ToolCallInfo,
+): DynamicToolUIPart["state"] {
   if (tool.state === "error") return "output-error";
   if (tool.output !== undefined && tool.state === "done")
     return "output-available";
@@ -91,8 +93,7 @@ function ToolBlock({
     uiState !== "input-available" &&
     uiState !== "input-streaming" &&
     !(
-      uiState === "output-available" &&
-      tool.hitlApproval.approved === undefined
+      uiState === "output-available" && tool.hitlApproval.approved === undefined
     );
 
   return (
@@ -249,7 +250,10 @@ export function ChatMessageList({
                       isStreaming={false}
                     />
                   ) : (
-                    <MessageResponse mode="static" parseIncompleteMarkdown={false}>
+                    <MessageResponse
+                      mode="static"
+                      parseIncompleteMarkdown={false}
+                    >
                       {msg.content}
                     </MessageResponse>
                   )}

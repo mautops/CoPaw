@@ -40,9 +40,7 @@ export function WorkspaceNewDialog({
 }) {
   const resolved = safeWorkingMdFilename(name);
   const canSubmit =
-    Boolean(agentId) &&
-    resolved.length > 0 &&
-    content.trim().length > 0;
+    Boolean(agentId) && resolved.length > 0 && content.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

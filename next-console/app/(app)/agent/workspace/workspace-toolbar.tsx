@@ -113,9 +113,7 @@ export function WorkspaceToolbar({
               className="min-w-0 w-full max-w-full font-mono text-xs"
             >
               <SelectValue
-                placeholder={
-                  agentsLoading ? "加载中…" : "无可用 Agent"
-                }
+                placeholder={agentsLoading ? "加载中…" : "无可用 Agent"}
               />
             </SelectTrigger>
             <SelectContent>

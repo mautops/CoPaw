@@ -445,13 +445,16 @@ async def test_probe_model_multimodal_uses_ollama_default_api_key() -> None:
         chat_model="OllamaChatModel",
     )
 
-    with patch(
-        "copaw.providers.openai_provider.OpenAIProvider.__init__",
-        return_value=None,
-    ) as mock_init, patch(
-        "copaw.providers.openai_provider.OpenAIProvider._probe_image_support",
-        new_callable=AsyncMock,
-        return_value=(True, "ok"),
+    with (
+        patch(
+            "copaw.providers.openai_provider.OpenAIProvider.__init__",
+            return_value=None,
+        ) as mock_init,
+        patch(
+            "copaw.providers.openai_provider.OpenAIProvider._probe_image_support",
+            new_callable=AsyncMock,
+            return_value=(True, "ok"),
+        ),
     ):
         await provider.probe_model_multimodal("llava:7b", timeout=5.0)
 

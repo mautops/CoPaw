@@ -28,7 +28,10 @@ def chat_row_visible_to_aliases(
     stored_user_id: str,
     aliases: Iterable[str],
 ) -> bool:
-    """True if persisted ``user_id`` matches any JWT alias (local-part, email, uid, …)."""
+    """True if persisted ``user_id`` matches any JWT alias.
+
+    Aliases may be local-part, email, uid, etc.
+    """
     for raw in aliases:
         a = str(raw).strip()
         if not a:
@@ -41,7 +44,10 @@ def chat_row_visible_to_aliases(
 
 
 def request_chat_visibility_aliases(request: Request) -> list[str]:
-    """Aliases from upstream JWT (next-console: mailbox local-part, email, Better Auth id)."""
+    """Aliases from upstream JWT for next-console.
+
+    Includes mailbox local-part, email, and Better Auth id when present.
+    """
     raw = getattr(request.state, "copaw_chat_aliases", None)
     if isinstance(raw, list) and raw:
         out: list[str] = []
@@ -57,10 +63,10 @@ def request_chat_visibility_aliases(request: Request) -> list[str]:
 def chat_stored_user_id_matches(
     stored_user_id: str, token_user_id: str
 ) -> bool:
-    """True if a persisted ``ChatSpec.user_id`` is visible to the JWT workflow user.
+    """True if persisted ``ChatSpec.user_id`` is visible to the JWT user.
 
-    Next-console historically sent full email as ``user_id`` while the token user
-    is the local-part segment; normalize so list/get still match.
+    Next-console historically stored full email as ``user_id`` while the token
+    user is the mailbox local-part; normalize so list/get still match.
     """
     if stored_user_id == token_user_id:
         return True

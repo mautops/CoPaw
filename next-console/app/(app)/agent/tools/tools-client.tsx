@@ -156,22 +156,24 @@ export function ToolsClient() {
                 无匹配项, 调整搜索条件.
               </p>
             )}
-          {!listQuery.isLoading && !listQuery.isError && filtered.length > 0 && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6">
-              {filtered.map((tool) => (
-                <ToolCard
-                  key={tool.name}
-                  tool={tool}
-                  toggling={
-                    toggleMutation.isPending && toggleName === tool.name
-                  }
-                  isHover={hoverKey === tool.name}
-                  onHoverChange={(h) => setHoverKey(h ? tool.name : null)}
-                  onToggle={() => handleToggle(tool)}
-                />
-              ))}
-            </div>
-          )}
+          {!listQuery.isLoading &&
+            !listQuery.isError &&
+            filtered.length > 0 && (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6">
+                {filtered.map((tool) => (
+                  <ToolCard
+                    key={tool.name}
+                    tool={tool}
+                    toggling={
+                      toggleMutation.isPending && toggleName === tool.name
+                    }
+                    isHover={hoverKey === tool.name}
+                    onHoverChange={(h) => setHoverKey(h ? tool.name : null)}
+                    onToggle={() => handleToggle(tool)}
+                  />
+                ))}
+              </div>
+            )}
         </ConsoleMirrorScrollPadding>
       </ScrollArea>
     </div>

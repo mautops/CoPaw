@@ -26,10 +26,7 @@ import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { ChatPromptTextareaWithMentions } from "./chat-prompt-textarea";
-import {
-  composeChatRefMessage,
-  type ChatPromptRefTag,
-} from "./chat-ref-tags";
+import { composeChatRefMessage, type ChatPromptRefTag } from "./chat-ref-tags";
 import type { ChatStatus, FileUIPart } from "ai";
 
 function ChatAttachmentStrip() {
@@ -114,27 +111,16 @@ export function ChatInput({
   }, []);
 
   const followUp =
-    showFollowUpSuggestions &&
-    onSuggestionClick &&
-    status === "ready" ? (
+    showFollowUpSuggestions && onSuggestionClick && status === "ready" ? (
       <div className="mb-2 px-1">
         <Suggestions className="w-full">
-          <Suggestion
-            suggestion="继续说明上一点"
-            onClick={onSuggestionClick}
-          />
+          <Suggestion suggestion="继续说明上一点" onClick={onSuggestionClick} />
           <Suggestion
             suggestion="给出更简短的结论"
             onClick={onSuggestionClick}
           />
-          <Suggestion
-            suggestion="列出关键步骤"
-            onClick={onSuggestionClick}
-          />
-          <Suggestion
-            suggestion="还有什么风险？"
-            onClick={onSuggestionClick}
-          />
+          <Suggestion suggestion="列出关键步骤" onClick={onSuggestionClick} />
+          <Suggestion suggestion="还有什么风险？" onClick={onSuggestionClick} />
         </Suggestions>
       </div>
     ) : null;
@@ -157,10 +143,7 @@ export function ChatInput({
             <div className="flex w-full min-w-0 flex-col gap-1.5 px-3 pt-1.5 pb-0">
               {refTags.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <ChatInlineRefTags
-                    tags={refTags}
-                    onRemove={removeRefTag}
-                  />
+                  <ChatInlineRefTags tags={refTags} onRemove={removeRefTag} />
                 </div>
               ) : null}
               <ChatPromptTextareaWithMentions

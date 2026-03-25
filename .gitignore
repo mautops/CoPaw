@@ -5,6 +5,7 @@
 .pnp.js
 node_modules/
 sessions_mount_dir/
+.pnpm-store
 
 # testing
 /coverage

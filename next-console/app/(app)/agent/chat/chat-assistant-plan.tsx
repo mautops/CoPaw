@@ -31,8 +31,7 @@ export function parseAssistantPlan(content: string): {
     const s = line.trim();
     return s.length > 0 && !s.startsWith("#");
   });
-  const description =
-    descLine?.trim().slice(0, 200) || "展开查看完整内容";
+  const description = descLine?.trim().slice(0, 200) || "展开查看完整内容";
   const renderBody = rest.length > 0 ? rest : " ";
   return { title, description, body: content, renderBody };
 }
@@ -55,9 +54,7 @@ export function AssistantPlanOrText({
   };
 
   if (!plan) {
-    return (
-      <MessageResponse {...streamdownCommon}>{content}</MessageResponse>
-    );
+    return <MessageResponse {...streamdownCommon}>{content}</MessageResponse>;
   }
 
   return (
@@ -72,7 +69,9 @@ export function AssistantPlanOrText({
         </PlanAction>
       </PlanHeader>
       <PlanContent className="pt-0">
-        <MessageResponse {...streamdownCommon}>{plan.renderBody}</MessageResponse>
+        <MessageResponse {...streamdownCommon}>
+          {plan.renderBody}
+        </MessageResponse>
       </PlanContent>
     </Plan>
   );

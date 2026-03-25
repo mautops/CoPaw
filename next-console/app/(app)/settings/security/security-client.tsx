@@ -312,824 +312,828 @@ export function SecurityClient() {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-base">
-      <SecurityToolbar
-        showLeftSidebar={showLeftSidebar}
-        onToggleLeftSidebar={toggleLeftSidebar}
-        onRefresh={invalidateAll}
-        refreshing={fetching}
-      />
+        <SecurityToolbar
+          showLeftSidebar={showLeftSidebar}
+          onToggleLeftSidebar={toggleLeftSidebar}
+          onRefresh={invalidateAll}
+          refreshing={fetching}
+        />
 
-      <ScrollArea className="min-h-0 flex-1">
-        <ConsoleMirrorScrollPadding className="space-y-0">
-          <header className="mb-5">
-            <h1 className="text-[22px] font-bold tracking-tight text-[#1a1a1a] dark:text-white/90">
-              安全
-            </h1>
-            <p className="mt-1.5 text-sm leading-relaxed text-[#999] dark:text-white/45">
-              Tool Guard, File Guard 与 Skill 扫描与{" "}
-              <Link
-                href="/agent/tools"
-                className="font-medium text-[#615ced] underline underline-offset-2 hover:underline dark:text-[#8b84f5]"
-              >
-                内置工具
-              </Link>{" "}
-              协同, 在「Tool Guard」页签保存规则后生效.
-            </p>
-          </header>
-
-          <Tabs defaultValue="tool-guard" className="w-full">
-            <TabsList
-              variant="line"
-              className="mb-5 h-auto min-h-10 w-full flex-wrap justify-start gap-6 rounded-none border-0 border-b border-[#f0f0f0] bg-transparent p-0 dark:border-white/10"
-            >
-              <TabsTrigger
-                value="tool-guard"
-                className="relative flex-none gap-1.5 rounded-none border-0 bg-transparent px-1 py-2.5 text-sm font-medium text-[#666] shadow-none hover:text-[#615ced] data-[state=active]:font-semibold data-[state=active]:text-[#615ced] data-[state=active]:shadow-none data-[state=active]:after:bg-[#615ced] dark:text-white/70 dark:data-[state=active]:text-[#8b87f5] dark:data-[state=active]:after:bg-[#8b87f5] [&_svg]:size-4"
-              >
-                <ShieldIcon className="size-4" />
-                Tool Guard
-              </TabsTrigger>
-              <TabsTrigger
-                value="file-guard"
-                className="relative flex-none gap-1.5 rounded-none border-0 bg-transparent px-1 py-2.5 text-sm font-medium text-[#666] shadow-none hover:text-[#615ced] data-[state=active]:font-semibold data-[state=active]:text-[#615ced] data-[state=active]:shadow-none data-[state=active]:after:bg-[#615ced] dark:text-white/70 dark:data-[state=active]:text-[#8b87f5] dark:data-[state=active]:after:bg-[#8b87f5] [&_svg]:size-4"
-              >
-                <FileLock2Icon className="size-4" />
-                文件防护
-              </TabsTrigger>
-              <TabsTrigger
-                value="skill-scanner"
-                className="relative flex-none gap-1.5 rounded-none border-0 bg-transparent px-1 py-2.5 text-sm font-medium text-[#666] shadow-none hover:text-[#615ced] data-[state=active]:font-semibold data-[state=active]:text-[#615ced] data-[state=active]:shadow-none data-[state=active]:after:bg-[#615ced] dark:text-white/70 dark:data-[state=active]:text-[#8b87f5] dark:data-[state=active]:after:bg-[#8b87f5] [&_svg]:size-4"
-              >
-                <ScanLineIcon className="size-4" />
-                Skill 扫描
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="tool-guard" className="mt-0 space-y-0">
-              <p className="mb-5 text-sm leading-relaxed text-[#888] dark:text-white/45">
-                配置需拦截的高风险工具调用与自定义规则. 内置规则与自定义规则合并展示,
-                可通过开关单独禁用某条规则.
+        <ScrollArea className="min-h-0 flex-1">
+          <ConsoleMirrorScrollPadding className="space-y-0">
+            <header className="mb-5">
+              <h1 className="text-[22px] font-bold tracking-tight text-[#1a1a1a] dark:text-white/90">
+                安全
+              </h1>
+              <p className="mt-1.5 text-sm leading-relaxed text-[#999] dark:text-white/45">
+                Tool Guard, File Guard 与 Skill 扫描与{" "}
+                <Link
+                  href="/agent/tools"
+                  className="font-medium text-[#615ced] underline underline-offset-2 hover:underline dark:text-[#8b84f5]"
+                >
+                  内置工具
+                </Link>{" "}
+                协同, 在「Tool Guard」页签保存规则后生效.
               </p>
+            </header>
 
-              {toolGuardQuery.isError ? (
-                <Alert variant="destructive" className="mb-5">
-                  <AlertTitle>加载 Tool Guard 失败</AlertTitle>
-                  <AlertDescription>
-                    {toolGuardQuery.error instanceof Error
-                      ? toolGuardQuery.error.message
-                      : "未知错误"}
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-              {builtinQuery.isError ? (
-                <Alert variant="destructive" className="mb-5">
-                  <AlertTitle>加载内置规则失败</AlertTitle>
-                  <AlertDescription>
-                    {builtinQuery.error instanceof Error
-                      ? builtinQuery.error.message
-                      : "未知错误"}
-                  </AlertDescription>
-                </Alert>
-              ) : null}
+            <Tabs defaultValue="tool-guard" className="w-full">
+              <TabsList
+                variant="line"
+                className="mb-5 h-auto min-h-10 w-full flex-wrap justify-start gap-6 rounded-none border-0 border-b border-[#f0f0f0] bg-transparent p-0 dark:border-white/10"
+              >
+                <TabsTrigger
+                  value="tool-guard"
+                  className="relative flex-none gap-1.5 rounded-none border-0 bg-transparent px-1 py-2.5 text-sm font-medium text-[#666] shadow-none hover:text-[#615ced] data-[state=active]:font-semibold data-[state=active]:text-[#615ced] data-[state=active]:shadow-none data-[state=active]:after:bg-[#615ced] dark:text-white/70 dark:data-[state=active]:text-[#8b87f5] dark:data-[state=active]:after:bg-[#8b87f5] [&_svg]:size-4"
+                >
+                  <ShieldIcon className="size-4" />
+                  Tool Guard
+                </TabsTrigger>
+                <TabsTrigger
+                  value="file-guard"
+                  className="relative flex-none gap-1.5 rounded-none border-0 bg-transparent px-1 py-2.5 text-sm font-medium text-[#666] shadow-none hover:text-[#615ced] data-[state=active]:font-semibold data-[state=active]:text-[#615ced] data-[state=active]:shadow-none data-[state=active]:after:bg-[#615ced] dark:text-white/70 dark:data-[state=active]:text-[#8b87f5] dark:data-[state=active]:after:bg-[#8b87f5] [&_svg]:size-4"
+                >
+                  <FileLock2Icon className="size-4" />
+                  文件防护
+                </TabsTrigger>
+                <TabsTrigger
+                  value="skill-scanner"
+                  className="relative flex-none gap-1.5 rounded-none border-0 bg-transparent px-1 py-2.5 text-sm font-medium text-[#666] shadow-none hover:text-[#615ced] data-[state=active]:font-semibold data-[state=active]:text-[#615ced] data-[state=active]:shadow-none data-[state=active]:after:bg-[#615ced] dark:text-white/70 dark:data-[state=active]:text-[#8b87f5] dark:data-[state=active]:after:bg-[#8b87f5] [&_svg]:size-4"
+                >
+                  <ScanLineIcon className="size-4" />
+                  Skill 扫描
+                </TabsTrigger>
+              </TabsList>
 
-              <ConsoleMirrorPanel className="mb-5 space-y-5">
-                {toolGuardQuery.isLoading || !tgDraft ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2Icon className="size-4 animate-spin" />
-                    加载中
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-medium text-[#333] dark:text-white/85">
-                        启用 Tool Guard
-                      </span>
-                      <Switch
-                        checked={tgDraft.enabled}
-                        onCheckedChange={(v) =>
-                          setTgDraft({ ...tgDraft, enabled: v })
-                        }
-                      />
+              <TabsContent value="tool-guard" className="mt-0 space-y-0">
+                <p className="mb-5 text-sm leading-relaxed text-[#888] dark:text-white/45">
+                  配置需拦截的高风险工具调用与自定义规则.
+                  内置规则与自定义规则合并展示, 可通过开关单独禁用某条规则.
+                </p>
+
+                {toolGuardQuery.isError ? (
+                  <Alert variant="destructive" className="mb-5">
+                    <AlertTitle>加载 Tool Guard 失败</AlertTitle>
+                    <AlertDescription>
+                      {toolGuardQuery.error instanceof Error
+                        ? toolGuardQuery.error.message
+                        : "未知错误"}
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+                {builtinQuery.isError ? (
+                  <Alert variant="destructive" className="mb-5">
+                    <AlertTitle>加载内置规则失败</AlertTitle>
+                    <AlertDescription>
+                      {builtinQuery.error instanceof Error
+                        ? builtinQuery.error.message
+                        : "未知错误"}
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+
+                <ConsoleMirrorPanel className="mb-5 space-y-5">
+                  {toolGuardQuery.isLoading || !tgDraft ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2Icon className="size-4 animate-spin" />
+                      加载中
                     </div>
-                    <div className="space-y-2">
-                      <span className="text-sm font-medium text-[#333] dark:text-white/85">
-                        保护范围
-                      </span>
-                      <Select
-                        value={tgMode}
-                        onValueChange={(v) => setTgMode(v as GuardedToolsMode)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="default">
-                            内置默认工具集
-                          </SelectItem>
-                          <SelectItem value="none">不保护任何工具</SelectItem>
-                          <SelectItem value="list">仅列表中的工具</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {tgMode === "list" ? (
-                        <Textarea
-                          value={linesFromList(tgDraft.guarded_tools ?? [])}
-                          onChange={(e) =>
-                            setTgDraft(
-                              applyGuardedToolsMode(
-                                tgDraft,
-                                "list",
-                                e.target.value,
-                              ),
-                            )
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-medium text-[#333] dark:text-white/85">
+                          启用 Tool Guard
+                        </span>
+                        <Switch
+                          checked={tgDraft.enabled}
+                          onCheckedChange={(v) =>
+                            setTgDraft({ ...tgDraft, enabled: v })
                           }
-                          placeholder="每行一个工具名"
-                          rows={4}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <span className="text-sm font-medium text-[#333] dark:text-white/85">
+                          保护范围
+                        </span>
+                        <Select
+                          value={tgMode}
+                          onValueChange={(v) =>
+                            setTgMode(v as GuardedToolsMode)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">
+                              内置默认工具集
+                            </SelectItem>
+                            <SelectItem value="none">不保护任何工具</SelectItem>
+                            <SelectItem value="list">仅列表中的工具</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {tgMode === "list" ? (
+                          <Textarea
+                            value={linesFromList(tgDraft.guarded_tools ?? [])}
+                            onChange={(e) =>
+                              setTgDraft(
+                                applyGuardedToolsMode(
+                                  tgDraft,
+                                  "list",
+                                  e.target.value,
+                                ),
+                              )
+                            }
+                            placeholder="每行一个工具名"
+                            rows={4}
+                            className="font-mono text-sm"
+                          />
+                        ) : null}
+                      </div>
+                      <div className="space-y-2">
+                        <span className="text-sm font-medium text-[#333] dark:text-white/85">
+                          全局拒绝的工具名 (每行)
+                        </span>
+                        <Textarea
+                          value={linesFromList(tgDraft.denied_tools)}
+                          onChange={(e) =>
+                            setTgDraft({
+                              ...tgDraft,
+                              denied_tools: listFromLines(e.target.value),
+                            })
+                          }
+                          rows={3}
                           className="font-mono text-sm"
                         />
-                      ) : null}
-                    </div>
-                    <div className="space-y-2">
-                      <span className="text-sm font-medium text-[#333] dark:text-white/85">
-                        全局拒绝的工具名 (每行)
-                      </span>
-                      <Textarea
-                        value={linesFromList(tgDraft.denied_tools)}
-                        onChange={(e) =>
-                          setTgDraft({
-                            ...tgDraft,
-                            denied_tools: listFromLines(e.target.value),
-                          })
-                        }
-                        rows={3}
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                  </>
-                )}
-              </ConsoleMirrorPanel>
-
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-base font-semibold text-[#1a1a1a] dark:text-white/90">
-                  规则列表
-                </h2>
-                <Button
-                  size="sm"
-                  className={consolePrimaryButtonClass("gap-1.5")}
-                  onClick={openNewRule}
-                  disabled={!tgDraft?.enabled}
-                >
-                  <PlusCircleIcon className="size-4" />
-                  添加规则
-                </Button>
-              </div>
-
-              <ConsoleMirrorPanel className="p-0">
-                {toolGuardQuery.isLoading ||
-                builtinQuery.isLoading ||
-                !tgDraft ? (
-                  <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-                    <Loader2Icon className="size-4 animate-spin" />
-                    加载规则
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[720px] text-left text-sm">
-                      <thead className="border-b border-[#f0f0f0] bg-[#fafafa] dark:border-white/10 dark:bg-white/[0.04]">
-                        <tr>
-                          <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
-                            规则 ID
-                          </th>
-                          <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
-                            严重级别
-                          </th>
-                          <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
-                            描述
-                          </th>
-                          <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
-                            来源
-                          </th>
-                          <th className="px-4 py-3 text-right font-semibold text-[#333] dark:text-white/80">
-                            操作
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {mergedRules.map((r) => (
-                          <tr
-                            key={`${r.source}-${r.id}`}
-                            className={`border-b border-[#f0f0f0] last:border-0 dark:border-white/8 ${r.disabled ? "opacity-40" : ""}`}
-                          >
-                            <td className="max-w-[220px] truncate px-4 py-3 font-mono text-xs">
-                              {r.id}
-                            </td>
-                            <td className="px-4 py-3">
-                              <Badge
-                                variant="secondary"
-                                className={severityBadgeClass(r.severity)}
-                              >
-                                {r.severity}
-                              </Badge>
-                            </td>
-                            <td
-                              className="max-w-[280px] truncate px-4 py-3 text-muted-foreground"
-                              title={r.description}
-                            >
-                              {r.description || r.category || "—"}
-                            </td>
-                            <td className="px-4 py-3">
-                              <Badge
-                                variant="outline"
-                                className={
-                                  r.source === "builtin"
-                                    ? "border-blue-500/30 text-blue-700 dark:text-blue-300"
-                                    : "border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
-                                }
-                              >
-                                {r.source === "builtin" ? "内置" : "自定义"}
-                              </Badge>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex flex-wrap items-center justify-end gap-1">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span>
-                                      <Switch
-                                        checked={!r.disabled}
-                                        disabled={!tgDraft.enabled}
-                                        onCheckedChange={() =>
-                                          toggleMergedRule(r.id, r.disabled)
-                                        }
-                                      />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    {r.disabled ? "启用规则" : "禁用规则"}
-                                  </TooltipContent>
-                                </Tooltip>
-                                {r.source === "builtin" ? (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 gap-1 px-2"
-                                    disabled={!tgDraft.enabled}
-                                    onClick={() => setPreviewRule(r)}
-                                  >
-                                    <EyeIcon className="size-3.5" />
-                                    预览
-                                  </Button>
-                                ) : (
-                                  <>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-8"
-                                      disabled={!tgDraft.enabled}
-                                      onClick={() => openEditMergedRule(r)}
-                                    >
-                                      <PencilIcon className="size-4" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-8 text-destructive hover:text-destructive"
-                                      disabled={!tgDraft.enabled}
-                                      onClick={() =>
-                                        deleteCustomRuleById(r.id)
-                                      }
-                                    >
-                                      <Trash2Icon className="size-4" />
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </ConsoleMirrorPanel>
-
-              {putTg.isError ? (
-                <Alert variant="destructive" className="mt-4">
-                  <AlertTitle>保存失败</AlertTitle>
-                  <AlertDescription>
-                    {putTg.error instanceof Error
-                      ? putTg.error.message
-                      : "未知错误"}
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-
-              <div className="mt-2 flex justify-end gap-2 border-t border-[#f0f0f0] pt-4 dark:border-white/10">
-                <Button
-                  variant="outline"
-                  disabled={putTg.isPending}
-                  onClick={handleResetToolGuard}
-                >
-                  重置
-                </Button>
-                <Button
-                  className={consolePrimaryButtonClass()}
-                  disabled={putTg.isPending || !tgDraft}
-                  onClick={() => tgDraft && putTg.mutate(tgDraft)}
-                >
-                  {putTg.isPending ? (
-                    <Loader2Icon className="size-4 animate-spin" />
-                  ) : null}
-                  保存
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="file-guard" className="mt-0">
-              <p className="mb-5 text-sm leading-relaxed text-[#888] dark:text-white/45">
-                限制智能体可读取或修改的文件路径, 降低敏感文件泄露风险.
-              </p>
-              <ConsoleMirrorPanel className="space-y-4">
-                {fileGuardQuery.isLoading ? (
-                  <Loader2Icon className="size-4 animate-spin" />
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-medium text-[#333] dark:text-white/85">
-                        启用路径保护
-                      </span>
-                      <Switch
-                        checked={fgEnabled}
-                        onCheckedChange={setFgEnabled}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <span className="text-sm font-medium text-[#333] dark:text-white/85">
-                        敏感路径 (每行)
-                      </span>
-                      <Textarea
-                        value={fgPathsText}
-                        onChange={(e) => setFgPathsText(e.target.value)}
-                        rows={8}
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                    {putFg.isError ? (
-                      <Alert variant="destructive">
-                        <AlertDescription>
-                          {putFg.error instanceof Error
-                            ? putFg.error.message
-                            : "保存失败"}
-                        </AlertDescription>
-                      </Alert>
-                    ) : null}
-                    <Button
-                      className={consolePrimaryButtonClass()}
-                      disabled={putFg.isPending}
-                      onClick={() => putFg.mutate()}
-                    >
-                      {putFg.isPending ? (
-                        <Loader2Icon className="size-4 animate-spin" />
-                      ) : null}
-                      保存
-                    </Button>
-                  </>
-                )}
-              </ConsoleMirrorPanel>
-            </TabsContent>
-
-            <TabsContent value="skill-scanner" className="mt-0">
-              <p className="mb-5 text-sm leading-relaxed text-[#888] dark:text-white/45">
-                扫描工作区自定义 Skill 的静态风险 (例如可疑外部调用),
-                可配置拦截, 警告或关闭, 并维护白名单与扫描记录.
-              </p>
-              <ConsoleMirrorPanel className="space-y-4">
-                {skillScannerQuery.isLoading || !scDraft ? (
-                  <Loader2Icon className="size-4 animate-spin" />
-                ) : (
-                  <>
-                    <div className="flex flex-wrap items-end gap-4">
-                      <div className="space-y-2">
-                        <span className="text-sm font-medium leading-none">
-                          模式
-                        </span>
-                      <Select
-                        value={scDraft.mode}
-                        onValueChange={(v) =>
-                          setScDraft({
-                            ...scDraft,
-                            mode: v as SkillScannerConfig["mode"],
-                          })
-                        }
-                      >
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="block">block</SelectItem>
-                          <SelectItem value="warn">warn</SelectItem>
-                          <SelectItem value="off">off</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <span className="text-sm font-medium leading-none">
-                        超时 (秒)
-                      </span>
-                      <Input
-                        type="number"
-                        min={5}
-                        max={300}
-                        className="w-[120px]"
-                        value={scDraft.timeout}
-                        onChange={(e) =>
-                          setScDraft({
-                            ...scDraft,
-                            timeout: Number(e.target.value) || 30,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium leading-none">
-                        白名单
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setWlOpen(true)}
-                      >
-                        添加技能
-                      </Button>
-                    </div>
-                    {scDraft.whitelist.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        暂无白名单
-                      </p>
-                    ) : (
-                      <div className="space-y-2 rounded-md border border-border p-2">
-                        {scDraft.whitelist.map((w) => (
-                          <div
-                            key={w.skill_name}
-                            className="flex items-center justify-between gap-2 text-sm"
-                          >
-                            <span className="truncate font-mono">
-                              {w.skill_name}
-                            </span>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={removeWl.isPending}
-                              onClick={() => removeWl.mutate(w.skill_name)}
-                            >
-                              移除
-                            </Button>
-                          </div>
-                        ))}
                       </div>
-                    )}
-                  </div>
-                  {putSc.isError ? (
-                    <Alert variant="destructive">
-                      <AlertDescription>
-                        {putSc.error instanceof Error
-                          ? putSc.error.message
-                          : "保存失败"}
-                      </AlertDescription>
-                    </Alert>
-                  ) : null}
+                    </>
+                  )}
+                </ConsoleMirrorPanel>
+
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-base font-semibold text-[#1a1a1a] dark:text-white/90">
+                    规则列表
+                  </h2>
+                  <Button
+                    size="sm"
+                    className={consolePrimaryButtonClass("gap-1.5")}
+                    onClick={openNewRule}
+                    disabled={!tgDraft?.enabled}
+                  >
+                    <PlusCircleIcon className="size-4" />
+                    添加规则
+                  </Button>
+                </div>
+
+                <ConsoleMirrorPanel className="p-0">
+                  {toolGuardQuery.isLoading ||
+                  builtinQuery.isLoading ||
+                  !tgDraft ? (
+                    <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
+                      <Loader2Icon className="size-4 animate-spin" />
+                      加载规则
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[720px] text-left text-sm">
+                        <thead className="border-b border-[#f0f0f0] bg-[#fafafa] dark:border-white/10 dark:bg-white/[0.04]">
+                          <tr>
+                            <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
+                              规则 ID
+                            </th>
+                            <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
+                              严重级别
+                            </th>
+                            <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
+                              描述
+                            </th>
+                            <th className="px-4 py-3 font-semibold text-[#333] dark:text-white/80">
+                              来源
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-[#333] dark:text-white/80">
+                              操作
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {mergedRules.map((r) => (
+                            <tr
+                              key={`${r.source}-${r.id}`}
+                              className={`border-b border-[#f0f0f0] last:border-0 dark:border-white/8 ${r.disabled ? "opacity-40" : ""}`}
+                            >
+                              <td className="max-w-[220px] truncate px-4 py-3 font-mono text-xs">
+                                {r.id}
+                              </td>
+                              <td className="px-4 py-3">
+                                <Badge
+                                  variant="secondary"
+                                  className={severityBadgeClass(r.severity)}
+                                >
+                                  {r.severity}
+                                </Badge>
+                              </td>
+                              <td
+                                className="max-w-[280px] truncate px-4 py-3 text-muted-foreground"
+                                title={r.description}
+                              >
+                                {r.description || r.category || "—"}
+                              </td>
+                              <td className="px-4 py-3">
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    r.source === "builtin"
+                                      ? "border-blue-500/30 text-blue-700 dark:text-blue-300"
+                                      : "border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+                                  }
+                                >
+                                  {r.source === "builtin" ? "内置" : "自定义"}
+                                </Badge>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex flex-wrap items-center justify-end gap-1">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span>
+                                        <Switch
+                                          checked={!r.disabled}
+                                          disabled={!tgDraft.enabled}
+                                          onCheckedChange={() =>
+                                            toggleMergedRule(r.id, r.disabled)
+                                          }
+                                        />
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {r.disabled ? "启用规则" : "禁用规则"}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  {r.source === "builtin" ? (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 gap-1 px-2"
+                                      disabled={!tgDraft.enabled}
+                                      onClick={() => setPreviewRule(r)}
+                                    >
+                                      <EyeIcon className="size-3.5" />
+                                      预览
+                                    </Button>
+                                  ) : (
+                                    <>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-8"
+                                        disabled={!tgDraft.enabled}
+                                        onClick={() => openEditMergedRule(r)}
+                                      >
+                                        <PencilIcon className="size-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-8 text-destructive hover:text-destructive"
+                                        disabled={!tgDraft.enabled}
+                                        onClick={() =>
+                                          deleteCustomRuleById(r.id)
+                                        }
+                                      >
+                                        <Trash2Icon className="size-4" />
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </ConsoleMirrorPanel>
+
+                {putTg.isError ? (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertTitle>保存失败</AlertTitle>
+                    <AlertDescription>
+                      {putTg.error instanceof Error
+                        ? putTg.error.message
+                        : "未知错误"}
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+
+                <div className="mt-2 flex justify-end gap-2 border-t border-[#f0f0f0] pt-4 dark:border-white/10">
+                  <Button
+                    variant="outline"
+                    disabled={putTg.isPending}
+                    onClick={handleResetToolGuard}
+                  >
+                    重置
+                  </Button>
                   <Button
                     className={consolePrimaryButtonClass()}
-                    disabled={putSc.isPending}
-                    onClick={() => putSc.mutate(scDraft)}
+                    disabled={putTg.isPending || !tgDraft}
+                    onClick={() => tgDraft && putTg.mutate(tgDraft)}
                   >
-                    {putSc.isPending ? (
+                    {putTg.isPending ? (
                       <Loader2Icon className="size-4 animate-spin" />
                     ) : null}
                     保存
                   </Button>
+                </div>
+              </TabsContent>
 
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-sm font-medium leading-none">
-                        拦截 / 警告记录
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={
-                          clearHistory.isPending ||
-                          (blockedQuery.data?.length ?? 0) === 0
-                        }
-                        onClick={() => clearHistory.mutate()}
-                      >
-                        清空全部
-                      </Button>
-                    </div>
-                    {blockedQuery.isLoading ? (
-                      <Loader2Icon className="size-4 animate-spin" />
-                    ) : blockedQuery.isError ? (
-                      <Alert variant="destructive">
-                        <AlertDescription>
-                          {blockedQuery.error instanceof Error
-                            ? blockedQuery.error.message
-                            : "加载失败"}
-                        </AlertDescription>
-                      </Alert>
-                    ) : (blockedQuery.data?.length ?? 0) === 0 ? (
-                      <p className="text-sm text-muted-foreground">暂无记录</p>
-                    ) : (
-                      <div className="space-y-2 rounded-md border border-border p-2">
-                        {(blockedQuery.data ?? []).map((rec, i) => (
-                          <div
-                            key={`${rec.skill_name}-${rec.blocked_at}-${i}`}
-                            className="flex flex-wrap items-end justify-between gap-2 border-b border-border/60 pb-2 text-sm last:border-0"
-                          >
-                            <div className="min-w-0">
-                              <p className="font-mono font-medium">
-                                {rec.skill_name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {rec.blocked_at} · {rec.action} ·{" "}
-                                {rec.max_severity}
-                              </p>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={removeBlocked.isPending}
-                              onClick={() => removeBlocked.mutate(i)}
-                            >
-                              删除
-                            </Button>
-                          </div>
-                        ))}
+              <TabsContent value="file-guard" className="mt-0">
+                <p className="mb-5 text-sm leading-relaxed text-[#888] dark:text-white/45">
+                  限制智能体可读取或修改的文件路径, 降低敏感文件泄露风险.
+                </p>
+                <ConsoleMirrorPanel className="space-y-4">
+                  {fileGuardQuery.isLoading ? (
+                    <Loader2Icon className="size-4 animate-spin" />
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-medium text-[#333] dark:text-white/85">
+                          启用路径保护
+                        </span>
+                        <Switch
+                          checked={fgEnabled}
+                          onCheckedChange={setFgEnabled}
+                        />
                       </div>
-                    )}
-                  </div>
-                </>
-              )}
-              </ConsoleMirrorPanel>
-            </TabsContent>
-          </Tabs>
-        </ConsoleMirrorScrollPadding>
-      </ScrollArea>
+                      <div className="space-y-2">
+                        <span className="text-sm font-medium text-[#333] dark:text-white/85">
+                          敏感路径 (每行)
+                        </span>
+                        <Textarea
+                          value={fgPathsText}
+                          onChange={(e) => setFgPathsText(e.target.value)}
+                          rows={8}
+                          className="font-mono text-sm"
+                        />
+                      </div>
+                      {putFg.isError ? (
+                        <Alert variant="destructive">
+                          <AlertDescription>
+                            {putFg.error instanceof Error
+                              ? putFg.error.message
+                              : "保存失败"}
+                          </AlertDescription>
+                        </Alert>
+                      ) : null}
+                      <Button
+                        className={consolePrimaryButtonClass()}
+                        disabled={putFg.isPending}
+                        onClick={() => putFg.mutate()}
+                      >
+                        {putFg.isPending ? (
+                          <Loader2Icon className="size-4 animate-spin" />
+                        ) : null}
+                        保存
+                      </Button>
+                    </>
+                  )}
+                </ConsoleMirrorPanel>
+              </TabsContent>
 
-      <Dialog open={ruleOpen} onOpenChange={setRuleOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {ruleIdx !== null ? "编辑规则" : "新建规则"}
-            </DialogTitle>
-            <DialogDescription>
-              与后端 ToolGuardRuleConfig 一致, patterns 每行一条.
-            </DialogDescription>
-          </DialogHeader>
-          {ruleEdit ? (
+              <TabsContent value="skill-scanner" className="mt-0">
+                <p className="mb-5 text-sm leading-relaxed text-[#888] dark:text-white/45">
+                  扫描工作区自定义 Skill 的静态风险 (例如可疑外部调用),
+                  可配置拦截, 警告或关闭, 并维护白名单与扫描记录.
+                </p>
+                <ConsoleMirrorPanel className="space-y-4">
+                  {skillScannerQuery.isLoading || !scDraft ? (
+                    <Loader2Icon className="size-4 animate-spin" />
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-end gap-4">
+                        <div className="space-y-2">
+                          <span className="text-sm font-medium leading-none">
+                            模式
+                          </span>
+                          <Select
+                            value={scDraft.mode}
+                            onValueChange={(v) =>
+                              setScDraft({
+                                ...scDraft,
+                                mode: v as SkillScannerConfig["mode"],
+                              })
+                            }
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="block">block</SelectItem>
+                              <SelectItem value="warn">warn</SelectItem>
+                              <SelectItem value="off">off</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <span className="text-sm font-medium leading-none">
+                            超时 (秒)
+                          </span>
+                          <Input
+                            type="number"
+                            min={5}
+                            max={300}
+                            className="w-[120px]"
+                            value={scDraft.timeout}
+                            onChange={(e) =>
+                              setScDraft({
+                                ...scDraft,
+                                timeout: Number(e.target.value) || 30,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-medium leading-none">
+                            白名单
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setWlOpen(true)}
+                          >
+                            添加技能
+                          </Button>
+                        </div>
+                        {scDraft.whitelist.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            暂无白名单
+                          </p>
+                        ) : (
+                          <div className="space-y-2 rounded-md border border-border p-2">
+                            {scDraft.whitelist.map((w) => (
+                              <div
+                                key={w.skill_name}
+                                className="flex items-center justify-between gap-2 text-sm"
+                              >
+                                <span className="truncate font-mono">
+                                  {w.skill_name}
+                                </span>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  disabled={removeWl.isPending}
+                                  onClick={() => removeWl.mutate(w.skill_name)}
+                                >
+                                  移除
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {putSc.isError ? (
+                        <Alert variant="destructive">
+                          <AlertDescription>
+                            {putSc.error instanceof Error
+                              ? putSc.error.message
+                              : "保存失败"}
+                          </AlertDescription>
+                        </Alert>
+                      ) : null}
+                      <Button
+                        className={consolePrimaryButtonClass()}
+                        disabled={putSc.isPending}
+                        onClick={() => putSc.mutate(scDraft)}
+                      >
+                        {putSc.isPending ? (
+                          <Loader2Icon className="size-4 animate-spin" />
+                        ) : null}
+                        保存
+                      </Button>
+
+                      <Separator />
+
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm font-medium leading-none">
+                            拦截 / 警告记录
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={
+                              clearHistory.isPending ||
+                              (blockedQuery.data?.length ?? 0) === 0
+                            }
+                            onClick={() => clearHistory.mutate()}
+                          >
+                            清空全部
+                          </Button>
+                        </div>
+                        {blockedQuery.isLoading ? (
+                          <Loader2Icon className="size-4 animate-spin" />
+                        ) : blockedQuery.isError ? (
+                          <Alert variant="destructive">
+                            <AlertDescription>
+                              {blockedQuery.error instanceof Error
+                                ? blockedQuery.error.message
+                                : "加载失败"}
+                            </AlertDescription>
+                          </Alert>
+                        ) : (blockedQuery.data?.length ?? 0) === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            暂无记录
+                          </p>
+                        ) : (
+                          <div className="space-y-2 rounded-md border border-border p-2">
+                            {(blockedQuery.data ?? []).map((rec, i) => (
+                              <div
+                                key={`${rec.skill_name}-${rec.blocked_at}-${i}`}
+                                className="flex flex-wrap items-end justify-between gap-2 border-b border-border/60 pb-2 text-sm last:border-0"
+                              >
+                                <div className="min-w-0">
+                                  <p className="font-mono font-medium">
+                                    {rec.skill_name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {rec.blocked_at} · {rec.action} ·{" "}
+                                    {rec.max_severity}
+                                  </p>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  disabled={removeBlocked.isPending}
+                                  onClick={() => removeBlocked.mutate(i)}
+                                >
+                                  删除
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </ConsoleMirrorPanel>
+              </TabsContent>
+            </Tabs>
+          </ConsoleMirrorScrollPadding>
+        </ScrollArea>
+
+        <Dialog open={ruleOpen} onOpenChange={setRuleOpen}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {ruleIdx !== null ? "编辑规则" : "新建规则"}
+              </DialogTitle>
+              <DialogDescription>
+                与后端 ToolGuardRuleConfig 一致, patterns 每行一条.
+              </DialogDescription>
+            </DialogHeader>
+            {ruleEdit ? (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">id</span>
+                  <Input
+                    value={ruleEdit.id}
+                    onChange={(e) =>
+                      setRuleEdit({ ...ruleEdit, id: e.target.value })
+                    }
+                    className="font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">tools (每行)</span>
+                  <Textarea
+                    rows={2}
+                    value={linesFromList(ruleEdit.tools)}
+                    onChange={(e) =>
+                      setRuleEdit({
+                        ...ruleEdit,
+                        tools: listFromLines(e.target.value),
+                      })
+                    }
+                    className="font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">params (每行)</span>
+                  <Textarea
+                    rows={2}
+                    value={linesFromList(ruleEdit.params)}
+                    onChange={(e) =>
+                      setRuleEdit({
+                        ...ruleEdit,
+                        params: listFromLines(e.target.value),
+                      })
+                    }
+                    className="font-mono text-sm"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <span className="text-sm font-medium">category</span>
+                    <Input
+                      value={ruleEdit.category}
+                      onChange={(e) =>
+                        setRuleEdit({ ...ruleEdit, category: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-sm font-medium">severity</span>
+                    <Input
+                      value={ruleEdit.severity}
+                      onChange={(e) =>
+                        setRuleEdit({ ...ruleEdit, severity: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">patterns (每行)</span>
+                  <Textarea
+                    rows={4}
+                    value={linesFromList(ruleEdit.patterns)}
+                    onChange={(e) =>
+                      setRuleEdit({
+                        ...ruleEdit,
+                        patterns: listFromLines(e.target.value),
+                      })
+                    }
+                    className="font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">
+                    exclude_patterns (每行)
+                  </span>
+                  <Textarea
+                    rows={2}
+                    value={linesFromList(ruleEdit.exclude_patterns)}
+                    onChange={(e) =>
+                      setRuleEdit({
+                        ...ruleEdit,
+                        exclude_patterns: listFromLines(e.target.value),
+                      })
+                    }
+                    className="font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">description</span>
+                  <Textarea
+                    rows={2}
+                    value={ruleEdit.description}
+                    onChange={(e) =>
+                      setRuleEdit({ ...ruleEdit, description: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">remediation</span>
+                  <Textarea
+                    rows={2}
+                    value={ruleEdit.remediation}
+                    onChange={(e) =>
+                      setRuleEdit({ ...ruleEdit, remediation: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            ) : null}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRuleOpen(false)}>
+                取消
+              </Button>
+              <Button onClick={saveRule}>确定</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={wlOpen} onOpenChange={setWlOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>白名单技能</DialogTitle>
+              <DialogDescription>
+                与后端 SkillScannerWhitelistEntry 一致, content_hash
+                可留空表示任意内容.
+              </DialogDescription>
+            </DialogHeader>
             <div className="space-y-3">
               <div className="space-y-1">
-                <span className="text-sm font-medium">id</span>
+                <span className="text-sm font-medium">skill_name</span>
                 <Input
-                  value={ruleEdit.id}
-                  onChange={(e) =>
-                    setRuleEdit({ ...ruleEdit, id: e.target.value })
-                  }
+                  value={wlName}
+                  onChange={(e) => setWlName(e.target.value)}
                   className="font-mono"
                 />
               </div>
               <div className="space-y-1">
-                <span className="text-sm font-medium">tools (每行)</span>
-                <Textarea
-                  rows={2}
-                  value={linesFromList(ruleEdit.tools)}
-                  onChange={(e) =>
-                    setRuleEdit({
-                      ...ruleEdit,
-                      tools: listFromLines(e.target.value),
-                    })
-                  }
+                <span className="text-sm font-medium">content_hash (可选)</span>
+                <Input
+                  value={wlHash}
+                  onChange={(e) => setWlHash(e.target.value)}
                   className="font-mono text-sm"
                 />
               </div>
-              <div className="space-y-1">
-                <span className="text-sm font-medium">params (每行)</span>
-                <Textarea
-                  rows={2}
-                  value={linesFromList(ruleEdit.params)}
-                  onChange={(e) =>
-                    setRuleEdit({
-                      ...ruleEdit,
-                      params: listFromLines(e.target.value),
-                    })
-                  }
-                  className="font-mono text-sm"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <span className="text-sm font-medium">category</span>
-                  <Input
-                    value={ruleEdit.category}
-                    onChange={(e) =>
-                      setRuleEdit({ ...ruleEdit, category: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-sm font-medium">severity</span>
-                  <Input
-                    value={ruleEdit.severity}
-                    onChange={(e) =>
-                      setRuleEdit({ ...ruleEdit, severity: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <span className="text-sm font-medium">patterns (每行)</span>
-                <Textarea
-                  rows={4}
-                  value={linesFromList(ruleEdit.patterns)}
-                  onChange={(e) =>
-                    setRuleEdit({
-                      ...ruleEdit,
-                      patterns: listFromLines(e.target.value),
-                    })
-                  }
-                  className="font-mono text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <span className="text-sm font-medium">
-                  exclude_patterns (每行)
-                </span>
-                <Textarea
-                  rows={2}
-                  value={linesFromList(ruleEdit.exclude_patterns)}
-                  onChange={(e) =>
-                    setRuleEdit({
-                      ...ruleEdit,
-                      exclude_patterns: listFromLines(e.target.value),
-                    })
-                  }
-                  className="font-mono text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <span className="text-sm font-medium">description</span>
-                <Textarea
-                  rows={2}
-                  value={ruleEdit.description}
-                  onChange={(e) =>
-                    setRuleEdit({ ...ruleEdit, description: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-1">
-                <span className="text-sm font-medium">remediation</span>
-                <Textarea
-                  rows={2}
-                  value={ruleEdit.remediation}
-                  onChange={(e) =>
-                    setRuleEdit({ ...ruleEdit, remediation: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-          ) : null}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRuleOpen(false)}>
-              取消
-            </Button>
-            <Button onClick={saveRule}>确定</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={wlOpen} onOpenChange={setWlOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>白名单技能</DialogTitle>
-            <DialogDescription>
-              与后端 SkillScannerWhitelistEntry 一致, content_hash
-              可留空表示任意内容.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <span className="text-sm font-medium">skill_name</span>
-              <Input
-                value={wlName}
-                onChange={(e) => setWlName(e.target.value)}
-                className="font-mono"
-              />
-            </div>
-            <div className="space-y-1">
-              <span className="text-sm font-medium">content_hash (可选)</span>
-              <Input
-                value={wlHash}
-                onChange={(e) => setWlHash(e.target.value)}
-                className="font-mono text-sm"
-              />
-            </div>
-            {addWl.isError ? (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {addWl.error instanceof Error
-                    ? addWl.error.message
-                    : "添加失败"}
-                </AlertDescription>
-              </Alert>
-            ) : null}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setWlOpen(false)}>
-              取消
-            </Button>
-            <Button
-              disabled={!wlName.trim() || addWl.isPending}
-              onClick={() => addWl.mutate()}
-            >
-              {addWl.isPending ? (
-                <Loader2Icon className="size-4 animate-spin" />
+              {addWl.isError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {addWl.error instanceof Error
+                      ? addWl.error.message
+                      : "添加失败"}
+                  </AlertDescription>
+                </Alert>
               ) : null}
-              添加
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setWlOpen(false)}>
+                取消
+              </Button>
+              <Button
+                disabled={!wlName.trim() || addWl.isPending}
+                onClick={() => addWl.mutate()}
+              >
+                {addWl.isPending ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : null}
+                添加
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog
-        open={previewRule != null}
-        onOpenChange={(open) => {
-          if (!open) setPreviewRule(null);
-        }}
-      >
-        <DialogContent className="max-h-[85vh] overflow-y-auto text-base sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="break-all font-mono text-base">
-              {previewRule?.id ?? "规则"}
-            </DialogTitle>
-            <DialogDescription>内置规则只读预览</DialogDescription>
-          </DialogHeader>
-          {previewRule ? (
-            <div className="space-y-3 text-sm">
-              <div>
-                <span className="font-medium text-foreground">严重级别</span>
-                <p className="mt-1 text-muted-foreground">
-                  {previewRule.severity} · {previewRule.category}
-                </p>
-              </div>
-              {previewRule.description ? (
+        <Dialog
+          open={previewRule != null}
+          onOpenChange={(open) => {
+            if (!open) setPreviewRule(null);
+          }}
+        >
+          <DialogContent className="max-h-[85vh] overflow-y-auto text-base sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="break-all font-mono text-base">
+                {previewRule?.id ?? "规则"}
+              </DialogTitle>
+              <DialogDescription>内置规则只读预览</DialogDescription>
+            </DialogHeader>
+            {previewRule ? (
+              <div className="space-y-3 text-sm">
                 <div>
-                  <span className="font-medium text-foreground">描述</span>
+                  <span className="font-medium text-foreground">严重级别</span>
                   <p className="mt-1 text-muted-foreground">
-                    {previewRule.description}
+                    {previewRule.severity} · {previewRule.category}
                   </p>
                 </div>
-              ) : null}
-              <div>
-                <span className="font-medium text-foreground">patterns</span>
-                <pre className="mt-1 max-h-40 overflow-auto rounded-md border border-border bg-muted/40 p-2 font-mono text-xs whitespace-pre-wrap">
-                  {previewRule.patterns.length
-                    ? previewRule.patterns.join("\n")
-                    : "—"}
-                </pre>
-              </div>
-              <div>
-                <span className="font-medium text-foreground">
-                  exclude_patterns
-                </span>
-                <pre className="mt-1 max-h-32 overflow-auto rounded-md border border-border bg-muted/40 p-2 font-mono text-xs whitespace-pre-wrap">
-                  {previewRule.exclude_patterns.length
-                    ? previewRule.exclude_patterns.join("\n")
-                    : "—"}
-                </pre>
-              </div>
-              {previewRule.remediation ? (
+                {previewRule.description ? (
+                  <div>
+                    <span className="font-medium text-foreground">描述</span>
+                    <p className="mt-1 text-muted-foreground">
+                      {previewRule.description}
+                    </p>
+                  </div>
+                ) : null}
+                <div>
+                  <span className="font-medium text-foreground">patterns</span>
+                  <pre className="mt-1 max-h-40 overflow-auto rounded-md border border-border bg-muted/40 p-2 font-mono text-xs whitespace-pre-wrap">
+                    {previewRule.patterns.length
+                      ? previewRule.patterns.join("\n")
+                      : "—"}
+                  </pre>
+                </div>
                 <div>
                   <span className="font-medium text-foreground">
-                    remediation
+                    exclude_patterns
                   </span>
-                  <p className="mt-1 text-muted-foreground">
-                    {previewRule.remediation}
-                  </p>
+                  <pre className="mt-1 max-h-32 overflow-auto rounded-md border border-border bg-muted/40 p-2 font-mono text-xs whitespace-pre-wrap">
+                    {previewRule.exclude_patterns.length
+                      ? previewRule.exclude_patterns.join("\n")
+                      : "—"}
+                  </pre>
                 </div>
-              ) : null}
-            </div>
-          ) : null}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPreviewRule(null)}>
-              关闭
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                {previewRule.remediation ? (
+                  <div>
+                    <span className="font-medium text-foreground">
+                      remediation
+                    </span>
+                    <p className="mt-1 text-muted-foreground">
+                      {previewRule.remediation}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPreviewRule(null)}>
+                关闭
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   );

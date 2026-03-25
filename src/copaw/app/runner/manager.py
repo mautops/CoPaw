@@ -53,7 +53,7 @@ class ChatManager:
         Args:
             user_id: Optional single user ID filter
             channel: Optional channel filter
-            visibility_aliases: Console JWT: match any of these against stored user_id
+            visibility_aliases: JWT aliases to match against stored user_id
 
         Returns:
             List of chat specifications

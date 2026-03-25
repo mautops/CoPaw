@@ -95,9 +95,7 @@ export function ModelsSettingsClient() {
       return { regularProviders: regular, embeddedProviders: embedded };
     }
     return {
-      regularProviders: regular.filter((p) =>
-        p.name.toLowerCase().includes(q),
-      ),
+      regularProviders: regular.filter((p) => p.name.toLowerCase().includes(q)),
       embeddedProviders: embedded.filter((p) =>
         p.name.toLowerCase().includes(q),
       ),
@@ -157,9 +155,7 @@ export function ModelsSettingsClient() {
   };
 
   const isSlotMatchingActive =
-    !dirty &&
-    selProvider === activeProviderId &&
-    selModel === activeModelId;
+    !dirty && selProvider === activeProviderId && selModel === activeModelId;
   const canSaveSlot =
     dirty && !!selProvider && !!selModel && !setActiveMutation.isPending;
 
@@ -194,8 +190,9 @@ export function ModelsSettingsClient() {
           ) : (
             <>
               <p className="mb-8 text-sm text-[#999] dark:text-white/35">
-                活动模型写入当前智能体配置. Provider 与密钥由 CoPaw 服务端持久化,
-                与 <span className="font-mono text-foreground">/agent/config</span>{" "}
+                活动模型写入当前智能体配置. Provider 与密钥由 CoPaw
+                服务端持久化, 与{" "}
+                <span className="font-mono text-foreground">/agent/config</span>{" "}
                 中的运行参数相互独立.
               </p>
 
@@ -223,8 +220,7 @@ export function ModelsSettingsClient() {
                         const id = v === "__none__" ? "" : v;
                         setSlotDraft({
                           provider_id: id,
-                          model:
-                            id === activeProviderId ? activeModelId : "",
+                          model: id === activeProviderId ? activeModelId : "",
                         });
                       }}
                     >
@@ -250,12 +246,13 @@ export function ModelsSettingsClient() {
                       onValueChange={(v) => {
                         const m = v === "__none__" ? "" : v;
                         setSlotDraft((prev) => ({
-                          provider_id:
-                            prev?.provider_id ?? activeProviderId,
+                          provider_id: prev?.provider_id ?? activeProviderId,
                           model: m,
                         }));
                       }}
-                      disabled={!selProvider || modelsForSelectedProvider.length === 0}
+                      disabled={
+                        !selProvider || modelsForSelectedProvider.length === 0
+                      }
                     >
                       <SelectTrigger className="h-10 w-full text-base">
                         <SelectValue

@@ -98,7 +98,8 @@ export function SessionsClient() {
     const rows = listQuery.data ?? [];
     return rows.filter(
       (r) =>
-        chatRowBelongsToCurrentUser(r, user) && rowMatchesSearch(r, searchQuery),
+        chatRowBelongsToCurrentUser(r, user) &&
+        rowMatchesSearch(r, searchQuery),
     );
   }, [listQuery.data, searchQuery, user]);
 
@@ -136,7 +137,8 @@ export function SessionsClient() {
             <Alert variant="destructive">
               <AlertTitle>无法加载会话列表</AlertTitle>
               <AlertDescription>
-                当前账号没有可用于会话隔离的用户名或非 UUID 标识, 请完善个人资料中的用户名或邮箱后重试.
+                当前账号没有可用于会话隔离的用户名或非 UUID 标识,
+                请完善个人资料中的用户名或邮箱后重试.
               </AlertDescription>
             </Alert>
           ) : null}

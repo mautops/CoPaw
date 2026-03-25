@@ -44,12 +44,12 @@ export function ProviderSummaryCard({
   const configured = providerIsConfigured(p);
   const available = providerIsAvailable(p);
 
-  const statusLabel = available
-    ? "可用"
+  const statusLabel = available ? "可用" : configured ? "未添加模型" : "未配置";
+  const statusType = available
+    ? "enabled"
     : configured
-      ? "未添加模型"
-      : "未配置";
-  const statusType = available ? "enabled" : configured ? "partial" : "disabled";
+      ? "partial"
+      : "disabled";
   const dotColor =
     statusType === "enabled"
       ? "#52c41a"
@@ -128,8 +128,7 @@ export function ProviderSummaryCard({
                   "text-xs font-medium",
                   statusType === "enabled" && "text-[#52c41a]",
                   statusType === "partial" && "text-[#faad14]",
-                  statusType === "disabled" &&
-                    "text-[#999] dark:text-white/30",
+                  statusType === "disabled" && "text-[#999] dark:text-white/30",
                 )}
               >
                 {statusLabel}

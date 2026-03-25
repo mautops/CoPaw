@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: E501
 # pylint: disable=line-too-long
-"""File search tools: grep (content search) and glob (file discovery).
-
-"""
+"""File search tools: grep (content search) and glob (file discovery)."""
 
 import asyncio
 import fnmatch
