@@ -19,9 +19,11 @@ import {
   ChatHistorySidebar,
   SIDEBAR_DEFAULT_WIDTH,
 } from "./chat-history-sidebar";
+import { ChatModelSelector } from "./chat-model-selector";
 import { ChatInput } from "./chat-input";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSearchDialog } from "./chat-search-dialog";
+import { copawScopeUserFromSessionUser } from "@/lib/workflow-username";
 import { useChatSessions } from "./use-chat-sessions";
 import { useChatStream } from "./use-chat-stream";
 
@@ -35,7 +37,7 @@ function ChatPageInner() {
 
   const { showLeftSidebar, toggleLeftSidebar, user } = useAppShell();
 
-  const userId = user?.username || user?.email || "default";
+  const userId = (user && copawScopeUserFromSessionUser(user)) || "default";
 
   const userInitials = (user?.name || user?.username || user?.email || "U")
     .split(/[\s@]/)
@@ -196,6 +198,7 @@ function ChatPageInner() {
             onToggleRightSidebar={() => setShowRightSidebar((p) => !p)}
             onSearchOpen={() => setSearchOpen(true)}
             searchPlaceholder="搜索对话..."
+            endSlot={<ChatModelSelector />}
           />
 
           <Conversation className="min-h-0 flex-1">
@@ -251,6 +254,8 @@ function ChatPageInner() {
             status={status}
             onSubmit={handleSubmit}
             onStop={handleStop}
+            showFollowUpSuggestions={messages.length > 0}
+            onSuggestionClick={handleSuggestion}
           />
         </div>
 

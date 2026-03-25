@@ -32,6 +32,8 @@ export interface WorkflowMeta {
   description?: string | null;
   tags: string[];
   category?: string | null;
+  /** List/catalog bucket; YAML `catalog` or fallback to `category`. */
+  catalog?: string | null;
   status?: string | null;
   version?: string | null;
 }
@@ -46,6 +48,8 @@ export interface WorkflowInfo {
   description?: string | null;
   tags: string[];
   category?: string | null;
+  /** Normalized list bucket; null if uncategorized. */
+  catalog: string | null;
   status?: string | null;
   version?: string | null;
 }
@@ -128,17 +132,24 @@ export const workflowApi = {
       workflows: r.workflows.map((w) => ({
         ...w,
         tags: normalizeTags(w.tags),
+        catalog:
+          (typeof w.catalog === "string" ? w.catalog : null)?.trim() ||
+          (typeof w.category === "string" ? w.category : null)?.trim() ||
+          null,
       })),
     };
   },
 
   get: async (filename: string) => {
     const d = await apiRequest<WorkflowDetailBody>(workflowPath(filename));
+    const metaTags = normalizeTags(d.meta?.tags);
+    const cat = d.meta?.catalog?.trim() || d.meta?.category?.trim() || null;
     return {
       ...d,
       meta: {
         ...d.meta,
-        tags: normalizeTags(d.meta?.tags),
+        tags: metaTags,
+        catalog: cat ?? undefined,
       },
     };
   },

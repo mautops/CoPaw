@@ -8,6 +8,13 @@ export interface WorkingMdFile {
   modified_time: string;
 }
 
+function jsonHeaders(agentId: string): HeadersInit {
+  return {
+    "Content-Type": "application/json",
+    "X-Agent-Id": agentId,
+  };
+}
+
 async function parseErrorMessage(res: Response): Promise<string> {
   try {
     const j = (await res.json()) as { detail?: unknown };
@@ -20,9 +27,13 @@ async function parseErrorMessage(res: Response): Promise<string> {
   return `HTTP ${res.status}`;
 }
 
-async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+async function apiRequest<T>(
+  path: string,
+  agentId: string,
+  init?: RequestInit,
+): Promise<T> {
   const res = await fetch(`${API_BASE}/api${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: jsonHeaders(agentId),
     ...init,
   });
   if (!res.ok) throw new Error(await parseErrorMessage(res));
@@ -37,22 +48,45 @@ function parseDownloadFilename(disposition: string | null): string | null {
 }
 
 export const workspaceApi = {
-  listWorkingFiles: () => apiRequest<WorkingMdFile[]>("/agent/files"),
+  listWorkingFiles: (agentId: string) =>
+    apiRequest<WorkingMdFile[]>("/agent/files", agentId),
 
-  getWorkingFile: (filename: string) =>
+  getWorkingFile: (agentId: string, filename: string) =>
     apiRequest<{ content: string }>(
       `/agent/files/${encodeURIComponent(filename)}`,
+      agentId,
     ),
 
-  saveWorkingFile: (filename: string, content: string) =>
+  saveWorkingFile: (agentId: string, filename: string, content: string) =>
     apiRequest<{ written?: boolean }>(
       `/agent/files/${encodeURIComponent(filename)}`,
+      agentId,
+      { method: "PUT", body: JSON.stringify({ content }) },
+    ),
+
+  listMemoryFiles: (agentId: string) =>
+    apiRequest<WorkingMdFile[]>("/agent/memory", agentId),
+
+  getMemoryFile: (agentId: string, filename: string) =>
+    apiRequest<{ content: string }>(
+      `/agent/memory/${encodeURIComponent(filename)}`,
+      agentId,
+    ),
+
+  saveMemoryFile: (agentId: string, filename: string, content: string) =>
+    apiRequest<{ written?: boolean }>(
+      `/agent/memory/${encodeURIComponent(filename)}`,
+      agentId,
       { method: "PUT", body: JSON.stringify({ content }) },
     ),
 
   /** Full workspace zip (browser download). */
-  downloadZip: async (): Promise<{ blob: Blob; filename: string }> => {
-    const res = await fetch(`${API_BASE}/api/workspace/download`);
+  downloadZip: async (
+    agentId: string,
+  ): Promise<{ blob: Blob; filename: string }> => {
+    const res = await fetch(`${API_BASE}/api/workspace/download`, {
+      headers: { "X-Agent-Id": agentId },
+    });
     if (!res.ok) throw new Error(await parseErrorMessage(res));
     const blob = await res.blob();
     const fn =
@@ -62,11 +96,15 @@ export const workspaceApi = {
   },
 
   /** Merge zip into workspace (multipart). */
-  uploadZip: async (file: File): Promise<{ success: boolean }> => {
+  uploadZip: async (
+    agentId: string,
+    file: File,
+  ): Promise<{ success: boolean }> => {
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch(`${API_BASE}/api/workspace/upload`, {
       method: "POST",
+      headers: { "X-Agent-Id": agentId },
       body: fd,
     });
     if (!res.ok) throw new Error(await parseErrorMessage(res));

@@ -37,12 +37,13 @@ function getGroupLabel(dateStr: string | null, now: Date): string {
 
   if (diffDays === 0) return "今天";
   if (diffDays === 1) return "昨天";
-  if (diffDays < 7) return "过去 7 天";
+  if (diffDays < 3) return "过去 3 天";
 
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
-  if (year === now.getFullYear()) return `${month} 月`;
-  return `${year} 年 ${month} 月`;
+  const day = date.getDate();
+  if (year === now.getFullYear()) return `${month} 月 ${day} 日`;
+  return `${year} 年 ${month} 月 ${day} 日`;
 }
 
 function groupSessions(sessions: ChatSpec[]): SessionGroup[] {
@@ -161,7 +162,7 @@ function SessionItem({
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="h-7 text-sm"
+            className="h-8 text-base md:text-base"
           />
           <Button
             size="icon"
@@ -193,7 +194,7 @@ function SessionItem({
         >
           <div className="flex min-w-0 items-center gap-2">
             <MessageSquareIcon className="size-3.5 shrink-0 text-muted-foreground" />
-            <span className="flex-1 truncate text-sm">{session.name}</span>
+            <span className="flex-1 truncate">{session.name}</span>
 
             {(isHovered || isActive) && (
               <div
@@ -250,7 +251,7 @@ function GroupSection({
       <button
         onClick={() => collapsible && setCollapsed((v) => !v)}
         className={cn(
-          "mb-1 flex w-full items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium text-muted-foreground",
+          "mb-1 flex w-full items-center gap-1 rounded px-2 py-0.5 font-medium text-muted-foreground",
           collapsible &&
             "cursor-pointer hover:text-foreground transition-colors",
         )}
@@ -349,7 +350,7 @@ export function ChatHistorySidebar({
       />
 
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <span className="text-sm font-medium text-foreground">历史记录</span>
+        <span className="font-medium text-foreground">历史记录</span>
         <Button
           onClick={onNewChat}
           size="icon-sm"
@@ -362,7 +363,7 @@ export function ChatHistorySidebar({
 
       <div className="flex-1 overflow-y-auto p-2">
         {groups.length === 0 ? (
-          <p className="px-2 py-6 text-center text-xs text-muted-foreground">
+          <p className="px-2 py-6 text-center text-muted-foreground">
             暂无对话记录
           </p>
         ) : (

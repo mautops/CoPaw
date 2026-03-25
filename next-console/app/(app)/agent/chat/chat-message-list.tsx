@@ -1,9 +1,14 @@
 "use client";
 
 import {
+  Confirmation,
+  ConfirmationAccepted,
+  ConfirmationRejected,
+  ConfirmationRequest,
+  ConfirmationTitle,
+} from "@/components/ai-elements/confirmation";
+import {
   Message,
-  MessageAction,
-  MessageActions,
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message";
@@ -22,8 +27,9 @@ import {
 } from "@/components/ai-elements/tool";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ToolCallInfo } from "@/lib/chat-api";
-import type { ChatStatus } from "ai";
-import { BotIcon, CopyIcon } from "lucide-react";
+import type { ChatStatus, DynamicToolUIPart } from "ai";
+import { AssistantPlanOrText } from "./chat-assistant-plan";
+import { BotIcon } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import type { LocalMessage } from "./types";
 
@@ -54,12 +60,21 @@ function UserAvatar({
   return (
     <Avatar size="default" className="mt-0.5 shrink-0 ring-2 ring-border">
       <AvatarImage src={image} alt={name ?? "User"} />
-      <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
+      <AvatarFallback>{initials}</AvatarFallback>
     </Avatar>
   );
 }
 
 const AVATAR_PLACEHOLDER = <div className="size-8 shrink-0" />;
+
+function deriveDynamicToolState(tool: ToolCallInfo): DynamicToolUIPart["state"] {
+  if (tool.state === "error") return "output-error";
+  if (tool.output !== undefined && tool.state === "done")
+    return "output-available";
+  if (tool.toolUiState) return tool.toolUiState;
+  if (tool.output !== undefined) return "output-available";
+  return "input-available";
+}
 
 // ── Tool block ───────────────────────────────────────────────────────────────
 
@@ -70,12 +85,15 @@ function ToolBlock({
   tool: ToolCallInfo;
   defaultOpen?: boolean;
 }) {
-  const toolState =
-    tool.state === "error"
-      ? "output-error"
-      : tool.output !== undefined
-        ? "output-available"
-        : "input-available";
+  const uiState = deriveDynamicToolState(tool);
+  const showHitl =
+    tool.hitlApproval &&
+    uiState !== "input-available" &&
+    uiState !== "input-streaming" &&
+    !(
+      uiState === "output-available" &&
+      tool.hitlApproval.approved === undefined
+    );
 
   return (
     <Tool defaultOpen={defaultOpen} className="min-w-0 flex-1">
@@ -83,12 +101,36 @@ function ToolBlock({
         title={tool.name}
         type="dynamic-tool"
         toolName={tool.name}
-        state={toolState}
+        state={uiState}
       />
       <ToolContent>
         {tool.input != null && (
           <ToolInput input={tool.input as Record<string, unknown>} />
         )}
+        {showHitl ? (
+          <Confirmation
+            approval={{
+              id: tool.hitlApproval!.id,
+              approved: tool.hitlApproval!.approved,
+            }}
+            state={uiState}
+          >
+            <ConfirmationRequest>
+              <ConfirmationTitle>
+                此工具调用需通过安全策略确认
+              </ConfirmationTitle>
+              <p className="text-muted-foreground">
+                {`请按助手在对话中的说明在会话里回复以批准或拒绝. 流式 data.guard_approval === "requested" 时会显示此区域.`}
+              </p>
+            </ConfirmationRequest>
+            <ConfirmationAccepted>
+              <p className="text-muted-foreground">已批准并执行.</p>
+            </ConfirmationAccepted>
+            <ConfirmationRejected>
+              <p className="text-muted-foreground">已拒绝执行.</p>
+            </ConfirmationRejected>
+          </Confirmation>
+        ) : null}
         {tool.output !== undefined && (
           <ToolOutput
             output={tool.output}
@@ -144,7 +186,7 @@ export function ChatMessageList({
   ]);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col px-6">
+    <div className="mx-auto flex w-full max-w-5xl min-w-0 flex-col px-6">
       {messages.map((msg, idx) => {
         const isUser = msg.role === "user";
         const prevRole = idx > 0 ? messages[idx - 1].role : null;
@@ -173,7 +215,9 @@ export function ChatMessageList({
               className={`${marginTop} flex flex-row items-start gap-3`}
             >
               {showAvatar ? <BotAvatar /> : AVATAR_PLACEHOLDER}
-              <ToolBlock tool={msg.tool} />
+              <div className="min-w-0 flex-1">
+                <ToolBlock tool={msg.tool} />
+              </div>
             </div>
           );
         }
@@ -196,25 +240,21 @@ export function ChatMessageList({
             ) : (
               AVATAR_PLACEHOLDER
             )}
-            <div className="group flex min-w-0 flex-1 items-start gap-2">
+            <div className="min-w-0 flex-1">
               <Message from={msg.role} className="max-w-full">
                 <MessageContent>
-                  <MessageResponse>{msg.content}</MessageResponse>
+                  {msg.role === "assistant" ? (
+                    <AssistantPlanOrText
+                      content={msg.content}
+                      isStreaming={false}
+                    />
+                  ) : (
+                    <MessageResponse mode="static" parseIncompleteMarkdown={false}>
+                      {msg.content}
+                    </MessageResponse>
+                  )}
                 </MessageContent>
               </Message>
-              {msg.role === "assistant" && (
-                <MessageActions className="mt-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <MessageAction
-                    tooltip="复制"
-                    label="复制"
-                    onClick={() =>
-                      void navigator.clipboard.writeText(msg.content)
-                    }
-                  >
-                    <CopyIcon className="size-4" />
-                  </MessageAction>
-                </MessageActions>
-              )}
             </div>
           </div>
         );
@@ -281,11 +321,13 @@ function StreamingBlock({
       key: "shimmer",
       align: "items-start",
       body: (
-        <Message from="assistant" className="max-w-[calc(100%-2.5rem)]">
-          <MessageContent>
-            <Shimmer>思考中...</Shimmer>
-          </MessageContent>
-        </Message>
+        <div className="min-w-0 flex-1">
+          <Message from="assistant" className="max-w-full">
+            <MessageContent>
+              <Shimmer>思考中...</Shimmer>
+            </MessageContent>
+          </Message>
+        </div>
       ),
     });
   }
@@ -306,7 +348,11 @@ function StreamingBlock({
     rows.push({
       key: `tool-${tool.callId}`,
       align: "items-start",
-      body: <ToolBlock tool={tool} />,
+      body: (
+        <div className="min-w-0 flex-1">
+          <ToolBlock tool={tool} />
+        </div>
+      ),
     });
   }
   if (showText) {
@@ -314,26 +360,16 @@ function StreamingBlock({
       key: "text",
       align: "items-start",
       body: (
-        <div className="group flex min-w-0 flex-1 items-start gap-2">
+        <div className="min-w-0 flex-1">
           <Message from="assistant" className="max-w-full">
             <MessageContent>
-              <MessageResponse isAnimating={status === "streaming"}>
-                {streamingContent || " "}
-              </MessageResponse>
+              <AssistantPlanOrText
+                content={streamingContent || " "}
+                isStreaming={status === "streaming"}
+                isAnimating={status === "streaming"}
+              />
             </MessageContent>
           </Message>
-          <MessageActions className="mt-1 opacity-0 transition-opacity group-hover:opacity-100">
-            <MessageAction
-              tooltip="复制"
-              label="复制"
-              disabled={!streamingContent}
-              onClick={() =>
-                void navigator.clipboard.writeText(streamingContent)
-              }
-            >
-              <CopyIcon className="size-4" />
-            </MessageAction>
-          </MessageActions>
         </div>
       ),
     });

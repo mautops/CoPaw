@@ -1,41 +1,11 @@
 import { createHmac } from "node:crypto";
 
-/** Match ``copaw.app.auth._UUID_WORKFLOW_SEGMENT`` */
-const UUID_SEGMENT =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { copawScopeUserFromSessionUser } from "@/lib/workflow-username";
 
-function workflowSegmentFromClaimValue(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  let s = value.trim();
-  if (!s) return null;
-  if (s.includes("@")) s = s.split("@", 1)[0]!.trim();
-  if (!s || s.includes("..")) return null;
-  if (UUID_SEGMENT.test(s)) return null;
-  if (/[\x00-\x1f/\\]/.test(s)) return null;
-  return s;
-}
-
-/**
- * Same resolution order as ``copaw.app.auth._username_from_jwt_payload``.
- */
-export function resolvedWorkflowUsernameFromSessionUser(user: {
-  id: string;
-  email?: string | null;
-  name?: string | null;
-  username?: string | null;
-}): string | null {
-  for (const v of [user.username, user.email, user.name]) {
-    const seg = workflowSegmentFromClaimValue(v);
-    if (seg) return seg;
-  }
-  const sub = user.id;
-  if (typeof sub === "string" && sub.trim()) {
-    const s = sub.trim();
-    if (s.length === 36 && s.split("-").length === 5) return null;
-    return workflowSegmentFromClaimValue(s);
-  }
-  return null;
-}
+export {
+  copawScopeUserFromSessionUser,
+  resolvedWorkflowUsernameFromSessionUser,
+} from "@/lib/workflow-username";
 
 function b64urlJson(obj: object): string {
   return Buffer.from(JSON.stringify(obj)).toString("base64url");
@@ -54,18 +24,19 @@ export function mintCopawAccessJwt(
   },
   secret: string,
 ): string {
-  const wu = resolvedWorkflowUsernameFromSessionUser(user);
-  if (!wu) {
-    throw new Error("Session has no claim usable as CoPaw workflow username");
+  const scope = copawScopeUserFromSessionUser(user);
+  if (!scope) {
+    throw new Error("Session has no verified email for CoPaw scope");
   }
   const now = Math.floor(Date.now() / 1000);
   const claims: Record<string, string | number> = {
-    sub: user.id,
-    preferred_username: wu,
-    username: wu,
+    sub: scope,
+    preferred_username: scope,
+    username: scope,
     iat: now,
     exp: now + 3600,
   };
+  if (user.id) claims.copaw_uid = user.id;
   if (user.email) claims.email = user.email;
   if (user.name) claims.name = user.name;
 

@@ -6,6 +6,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from ..chat_access import (
+    chat_row_visible_to_aliases,
+    chat_stored_user_id_matches,
+)
 from ..models import ChatSpec, ChatsFile
 from ...channels.schema import DEFAULT_CHANNEL
 
@@ -124,6 +128,7 @@ class BaseChatRepository(ABC):
         self,
         user_id: Optional[str] = None,
         channel: Optional[str] = None,
+        visibility_aliases: Optional[list[str]] = None,
     ) -> list[ChatSpec]:
         """Filter chats by user_id and/or channel.
 
@@ -137,8 +142,18 @@ class BaseChatRepository(ABC):
         cf = await self.load()
         results = cf.chats
 
-        if user_id is not None:
-            results = [c for c in results if c.user_id == user_id]
+        if visibility_aliases is not None:
+            results = [
+                c
+                for c in results
+                if chat_row_visible_to_aliases(c.user_id, visibility_aliases)
+            ]
+        elif user_id is not None:
+            results = [
+                c
+                for c in results
+                if chat_stored_user_id_matches(c.user_id, user_id)
+            ]
 
         if channel is not None:
             results = [c for c in results if c.channel == channel]

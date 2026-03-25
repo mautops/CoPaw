@@ -34,6 +34,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from ..constant import SECRET_DIR
+from .workspace_subject import sanitize_workspace_owner_segment
 
 logger = logging.getLogger(__name__)
 
@@ -426,22 +427,62 @@ def _username_from_jwt_payload(payload: dict[str, Any]) -> Optional[str]:
     return None
 
 
-def _resolve_user_from_access_token(token: str) -> Optional[str]:
+def apply_access_token_to_request_state(request: Request, token: str) -> None:
+    """Set request.state.user and request.state.copaw_subject from token."""
     t = token.strip()
     if not t:
-        return None
+        return
     parts = t.split(".")
     if len(parts) == 2:
-        return verify_token(t)
+        user = verify_token(t)
+        if user:
+            request.state.user = user
+            u = str(user).strip()
+            request.state.copaw_chat_aliases = [u] if u else []
+            try:
+                request.state.copaw_subject = sanitize_workspace_owner_segment(
+                    str(user),
+                )
+            except ValueError:
+                logger.warning(
+                    "Invalid CoPaw token subject for workspace path",
+                )
+        return
     if len(parts) != 3:
-        return None
+        return
     secret = _upstream_jwt_secret()
     if not secret:
-        return None
+        return
     payload = _verify_hs256_jwt(t, secret)
     if not payload:
-        return None
-    return _username_from_jwt_payload(payload)
+        return
+    user = _username_from_jwt_payload(payload)
+    if user:
+        request.state.user = user
+    alias_list: list[str] = []
+    if user:
+        alias_list.append(user)
+    em = payload.get("email")
+    if isinstance(em, str) and em.strip():
+        alias_list.append(em.strip())
+    uid = payload.get("copaw_uid")
+    if isinstance(uid, str) and uid.strip():
+        alias_list.append(uid.strip())
+    sub_raw = payload.get("sub")
+    if isinstance(sub_raw, str) and sub_raw.strip():
+        alias_list.append(sub_raw.strip())
+    request.state.copaw_chat_aliases = list(dict.fromkeys(alias_list))
+    try:
+        if isinstance(sub_raw, str) and sub_raw.strip():
+            request.state.copaw_subject = sanitize_workspace_owner_segment(
+                sub_raw.strip(),
+            )
+        elif user:
+            request.state.copaw_subject = sanitize_workspace_owner_segment(
+                user,
+            )
+    except ValueError:
+        logger.warning("Invalid upstream JWT subject for workspace path")
 
 
 def _extract_access_token_header(request: Request) -> Optional[str]:
@@ -465,9 +506,7 @@ class AccessTokenUserMiddleware(BaseHTTPMiddleware):
         raw = _extract_access_token_header(request)
         if not raw:
             return await call_next(request)
-        user = _resolve_user_from_access_token(raw)
-        if user:
-            request.state.user = user
+        apply_access_token_to_request_state(request, raw)
         return await call_next(request)
 
 
@@ -511,6 +550,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
             )
 
         request.state.user = user
+        try:
+            request.state.copaw_subject = sanitize_workspace_owner_segment(
+                str(user),
+            )
+        except ValueError:
+            pass
         return await call_next(request)
 
     @staticmethod

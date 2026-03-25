@@ -18,7 +18,7 @@ import { Loader2Icon } from "lucide-react";
 export const DEFAULT_NEW_WORKFLOW_MARKDOWN = `---
 name: 显示名称
 description: 简短说明
-category: 分类
+catalog: 目录
 status: draft
 version: "1.0"
 tags:

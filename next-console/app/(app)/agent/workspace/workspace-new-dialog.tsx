@@ -18,6 +18,7 @@ import { Loader2Icon } from "lucide-react";
 export function WorkspaceNewDialog({
   open,
   onOpenChange,
+  agentId,
   name,
   onNameChange,
   content,
@@ -26,6 +27,7 @@ export function WorkspaceNewDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  agentId: string | null;
   name: string;
   onNameChange: (v: string) => void;
   content: string;
@@ -33,11 +35,14 @@ export function WorkspaceNewDialog({
   createMutation: UseMutationResult<
     unknown,
     Error,
-    { filename: string; content: string }
+    { agentId: string; filename: string; content: string }
   >;
 }) {
   const resolved = safeWorkingMdFilename(name);
-  const canSubmit = resolved.length > 0 && content.trim().length > 0;
+  const canSubmit =
+    Boolean(agentId) &&
+    resolved.length > 0 &&
+    content.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,12 +96,14 @@ export function WorkspaceNewDialog({
           </Button>
           <Button
             disabled={!canSubmit || createMutation.isPending}
-            onClick={() =>
+            onClick={() => {
+              if (!agentId) return;
               createMutation.mutate({
+                agentId,
                 filename: resolved,
                 content,
-              })
-            }
+              });
+            }}
           >
             {createMutation.isPending && (
               <Loader2Icon className="animate-spin" />

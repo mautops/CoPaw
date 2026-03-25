@@ -7,7 +7,11 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from agentscope.memory import InMemoryMemory
 
-from .chat_access import ensure_chat_visible, token_user_id
+from .chat_access import (
+    ensure_chat_visible,
+    request_chat_visibility_aliases,
+    token_user_id,
+)
 from .session import SafeJSONSession
 from .manager import ChatManager
 from .models import (
@@ -77,9 +81,16 @@ async def list_chats(
 
     When ``request.state.user`` is set, only that user's chats are returned.
     """
-    tu = token_user_id(request)
-    effective_user = tu if tu is not None else user_id
-    chats = await mgr.list_chats(user_id=effective_user, channel=channel)
+    aliases = request_chat_visibility_aliases(request)
+    if aliases:
+        chats = await mgr.list_chats(
+            visibility_aliases=aliases,
+            channel=channel,
+        )
+    else:
+        tu = token_user_id(request)
+        effective_user = tu if tu is not None else user_id
+        chats = await mgr.list_chats(user_id=effective_user, channel=channel)
     tracker = workspace.task_tracker
     result = []
     for spec in chats:

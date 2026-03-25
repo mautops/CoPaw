@@ -47,7 +47,7 @@ export function ChatSearchDialog({
                     {s.name}
                   </span>
                   {s.updated_at && (
-                    <span className="ml-2 shrink-0 text-xs text-muted-foreground">
+                    <span className="ml-2 shrink-0 text-muted-foreground">
                       {new Date(s.updated_at).toLocaleDateString("zh-CN")}
                     </span>
                   )}

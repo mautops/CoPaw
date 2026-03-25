@@ -9,7 +9,7 @@ import type { WorkflowInfo } from "@/lib/workflow-api";
 import { Loader2Icon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkflowListCard } from "./workflow-list-card";
-import { PAGE_SIZE, workflowsForStatusTab } from "./workflow-domain";
+import { PAGE_SIZE, workflowsForCatalogTab } from "./workflow-domain";
 
 export function WorkflowListContent({
   listQuery,
@@ -17,7 +17,7 @@ export function WorkflowListContent({
   filtered,
   tabValue,
   onTabChange,
-  workflowStatusTabValues,
+  workflowCatalogTabValues,
   tabCounts,
   page,
   modifierKeyPrefix,
@@ -32,7 +32,7 @@ export function WorkflowListContent({
   filtered: WorkflowInfo[];
   tabValue: string;
   onTabChange: (tab: string) => void;
-  workflowStatusTabValues: string[];
+  workflowCatalogTabValues: string[];
   tabCounts: Record<string, number>;
   page: number;
   modifierKeyPrefix: string;
@@ -64,7 +64,7 @@ export function WorkflowListContent({
             variant="line"
             className="mb-4 h-auto min-h-9 w-full flex-wrap justify-start gap-1 py-1"
           >
-            {workflowStatusTabValues.map((tab) => (
+            {workflowCatalogTabValues.map((tab) => (
               <TabsTrigger key={tab} value={tab} className="text-base">
                 {tab === "all" ? "全部" : tab}
                 <span className="tabular-nums text-muted-foreground">
@@ -74,8 +74,8 @@ export function WorkflowListContent({
               </TabsTrigger>
             ))}
           </TabsList>
-          {workflowStatusTabValues.map((tab) => {
-            const items = workflowsForStatusTab(filtered, tab);
+          {workflowCatalogTabValues.map((tab) => {
+            const items = workflowsForCatalogTab(filtered, tab);
             const tp = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
             const ep = tab === tabValue ? Math.min(Math.max(1, page), tp) : 1;
             const slice = items.slice(
@@ -91,7 +91,7 @@ export function WorkflowListContent({
                   </p>
                 ) : items.length === 0 ? (
                   <p className="py-10 text-center text-muted-foreground">
-                    该状态下暂无文档, 请切换其他分类
+                    当前目录下暂无文档, 请切换其他分类
                   </p>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

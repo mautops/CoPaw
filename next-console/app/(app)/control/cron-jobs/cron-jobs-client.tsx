@@ -467,7 +467,10 @@ export function CronJobsClient() {
           }
         }}
       >
-        <SheetContent className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <SheetContent
+          aria-describedby={undefined}
+          className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        >
           <SheetHeader className="shrink-0">
             <SheetTitle>
               {sheetMode === "create" ? "新建定时任务" : "编辑定时任务"}

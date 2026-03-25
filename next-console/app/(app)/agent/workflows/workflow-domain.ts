@@ -27,10 +27,18 @@ export function workflowDisplayTitle(w: WorkflowInfo): string {
   return cardHeading(w.filename);
 }
 
+export function workflowCatalogValue(w: WorkflowInfo): string {
+  const c = w.catalog?.trim();
+  if (c) return c;
+  return (w.category ?? "").trim();
+}
+
 export function workflowFixedMetaLine(w: WorkflowInfo): string[] {
-  return [w.category, w.status, w.version]
+  const bucket = workflowCatalogValue(w);
+  const tail = [w.status, w.version]
     .map((s) => (typeof s === "string" ? s.trim() : ""))
     .filter(Boolean);
+  return bucket ? [bucket, ...tail] : tail;
 }
 
 export function workflowTags(w: WorkflowInfo): string[] {
@@ -116,12 +124,12 @@ export const WORKFLOW_STATUS_BADGE: Record<WorkflowStatusTone, string> = {
   neutral: "border-muted-foreground/30 bg-muted/70 text-muted-foreground",
 };
 
-export function workflowsForStatusTab(
+export function workflowsForCatalogTab(
   items: WorkflowInfo[],
   tab: string,
 ): WorkflowInfo[] {
   if (tab === "all") return items;
-  return items.filter((w) => w.status?.trim() === tab);
+  return items.filter((w) => workflowCatalogValue(w) === tab);
 }
 
 /** Whitespace-separated tokens; category: / cat: / tag: / #tag plus plain name search. */
@@ -134,10 +142,20 @@ export function matchesWorkflowFilter(w: WorkflowInfo, query: string): boolean {
   const fileName = w.filename.toLowerCase();
   const desc = (w.description ?? "").toLowerCase();
   const cat = (w.category ?? "").trim().toLowerCase();
+  const catalogVal = workflowCatalogValue(w).toLowerCase();
   const tags = workflowTags(w).map((t) => t.toLowerCase());
 
   for (const raw of tokens) {
     const lower = raw.toLowerCase();
+    if (lower.startsWith("catalog:")) {
+      const i = raw.indexOf(":");
+      const v = raw
+        .slice(i + 1)
+        .trim()
+        .toLowerCase();
+      if (!v || !catalogVal.includes(v)) return false;
+      continue;
+    }
     if (lower.startsWith("category:") || lower.startsWith("cat:")) {
       const i = raw.indexOf(":");
       const v = raw

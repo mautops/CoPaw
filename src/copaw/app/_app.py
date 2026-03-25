@@ -25,6 +25,7 @@ from ..constant import (
 from ..__version__ import __version__
 from ..utils.logging import setup_logger, add_copaw_file_handler
 from .auth import AccessTokenUserMiddleware, AuthMiddleware
+from .user_primary_agent import UserPrimaryAgentMiddleware
 from .routers import router as api_router, create_agent_scoped_router
 from .routers.agent_scoped import AgentContextMiddleware
 from .routers.voice import voice_router
@@ -263,6 +264,8 @@ app = FastAPI(
 app.add_middleware(AgentContextMiddleware)
 
 app.add_middleware(AuthMiddleware)
+# After token resolution: bind copaw_subject -> primary agent_id
+app.add_middleware(UserPrimaryAgentMiddleware)
 # Outermost on request: resolve HS256 / CoPaw token into
 # request.state.user before AuthMiddleware
 app.add_middleware(AccessTokenUserMiddleware)

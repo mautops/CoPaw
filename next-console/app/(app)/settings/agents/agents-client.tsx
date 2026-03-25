@@ -471,7 +471,10 @@ export function AgentsSettingsClient() {
           if (!o) setEditId(null);
         }}
       >
-        <SheetContent className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[600px]">
+        <SheetContent
+          aria-describedby={undefined}
+          className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[600px]"
+        >
           <SheetHeader className="shrink-0 border-b border-[#f1f2f6] px-6 py-4 dark:border-white/8">
             <SheetTitle className="text-lg font-semibold text-[#1a1a1a] dark:text-white/90">
               {editId ? `编辑: ${editId}` : "编辑"}

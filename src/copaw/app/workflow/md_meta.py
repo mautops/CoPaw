@@ -89,12 +89,16 @@ def extract_meta_fields(
     str | None,
     str | None,
     str | None,
+    str | None,
 ]:
-    """Return name, description, tags, category, status, version."""
+    """Return name, description, tags, category, catalog, status, version."""
     name = _as_optional_str(meta.get("name"))
     description = _as_optional_str(meta.get("description"))
     tags = _normalize_tags_value(meta.get("tags"))
     category = _as_optional_str(meta.get("category"))
+    catalog = _as_optional_str(meta.get("catalog"))
+    if catalog is None:
+        catalog = category
     status = _as_optional_str(meta.get("status"))
     version = _as_optional_str(meta.get("version"))
-    return name, description, tags, category, status, version
+    return name, description, tags, category, catalog, status, version

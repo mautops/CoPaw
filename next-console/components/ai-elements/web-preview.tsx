@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -114,27 +113,33 @@ export const WebPreviewNavigationButton = ({
   tooltip,
   children,
   ...props
-}: WebPreviewNavigationButtonProps) => (
-  <TooltipProvider>
+}: WebPreviewNavigationButtonProps) => {
+  const btn = (
+    <Button
+      className="h-8 w-8 p-0 hover:text-foreground"
+      disabled={disabled}
+      onClick={onClick}
+      size="sm"
+      variant="ghost"
+      {...props}
+    >
+      {children}
+    </Button>
+  );
+
+  if (!tooltip) {
+    return btn;
+  }
+
+  return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          className="h-8 w-8 p-0 hover:text-foreground"
-          disabled={disabled}
-          onClick={onClick}
-          size="sm"
-          variant="ghost"
-          {...props}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
       <TooltipContent>
         <p>{tooltip}</p>
       </TooltipContent>
     </Tooltip>
-  </TooltipProvider>
-);
+  );
+};
 
 export type WebPreviewUrlProps = ComponentProps<typeof Input>;
 

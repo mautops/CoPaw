@@ -154,6 +154,7 @@ class WorkflowMetaInfo(BaseModel):
     description: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
     category: Optional[str] = None
+    catalog: Optional[str] = None
     status: Optional[str] = None
     version: Optional[str] = None
 
@@ -170,6 +171,7 @@ class WorkflowInfo(BaseModel):
     description: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
     category: Optional[str] = None
+    catalog: Optional[str] = None
     status: Optional[str] = None
     version: Optional[str] = None
 
@@ -261,7 +263,15 @@ def _read_workflow_text(file_path: Path) -> str:
 
 def _meta_for_raw(raw: str) -> WorkflowMetaInfo:
     _had, meta_dict, _body, _full = split_frontmatter(raw)
-    name, description, tags, category, status, version = extract_meta_fields(
+    (
+        name,
+        description,
+        tags,
+        category,
+        catalog,
+        status,
+        version,
+    ) = extract_meta_fields(
         meta_dict,
     )
     return WorkflowMetaInfo(
@@ -269,6 +279,7 @@ def _meta_for_raw(raw: str) -> WorkflowMetaInfo:
         description=description,
         tags=tags,
         category=category,
+        catalog=catalog,
         status=status,
         version=version,
     )
@@ -298,6 +309,7 @@ def _info_from_path(
         description=wmeta.description,
         tags=wmeta.tags,
         category=wmeta.category,
+        catalog=wmeta.catalog,
         status=wmeta.status,
         version=wmeta.version,
     )
@@ -415,6 +427,7 @@ async def get_workflow(
             description,
             tags,
             category,
+            catalog,
             status,
             version,
         ) = extract_meta_fields(
@@ -425,6 +438,7 @@ async def get_workflow(
             description=description,
             tags=tags,
             category=category,
+            catalog=catalog,
             status=status,
             version=version,
         )

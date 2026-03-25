@@ -3,20 +3,69 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Iterable, Optional
 
 from fastapi import HTTPException, Request
 
+from ..auth import _workflow_segment_from_claim_value
 from .models import ChatSpec
 
 
 def token_user_id(request: Request) -> Optional[str]:
-    """Return API user id if authenticated, else *None* (e.g. local CLI)."""
+    """Return tenant user id if authenticated, else *None* (e.g. local CLI).
+
+    Next-console HS256 JWT uses mailbox local-part (email before ``@``) as
+    ``sub`` / ``preferred_username``, stored as ``ChatSpec.user_id``.
+    """
     raw = getattr(request.state, "user", None)
     if raw is None:
         return None
     s = str(raw).strip()
     return s or None
+
+
+def chat_row_visible_to_aliases(
+    stored_user_id: str,
+    aliases: Iterable[str],
+) -> bool:
+    """True if persisted ``user_id`` matches any JWT alias (local-part, email, uid, …)."""
+    for raw in aliases:
+        a = str(raw).strip()
+        if not a:
+            continue
+        if stored_user_id == a:
+            return True
+        if chat_stored_user_id_matches(stored_user_id, a):
+            return True
+    return False
+
+
+def request_chat_visibility_aliases(request: Request) -> list[str]:
+    """Aliases from upstream JWT (next-console: mailbox local-part, email, Better Auth id)."""
+    raw = getattr(request.state, "copaw_chat_aliases", None)
+    if isinstance(raw, list) and raw:
+        out: list[str] = []
+        for x in raw:
+            s = str(x).strip()
+            if s and s not in out:
+                out.append(s)
+        return out
+    tu = token_user_id(request)
+    return [tu] if tu else []
+
+
+def chat_stored_user_id_matches(
+    stored_user_id: str, token_user_id: str
+) -> bool:
+    """True if a persisted ``ChatSpec.user_id`` is visible to the JWT workflow user.
+
+    Next-console historically sent full email as ``user_id`` while the token user
+    is the local-part segment; normalize so list/get still match.
+    """
+    if stored_user_id == token_user_id:
+        return True
+    seg = _workflow_segment_from_claim_value(stored_user_id)
+    return bool(seg and seg == token_user_id)
 
 
 def ensure_chat_visible(
@@ -25,7 +74,7 @@ def ensure_chat_visible(
     """404 if missing or not visible to the current token user."""
     if not spec:
         raise HTTPException(status_code=404, detail="Chat not found")
-    tu = token_user_id(request)
-    if tu is not None and spec.user_id != tu:
+    aliases = request_chat_visibility_aliases(request)
+    if aliases and not chat_row_visible_to_aliases(spec.user_id, aliases):
         raise HTTPException(status_code=404, detail="Chat not found")
     return spec

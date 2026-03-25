@@ -1,11 +1,17 @@
 import type { ChatSpec, ContentPart, ToolCallInfo } from "@/lib/chat-api";
 import { chatApi } from "@/lib/chat-api";
+import { llmModelsApi } from "@/lib/llm-models-api";
 import { workflowApi } from "@/lib/workflow-api";
 import { qkWorkflowRuns } from "@/app/(app)/agent/workflows/workflow-domain";
 import type { ChatStatus, FileUIPart } from "ai";
 import type { QueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  expandChatReferenceText,
+  uniqueWorkflowFilenames,
+} from "./chat-expand-refs";
+import { chatsListQueryKey } from "./chat-query-keys";
 import {
   DEFAULT_CHANNEL,
   type LocalMessage,
@@ -102,6 +108,28 @@ export function useChatStream({
       if (!text.trim() || status === "streaming" || status === "submitted")
         return;
 
+      let hasActiveLlm = false;
+      try {
+        const active = await llmModelsApi.getActive();
+        const slot = active?.active_llm;
+        hasActiveLlm = Boolean(slot?.provider_id && slot?.model);
+      } catch {
+        hasActiveLlm = false;
+      }
+      if (!hasActiveLlm) {
+        window.alert(
+          "未配置对话模型. 请点击顶部「选择模型」或前往 设置 → 模型 完成配置后再发送.",
+        );
+        return;
+      }
+
+      let textForApi = text;
+      try {
+        textForApi = await expandChatReferenceText(text);
+      } catch {
+        /* 展开失败时仍发送原文 */
+      }
+
       // Capture before state changes to detect first message in this session
       const isFirstMessage = messagesRef.current.length === 0;
 
@@ -169,6 +197,27 @@ export function useChatStream({
           }
         }
 
+        const atWorkflows = uniqueWorkflowFilenames(text);
+        await Promise.all(
+          atWorkflows.map(async (filename) => {
+            if (workflowExecContext?.filename === filename && forceNewChat) {
+              return;
+            }
+            try {
+              await workflowApi.appendRun(filename, {
+                user_id: resolvedUserId,
+                session_id: sessionId,
+                trigger: "chat_at",
+              });
+              void queryClient.invalidateQueries({
+                queryKey: qkWorkflowRuns(filename),
+              });
+            } catch {
+              /* 无效路径或未授权时不记录 */
+            }
+          }),
+        );
+
         const fileParts: ContentPart[] = await Promise.all(
           files.map(async (f) => {
             const file = dataUrlToFile(
@@ -193,7 +242,7 @@ export function useChatStream({
         );
 
         const contentParts: ContentPart[] = [
-          { type: "text", text },
+          { type: "text", text: textForApi },
           ...fileParts,
         ];
         const input = [
@@ -282,19 +331,23 @@ export function useChatStream({
               chatApi
                 .updateChat(finalChatId, { ...currentSpec, name: newName })
                 .then((updated) => {
-                  queryClient.setQueryData<ChatSpec[]>(["chats"], (prev = []) =>
-                    prev.map((s) => (s.id === finalChatId ? updated : s)),
+                  queryClient.setQueryData<ChatSpec[]>(
+                    chatsListQueryKey(userId),
+                    (prev = []) =>
+                      prev.map((s) => (s.id === finalChatId ? updated : s)),
                   );
                 })
                 .catch(() => {});
             }
           } else {
-            queryClient.setQueryData<ChatSpec[]>(["chats"], (prev = []) =>
-              prev.map((s) =>
-                s.id === finalChatId
-                  ? { ...s, updated_at: updatedAt, status: "idle" }
-                  : s,
-              ),
+            queryClient.setQueryData<ChatSpec[]>(
+              chatsListQueryKey(userId),
+              (prev = []) =>
+                prev.map((s) =>
+                  s.id === finalChatId
+                    ? { ...s, updated_at: updatedAt, status: "idle" }
+                    : s,
+                ),
             );
           }
         }

@@ -60,6 +60,10 @@ async def get_agent_for_request(
         config = load_config()
         target_agent_id = config.agents.active_agent or "default"
 
+    from .agent_tenancy import ensure_agent_allowed_for_request
+
+    ensure_agent_allowed_for_request(request, target_agent_id)
+
     # Get MultiAgentManager
     if not hasattr(request.app.state, "multi_agent_manager"):
         raise HTTPException(

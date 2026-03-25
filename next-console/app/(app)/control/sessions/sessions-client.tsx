@@ -25,7 +25,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { resolvedWorkflowUsernameFromSessionUser } from "@/lib/copaw-access-jwt";
+import { copawScopeUserFromSessionUser } from "@/lib/workflow-username";
 import type { ChatSpec } from "@/lib/sessions-api";
 import { sessionsApi } from "@/lib/sessions-api";
 import { useAppShell } from "../../app-shell";
@@ -52,7 +52,7 @@ export function SessionsClient() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const scopeUserId = useMemo(
-    () => (user ? resolvedWorkflowUsernameFromSessionUser(user) : null),
+    () => (user ? copawScopeUserFromSessionUser(user) : null),
     [user],
   );
 
@@ -240,7 +240,10 @@ export function SessionsClient() {
           if (!o) setSelected(null);
         }}
       >
-        <SheetContent className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <SheetContent
+          aria-describedby={undefined}
+          className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        >
           <SheetHeader className="shrink-0">
             <SheetTitle className="line-clamp-2 pr-8">
               {selected?.name ?? "会话"}

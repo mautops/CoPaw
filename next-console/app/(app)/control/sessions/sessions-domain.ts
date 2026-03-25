@@ -1,5 +1,5 @@
 import type { ChatSpec } from "@/lib/sessions-api";
-import { resolvedWorkflowUsernameFromSessionUser } from "@/lib/copaw-access-jwt";
+import { copawScopeUserFromSessionUser } from "@/lib/workflow-username";
 
 export type SessionsShellUser = {
   id: string;
@@ -8,20 +8,16 @@ export type SessionsShellUser = {
   username?: string | null;
 };
 
-/** True when ``row.user_id`` matches the CoPaw workflow user derived from the console session (JWT / chat 创建逻辑一致). */
+/** True when ``row.user_id`` matches mailbox local-part (same as JWT ``sub`` / chat ``user_id``). */
 export function chatRowBelongsToCurrentUser(
   row: ChatSpec,
   user: SessionsShellUser | null | undefined,
 ): boolean {
   if (!user) return false;
-  const scope = resolvedWorkflowUsernameFromSessionUser(user);
+  const scope = copawScopeUserFromSessionUser(user);
   if (scope && row.user_id === scope) return true;
-  if (user.email && row.user_id === user.email) return true;
-  if (user.username && row.user_id === user.username) return true;
-  if (user.email) {
-    const local = user.email.split("@")[0]?.trim();
-    if (local && row.user_id === local) return true;
-  }
+  const em = user.email?.trim();
+  if (em && row.user_id === em) return true;
   return false;
 }
 

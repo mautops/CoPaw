@@ -1,7 +1,8 @@
 import { type ChatSpec, chatApi } from "@/lib/chat-api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
+import { chatsListQueryKey } from "./chat-query-keys";
 import { DEFAULT_CHANNEL, type LocalMessage } from "./types";
 
 export function useChatSessions({
@@ -18,8 +19,10 @@ export function useChatSessions({
 
   // ── Queries ──────────────────────────────────────────────────────────────
 
+  const listKey = chatsListQueryKey(userId);
+
   const { data: sessions = [], isPending: sessionsPending } = useQuery({
-    queryKey: ["chats"],
+    queryKey: listKey,
     queryFn: () => chatApi.listChats(),
   });
 
@@ -47,20 +50,22 @@ export function useChatSessions({
   }, [sessions]);
 
   // Select the newest session on initial load (unless workflow-exec handoff)
-  if (
-    !skipInitialAutoSelect &&
-    sortedSessions.length > 0 &&
-    currentChatId === null
-  ) {
-    setCurrentChatId(sortedSessions[0].id);
-  }
+  useEffect(() => {
+    if (
+      !skipInitialAutoSelect &&
+      sortedSessions.length > 0 &&
+      currentChatId === null
+    ) {
+      setCurrentChatId(sortedSessions[0].id);
+    }
+  }, [skipInitialAutoSelect, sortedSessions, currentChatId]);
 
   // ── Mutations ────────────────────────────────────────────────────────────
 
   const createChat = useMutation({
     mutationFn: chatApi.createChat,
     onSuccess: (chatSpec) => {
-      queryClient.setQueryData<ChatSpec[]>(["chats"], (prev = []) => [
+      queryClient.setQueryData<ChatSpec[]>(listKey, (prev = []) => [
         chatSpec,
         ...prev,
       ]);
@@ -71,7 +76,7 @@ export function useChatSessions({
     mutationFn: ({ id, data }: { id: string; data: Partial<ChatSpec> }) =>
       chatApi.updateChat(id, data),
     onSuccess: (updated) => {
-      queryClient.setQueryData<ChatSpec[]>(["chats"], (prev = []) =>
+      queryClient.setQueryData<ChatSpec[]>(listKey, (prev = []) =>
         prev.map((s) => (s.id === updated.id ? updated : s)),
       );
     },
@@ -80,7 +85,7 @@ export function useChatSessions({
   const deleteChat = useMutation({
     mutationFn: chatApi.deleteChat,
     onSuccess: (_, id) => {
-      queryClient.setQueryData<ChatSpec[]>(["chats"], (prev = []) =>
+      queryClient.setQueryData<ChatSpec[]>(listKey, (prev = []) =>
         prev.filter((s) => s.id !== id),
       );
       if (id === currentChatId) {

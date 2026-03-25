@@ -46,12 +46,14 @@ class ChatManager:
         self,
         user_id: Optional[str] = None,
         channel: Optional[str] = None,
+        visibility_aliases: Optional[list[str]] = None,
     ) -> list[ChatSpec]:
         """List chat specs with optional filters.
 
         Args:
-            user_id: Optional user ID filter
+            user_id: Optional single user ID filter
             channel: Optional channel filter
+            visibility_aliases: Console JWT: match any of these against stored user_id
 
         Returns:
             List of chat specifications
@@ -59,11 +61,13 @@ class ChatManager:
         async with self._lock:
             logger.debug(
                 f"list_chats: repo path={self._repo.path}, "
-                f"filters: user_id={user_id}, channel={channel}",
+                f"filters: user_id={user_id}, channel={channel}, "
+                f"visibility_aliases={visibility_aliases!r}",
             )
             return await self._repo.filter_chats(
                 user_id=user_id,
                 channel=channel,
+                visibility_aliases=visibility_aliases,
             )
 
     async def get_chat(self, chat_id: str) -> Optional[ChatSpec]:

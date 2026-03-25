@@ -1,3 +1,5 @@
+import type { DynamicToolUIPart } from "ai";
+
 const API_BASE = "/api/copaw";
 
 export type ChatStatus = "idle" | "running";
@@ -45,6 +47,13 @@ export interface ToolCallInfo {
   input: unknown;
   output?: string;
   state: "running" | "done" | "error";
+  /**
+   * When set, drives ai-elements Tool/Confirmation (e.g. tool-guard pending approval).
+   * Populate from stream `data` when backend adds guard fields.
+   */
+  hitlApproval?: { id: string; approved?: boolean; reason?: string };
+  /** Override UI state for Tool header / Confirmation; derived from `state` when absent. */
+  toolUiState?: DynamicToolUIPart["state"];
 }
 
 export interface StreamParams {
@@ -291,6 +300,7 @@ export const chatApi = {
                 name?: string;
                 arguments?: string;
                 output?: string;
+                guard_approval?: string;
               };
               if (subType === "tool_call" && data.call_id) {
                 const isNew = !toolsMap.has(data.call_id);
@@ -308,6 +318,10 @@ export const chatApi = {
                     tool.input = data.arguments;
                   }
                 }
+                if (data.guard_approval === "requested") {
+                  tool.hitlApproval = { id: data.call_id };
+                  tool.toolUiState = "approval-requested";
+                }
                 toolsMap.set(data.call_id, tool);
                 if (isNew) {
                   toolsOrder.push(data.call_id);
@@ -318,6 +332,15 @@ export const chatApi = {
                 if (tool) {
                   tool.output = data.output ?? "";
                   tool.state = "done";
+                  if (
+                    tool.hitlApproval &&
+                    tool.hitlApproval.approved === undefined
+                  ) {
+                    tool.hitlApproval = {
+                      ...tool.hitlApproval,
+                      approved: true,
+                    };
+                  }
                   onToolUpdate?.({ ...tool });
                 }
               }

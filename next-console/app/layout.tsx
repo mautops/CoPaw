@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { QueryProvider } from "@/providers/query-provider";
+import type { Metadata, Viewport } from "next";
+import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,13 +7,19 @@ export const metadata: Metadata = {
   description: "Hi-Ops",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#09090b",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark h-screen antialiased">
+    <html lang="zh-CN" className="dark h-screen antialiased" suppressHydrationWarning>
       <body className="h-full bg-background">
-        <QueryProvider>{children}</QueryProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

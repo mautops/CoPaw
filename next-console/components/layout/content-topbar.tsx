@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   PanelLeftCloseIcon,
@@ -16,6 +17,8 @@ interface ContentTopbarProps {
   onToggleRightSidebar: () => void;
   onSearchOpen: () => void;
   searchPlaceholder?: string;
+  /** Shown right of the search bar, before the history sidebar toggle. */
+  endSlot?: ReactNode;
 }
 
 export function ContentTopbar({
@@ -25,6 +28,7 @@ export function ContentTopbar({
   onToggleRightSidebar,
   onSearchOpen,
   searchPlaceholder = "搜索...",
+  endSlot,
 }: ContentTopbarProps) {
   return (
     <header className="absolute inset-x-0 top-0 z-20 flex h-[52px] items-center border-b border-border bg-muted/90 backdrop-blur-md backdrop-saturate-150 supports-backdrop-filter:bg-muted/75">
@@ -61,8 +65,9 @@ export function ContentTopbar({
         </button>
       </div>
 
-      {/* Right: toggle right sidebar */}
-      <div className="ml-auto flex shrink-0 items-center px-3">
+      {/* Right: optional slot + toggle right sidebar */}
+      <div className="ml-auto flex shrink-0 items-center gap-2 px-3">
+        {endSlot}
         <Button
           size="icon-sm"
           variant="ghost"

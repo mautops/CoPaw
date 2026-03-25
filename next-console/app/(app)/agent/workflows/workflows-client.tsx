@@ -19,6 +19,7 @@ import {
   type WorkflowChatExecPayload,
 } from "@/lib/workflow-chat-bridge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { copawScopeUserFromSessionUser } from "@/lib/workflow-username";
 import { useAppShell } from "../../app-shell";
 import {
   DEFAULT_NEW_WORKFLOW_MARKDOWN,
@@ -31,8 +32,9 @@ import {
   PAGE_SIZE,
   QK_LIST,
   qkDetail,
+  workflowCatalogValue,
   workflowDisplayTitle,
-  workflowsForStatusTab,
+  workflowsForCatalogTab,
 } from "./workflow-domain";
 import { WorkflowListContent } from "./workflow-list-content";
 import { WorkflowPaginationFooter } from "./workflow-pagination-footer";
@@ -57,7 +59,7 @@ export function WorkflowsClient() {
   const [page, setPage] = useState(1);
   const [filterQuery, setFilterQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [statusTab, setStatusTab] = useState<string>("all");
+  const [catalogTab, setCatalogTab] = useState<string>("all");
 
   const modifierKeyPrefix = useSyncExternalStore(
     () => () => {},
@@ -105,37 +107,37 @@ export function WorkflowsClient() {
     [sorted, filterQuery],
   );
 
-  const dynamicStatusTabs = useMemo(() => {
+  const dynamicCatalogTabs = useMemo(() => {
     const seen = new Set<string>();
     for (const w of filtered) {
-      const s = w.status?.trim();
+      const s = workflowCatalogValue(w);
       if (s) seen.add(s);
     }
     return [...seen].sort((a, b) => a.localeCompare(b, "zh-Hans-CN"));
   }, [filtered]);
 
-  const workflowStatusTabValues = useMemo(
-    () => ["all", ...dynamicStatusTabs],
-    [dynamicStatusTabs],
+  const workflowCatalogTabValues = useMemo(
+    () => ["all", ...dynamicCatalogTabs],
+    [dynamicCatalogTabs],
   );
 
   const tabCounts = useMemo(() => {
     const c: Record<string, number> = { all: filtered.length };
     for (const w of filtered) {
-      const s = w.status?.trim();
+      const s = workflowCatalogValue(w);
       if (s) c[s] = (c[s] ?? 0) + 1;
     }
     return c;
   }, [filtered]);
 
-  const effectiveStatusTab =
-    statusTab === "all" || dynamicStatusTabs.includes(statusTab)
-      ? statusTab
+  const effectiveCatalogTab =
+    catalogTab === "all" || dynamicCatalogTabs.includes(catalogTab)
+      ? catalogTab
       : "all";
 
   const tabFiltered = useMemo(
-    () => workflowsForStatusTab(filtered, effectiveStatusTab),
-    [filtered, effectiveStatusTab],
+    () => workflowsForCatalogTab(filtered, effectiveCatalogTab),
+    [filtered, effectiveCatalogTab],
   );
 
   const totalPages = Math.max(1, Math.ceil(tabFiltered.length / PAGE_SIZE));
@@ -146,8 +148,8 @@ export function WorkflowsClient() {
     setPage(1);
   }, []);
 
-  const handleStatusTabChange = useCallback((tab: string) => {
-    setStatusTab(tab);
+  const handleCatalogTabChange = useCallback((tab: string) => {
+    setCatalogTab(tab);
     setPage(1);
   }, []);
 
@@ -205,7 +207,7 @@ export function WorkflowsClient() {
 
   const handleExecuteWorkflow = useCallback(
     async (w: WorkflowInfo) => {
-      const userId = user?.username || user?.email || "default";
+      const userId = copawScopeUserFromSessionUser(user ?? {}) ?? "default";
       try {
         const detail = await workflowApi.get(w.filename);
         const payload: WorkflowChatExecPayload = {
@@ -263,9 +265,9 @@ export function WorkflowsClient() {
             listQuery={listQuery}
             sorted={sorted}
             filtered={filtered}
-            tabValue={effectiveStatusTab}
-            onTabChange={handleStatusTabChange}
-            workflowStatusTabValues={workflowStatusTabValues}
+            tabValue={effectiveCatalogTab}
+            onTabChange={handleCatalogTabChange}
+            workflowCatalogTabValues={workflowCatalogTabValues}
             tabCounts={tabCounts}
             page={effectivePage}
             modifierKeyPrefix={modifierKeyPrefix}

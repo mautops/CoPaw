@@ -12,10 +12,21 @@ async function parseErrorMessage(res: Response): Promise<string> {
   return `HTTP ${res.status}`;
 }
 
-async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+async function apiRequest<T>(
+  path: string,
+  init?: RequestInit,
+  agentId?: string,
+): Promise<T> {
+  const headers = new Headers(init?.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (agentId) {
+    headers.set("X-Agent-Id", agentId);
+  }
   const res = await fetch(`${API_BASE}/api${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers,
   });
   if (!res.ok) throw new Error(await parseErrorMessage(res));
   if (res.status === 204) return undefined as T;
@@ -63,12 +74,16 @@ export const agentConfigApi = {
       body: JSON.stringify(body),
     }),
 
-  getSystemPromptFiles: () =>
-    apiRequest<string[]>("/agent/system-prompt-files"),
+  getSystemPromptFiles: (agentId?: string) =>
+    apiRequest<string[]>("/agent/system-prompt-files", undefined, agentId),
 
-  putSystemPromptFiles: (files: string[]) =>
-    apiRequest<string[]>("/agent/system-prompt-files", {
-      method: "PUT",
-      body: JSON.stringify(files),
-    }),
+  putSystemPromptFiles: (files: string[], agentId?: string) =>
+    apiRequest<string[]>(
+      "/agent/system-prompt-files",
+      {
+        method: "PUT",
+        body: JSON.stringify(files),
+      },
+      agentId,
+    ),
 };

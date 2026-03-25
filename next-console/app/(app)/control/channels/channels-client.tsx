@@ -475,7 +475,10 @@ export function ChannelsClient() {
           if (!o) setEditKey(null);
         }}
       >
-        <SheetContent className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <SheetContent
+          aria-describedby={undefined}
+          className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        >
           <SheetHeader>
             <SheetTitle className="font-mono">
               {editKey ? `通道: ${editKey}` : "通道"}

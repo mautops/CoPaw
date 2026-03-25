@@ -60,7 +60,7 @@ async function proxy(req: NextRequest): Promise<Response> {
     bearer = mintCopawAccessJwt(session.user, jwtSecret);
   } catch {
     return Response.json(
-      { detail: "CoPaw proxy: session missing workflow username claims" },
+      { detail: "CoPaw proxy: session requires verified email" },
       { status: 500 },
     );
   }

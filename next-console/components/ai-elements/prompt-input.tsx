@@ -509,6 +509,10 @@ export type PromptInputProps = Omit<
     message: PromptInputMessage,
     event: FormEvent<HTMLFormElement>,
   ) => void | Promise<void>;
+  /** When using PromptInputProvider, map textarea value to final message text (e.g. prefix ref tags). */
+  transformSubmitText?: (textareaValue: string) => string;
+  /** Called after textarea and attachments are cleared on successful capture, before onSubmit. */
+  onClearComposerExtras?: () => void;
 };
 
 export const PromptInput = ({
@@ -521,6 +525,8 @@ export const PromptInput = ({
   maxFileSize,
   onError,
   onSubmit,
+  transformSubmitText,
+  onClearComposerExtras,
   children,
   ...props
 }: PromptInputProps) => {
@@ -846,12 +852,15 @@ export const PromptInput = ({
       event.preventDefault();
 
       const form = event.currentTarget;
-      const text = usingProvider
+      const baseText = usingProvider
         ? controller.textInput.value
         : (() => {
             const formData = new FormData(form);
             return (formData.get("message") as string) || "";
           })();
+      const text = transformSubmitText
+        ? transformSubmitText(baseText)
+        : baseText;
 
       // Reset form immediately after capturing text to avoid race condition
       // where user input during async blob conversion would be lost
@@ -880,13 +889,22 @@ export const PromptInput = ({
         if (usingProvider) {
           controller.textInput.clear();
         }
+        onClearComposerExtras?.();
 
         await onSubmit({ files: convertedFiles, text }, event);
       } catch {
         // Don't clear on error - user may want to retry
       }
     },
-    [usingProvider, controller, files, onSubmit, clear],
+    [
+      usingProvider,
+      controller,
+      files,
+      onSubmit,
+      clear,
+      transformSubmitText,
+      onClearComposerExtras,
+    ],
   );
 
   // Render with or without local provider
@@ -1042,7 +1060,10 @@ export const PromptInputTextarea = ({
 
   return (
     <InputGroupTextarea
-      className={cn("field-sizing-content max-h-48 min-h-16", className)}
+      className={cn(
+        "field-sizing-content max-h-48 min-h-16 text-base md:text-base",
+        className,
+      )}
       name="message"
       onCompositionEnd={handleCompositionEnd}
       onCompositionStart={handleCompositionStart}

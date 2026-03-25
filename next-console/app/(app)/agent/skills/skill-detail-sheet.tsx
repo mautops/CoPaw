@@ -39,8 +39,11 @@ export function SkillDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-[520px]">
-        <SheetHeader className="border-b border-[#f1f2f6] px-6 py-4 text-left dark:border-white/[0.08]">
+      <SheetContent
+        aria-describedby={undefined}
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-[520px]"
+      >
+        <SheetHeader className="border-b border-[#f1f2f6] px-6 py-4 text-left dark:border-white/8">
           <SheetTitle className="pr-8 text-lg font-semibold text-[#1a1a1a] dark:text-white/90">
             {skill?.name ?? "—"}
           </SheetTitle>
@@ -77,7 +80,7 @@ export function SkillDetailSheet({
               <div>
                 <div className="text-xs text-[#999] dark:text-white/30">路径</div>
                 <div
-                  className="mt-1 break-all rounded-lg border border-[#eceff6] bg-[#f5f6fa] px-2.5 py-2 text-xs text-[#525866] dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/65"
+                  className="mt-1 break-all rounded-lg border border-[#eceff6] bg-[#f5f6fa] px-2.5 py-2 text-xs text-[#525866] dark:border-white/8 dark:bg-white/5 dark:text-white/65"
                   title={skill.path}
                 >
                   {skill.path}

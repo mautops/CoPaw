@@ -220,7 +220,9 @@ export function WorkflowDetailSheet({
                 value="preview"
                 className="min-h-0 flex-1 overflow-y-auto pr-1 data-[state=inactive]:hidden"
               >
-                <MessageResponse>{detailQuery.data.content}</MessageResponse>
+                <MessageResponse mode="static" parseIncompleteMarkdown={false}>
+                  {detailQuery.data.content}
+                </MessageResponse>
               </TabsContent>
               <TabsContent
                 value="source"
