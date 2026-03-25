@@ -1,0 +1,70 @@
+src/copaw/agents/md_files/qa/ru/SOUL.md
+  3a3094042f77f8fc 1-24
+src/copaw/cli/init_cmd.py
+  3a3094042f77f8fc 146-149,202-203
+src/copaw/agents/md_files/qa/en/AGENTS.md
+  3a3094042f77f8fc 1-78
+src/copaw/agents/md_files/qa/zh/PROFILE.md
+  3a3094042f77f8fc 1-25
+src/copaw/agents/tools/file_search.py
+  3a3094042f77f8fc 4,6-10,12,23-25,76-94,100-104,106-108,112,123-299,302-307,313,320,322,324,326,329-332,335,337-340,344-346,348-349,351,353,355-363,365-375,378-396,410,413,415-418,420,422-426,429-431,433-438,441-442,444-448
+src/copaw/app/routers/agent.py
+  3a3094042f77f8fc 17-18,240-243,245-246,248-254
+src/copaw/agents/md_files/qa/zh/AGENTS.md
+  3a3094042f77f8fc 1-77
+src/copaw/agents/utils/__init__.py
+  3a3094042f77f8fc 26,50
+src/copaw/config/config.py
+  3a3094042f77f8fc 775-796
+src/copaw/agents/skills_manager.py
+  3a3094042f77f8fc 78-104
+pyproject.toml
+  3a3094042f77f8fc 19
+src/copaw/agents/md_files/qa/ru/AGENTS.md
+  3a3094042f77f8fc 1-78
+src/copaw/agents/md_files/qa/zh/SOUL.md
+  3a3094042f77f8fc 1-24
+src/copaw/agents/md_files/qa/en/SOUL.md
+  3a3094042f77f8fc 1-24
+src/copaw/agents/skills/copaw_source_index/SKILL.md
+  3a3094042f77f8fc 1-54
+src/copaw/agents/utils/setup_utils.py
+  3a3094042f77f8fc 79-217
+src/copaw/app/_app.py
+  3a3094042f77f8fc 36-37,189
+src/copaw/app/routers/agents.py
+  3a3094042f77f8fc 10,25-29,31,45,159,170,325-328,349-354,491-518,524-526,533-539,543-544,555-564,575,577-582,584-592
+next-console/lib/agents-registry-api.ts
+  3a3094042f77f8fc 30-31
+src/copaw/constant.py
+  3a3094042f77f8fc 100-108
+src/copaw/agents/md_files/qa/en/PROFILE.md
+  3a3094042f77f8fc 1-25
+src/copaw/agents/md_files/qa/ru/PROFILE.md
+  3a3094042f77f8fc 1-25
+src/copaw/app/migration.py
+  3a3094042f77f8fc 17-28,323-422,424-463
+next-console/app/(app)/settings/agents/agents-client.tsx
+  3a3094042f77f8fc 11,297,305-312,346-348,352-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.18",
+  "base_commit_sha": "0e5c01037cbf20abf5a578b7692688348f0debfc",
+  "prompts": {
+    "3a3094042f77f8fc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "dfe7fe54-b66d-4a05-a8ec-5b051609075a",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 801,
+      "total_deletions": 245,
+      "accepted_lines": 1235,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/29918b194aaec678a34512a89bb1b4e31399bfac96fa330d6afe44300819142f"
+    }
+  }
+}
