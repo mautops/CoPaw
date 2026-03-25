@@ -1,0 +1,29 @@
+src/copaw/app/runner/chat_access.py
+  8c96194df895c426 31-34,47-50,66,68-69
+src/copaw/app/runner/manager.py
+  8c96194df895c426 56
+src/copaw/cli/app_cmd.py
+  8c96194df895c426 16,59
+tests/unit/providers/test_capability_baseline_props.py
+  8c96194df895c426 658-659,1115-1116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "2904f48b2b611e62555c7790c2d2acfa07d3e419",
+  "prompts": {
+    "8c96194df895c426": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8668dd91-93b4-47e4-81b7-53d20f86518a",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 20,
+      "total_deletions": 10,
+      "accepted_lines": 18,
+      "overriden_lines": 0
+    }
+  }
+}
