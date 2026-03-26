@@ -38,6 +38,7 @@ function SheetOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
+      suppressHydrationWarning
       className={cn(
         "fixed inset-0 isolate z-50 bg-black/10 duration-200 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className,
@@ -60,6 +61,7 @@ function SheetContent({
       <SheetOverlay />
       <DialogPrimitive.Content
         data-slot="sheet-content"
+        suppressHydrationWarning
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full min-h-0 w-full max-w-xl flex-col border-l border-border bg-background text-sm shadow-xl outline-none duration-200 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 sm:max-w-2xl",
           className,

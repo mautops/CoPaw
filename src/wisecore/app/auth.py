@@ -385,6 +385,10 @@ def _extract_access_token_header(request: Request) -> Optional[str]:
         q = request.query_params.get("token", "").strip()
         if q:
             return q
+
+    token = request.query_params.get("token")
+    if token:
+        return token
     return None
 
 

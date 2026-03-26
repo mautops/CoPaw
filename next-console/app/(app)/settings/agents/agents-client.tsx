@@ -44,7 +44,7 @@ import {
   agentMatchesFilter,
   QK_AGENTS_LIST,
 } from "./agents-domain";
-import { BotIcon, Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react";
+import { BotIcon, EyeIcon, EyeOffIcon, Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -163,6 +163,14 @@ export function AgentsSettingsClient() {
     mutationFn: (id: string) => agentsRegistryApi.delete(id),
     onSuccess: async () => {
       setDeleteId(null);
+      await invalidateList();
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: (vars: { id: string; enabled: boolean }) =>
+      agentsRegistryApi.toggle(vars.id, vars.enabled),
+    onSuccess: async () => {
       await invalidateList();
     },
   });
@@ -292,7 +300,7 @@ export function AgentsSettingsClient() {
                     {pagedRows.map((row, rowIndex) => (
                       <tr
                         key={`${row.id}:${rowIndex}`}
-                        className="border-b border-[#f0f0f0] last:border-0 hover:bg-black/2 dark:border-white/8 dark:hover:bg-white/5"
+                        className={`border-b border-[#f0f0f0] last:border-0 hover:bg-black/2 dark:border-white/8 dark:hover:bg-white/5 ${!row.enabled ? "opacity-60" : ""}`}
                       >
                         <td className="px-4 py-3">
                           <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -309,6 +317,14 @@ export function AgentsSettingsClient() {
                                 className="shrink-0 text-xs font-normal"
                               >
                                 内置 QA
+                              </Badge>
+                            ) : null}
+                            {!row.enabled ? (
+                              <Badge
+                                variant="outline"
+                                className="shrink-0 border-[#d9d9d9] text-xs font-normal text-[#999] dark:border-white/20 dark:text-white/50"
+                              >
+                                已禁用
                               </Badge>
                             ) : null}
                           </div>
@@ -340,6 +356,32 @@ export function AgentsSettingsClient() {
                               onClick={() => openEdit(row)}
                             >
                               编辑
+                            </Button>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              disabled={row.id === "default" || toggleMutation.isPending}
+                              title={
+                                row.id === "default"
+                                  ? "不能禁用 default"
+                                  : undefined
+                              }
+                              className="h-auto px-2 text-[#666] hover:text-[#333] disabled:opacity-100 dark:text-white/50 dark:hover:text-white/70"
+                              onClick={() =>
+                                toggleMutation.mutate({
+                                  id: row.id,
+                                  enabled: !row.enabled,
+                                })
+                              }
+                            >
+                              <span className="inline-flex items-center gap-1">
+                                {row.enabled ? (
+                                  <EyeOffIcon className="size-3.5" />
+                                ) : (
+                                  <EyeIcon className="size-3.5" />
+                                )}
+                                {row.enabled ? "禁用" : "启用"}
+                              </span>
                             </Button>
                             <Button
                               variant="link"

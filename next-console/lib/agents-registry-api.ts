@@ -5,6 +5,8 @@ export interface AgentSummary {
   name: string;
   description: string;
   workspace_dir: string;
+  /** Whether the agent is enabled */
+  enabled: boolean;
   /** Builtin QA helper; server refuses DELETE for this profile. */
   is_builtin?: boolean;
 }
@@ -23,6 +25,7 @@ export interface CreateAgentRequest {
 export interface AgentProfileRef {
   id: string;
   workspace_dir: string;
+  enabled?: boolean;
 }
 
 /** Partial body for PUT merge (only send fields to change). */
@@ -31,6 +34,12 @@ export interface AgentProfileUpdateBody {
   name?: string;
   description?: string;
   language?: string;
+}
+
+export interface ToggleAgentResponse {
+  success: boolean;
+  agent_id: string;
+  enabled: boolean;
 }
 
 export const agentsRegistryApi = {
@@ -57,5 +66,14 @@ export const agentsRegistryApi = {
     apiRequest<{ success: boolean; agent_id: string }>(
       `/agents/${encodeURIComponent(agentId)}`,
       { method: "DELETE" },
+    ),
+
+  toggle: (agentId: string, enabled: boolean) =>
+    apiRequest<ToggleAgentResponse>(
+      `/agents/${encodeURIComponent(agentId)}/toggle`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ enabled }),
+      },
     ),
 };

@@ -48,6 +48,7 @@ class AgentSummary(BaseModel):
     name: str
     description: str
     workspace_dir: str
+    enabled: bool
     is_builtin: bool = False
 
 
@@ -172,6 +173,7 @@ async def list_agents(request: Request) -> AgentListResponse:
                     name=agent_config.name,
                     description=description,
                     workspace_dir=agent_ref.workspace_dir,
+                    enabled=getattr(agent_ref, "enabled", True),
                     is_builtin=agent_id == BUILTIN_QA_AGENT_ID,
                 ),
             )
@@ -183,6 +185,7 @@ async def list_agents(request: Request) -> AgentListResponse:
                     name=agent_id.title(),
                     description="",
                     workspace_dir=agent_ref.workspace_dir,
+                    enabled=getattr(agent_ref, "enabled", True),
                     is_builtin=agent_id == BUILTIN_QA_AGENT_ID,
                 ),
             )
@@ -269,6 +272,7 @@ def provision_new_agent(
     agent_ref = AgentProfileRef(
         id=new_id,
         workspace_dir=str(ws),
+        enabled=True,
     )
 
     config.agents.profiles[new_id] = agent_ref
@@ -436,6 +440,70 @@ async def delete_agent(
     # Users can manually delete it if needed
 
     return {"success": True, "agent_id": agentId}
+
+
+@router.patch(
+    "/{agentId}/toggle",
+    summary="Toggle agent enabled state",
+    description="Enable or disable an agent (cannot disable default agent)",
+)
+async def toggle_agent_enabled(
+    agentId: str = PathParam(...),
+    enabled: bool = Body(..., embed=True),
+    request: Request = None,
+) -> dict:
+    """Toggle agent enabled state.
+
+    When disabling an agent:
+    1. Stop the agent instance if running
+    2. Update enabled field in config.json
+
+    When enabling an agent:
+    1. Update enabled field in config.json
+    2. Agent will be started immediately
+    """
+    config = load_config()
+
+    if agentId not in config.agents.profiles:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Agent '{agentId}' not found",
+        )
+
+    if agentId == "default":
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot disable the default agent",
+        )
+
+    agent_ref = config.agents.profiles[agentId]
+    manager = _get_multi_agent_manager(request)
+
+    # If disabling, stop the agent instance
+    if not enabled and getattr(agent_ref, "enabled", True):
+        await manager.stop_agent(agentId)
+
+    # Update enabled status
+    agent_ref.enabled = enabled
+    save_config(config)
+
+    # If enabling, start the agent instance immediately
+    if enabled:
+        try:
+            await manager.get_agent(agentId)
+            logger.info(f"Agent {agentId} started successfully")
+        except Exception as e:
+            logger.error(f"Failed to start agent {agentId}: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Agent enabled but failed to start: {str(e)}",
+            ) from e
+
+    return {
+        "success": True,
+        "agent_id": agentId,
+        "enabled": enabled,
+    }
 
 
 @router.get(

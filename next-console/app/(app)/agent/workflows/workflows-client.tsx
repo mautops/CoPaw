@@ -163,17 +163,20 @@ export function WorkflowsClient() {
   }, [queryClient]);
 
   const createMutation = useMutation({
-    mutationFn: (body: { filename: string; content: string }) =>
-      workflowApi.create({
+    mutationFn: (body: { filename: string; content: string }) => {
+      const normalizedFilename = ensureWorkflowMarkdownFilename(body.filename);
+      return workflowApi.create({
         ...body,
-        filename: ensureWorkflowMarkdownFilename(body.filename),
-      }),
-    onSuccess: async (_, vars) => {
+        filename: normalizedFilename,
+      });
+    },
+    onSuccess: async (data) => {
       setCreateOpen(false);
       setNewName("");
       setNewContent(DEFAULT_NEW_WORKFLOW_MARKDOWN);
       await invalidateList();
-      setSelected(vars.filename);
+      // Use the normalized filename from server response
+      setSelected(data.filename);
       setSheetOpen(true);
     },
   });
