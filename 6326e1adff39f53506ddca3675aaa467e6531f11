@@ -1,0 +1,45 @@
+docker/.env.example
+  f01487e8bbe12b65 53-56
+src/wisecore/app/routers/auth.py
+  f01487e8bbe12b65 7,20-21,179-226
+next-console/components/layout/user-profile-menu.tsx
+  f01487e8bbe12b65 17,36,97-98,141-154,189-220
+src/wisecore/app/auth.py
+  f01487e8bbe12b65 42,348-352,354-356
+next-console/lib/auth-headers.ts
+  f01487e8bbe12b65 2,23-44
+src/wisecore/app/token_crypto.py
+  f01487e8bbe12b65 1-217
+docs/CLI_TOKEN_INTEGRATION.md
+  f01487e8bbe12b65 1-356
+src/wisecore/app/runner/runner.py
+  f01487e8bbe12b65 277
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "6326e1adff39f53506ddca3675aaa467e6531f11",
+  "prompts": {
+    "f01487e8bbe12b65": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "592988e9-d4fc-44f5-80a2-5adcad62c9f2",
+        "model": "glm-5"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 260,
+      "total_deletions": 61,
+      "accepted_lines": 735,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/6ca267bceaccee59eadb583ed5a5beb3b4bf5de90b343a6a187dfa46e428332c",
+      "token_usage": {
+        "input_tokens": 30534212,
+        "output_tokens": 69983,
+        "cache_read_tokens": 30436153,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    }
+  }
+}
