@@ -1,0 +1,149 @@
+next-console/app/(app)/agent/workflows/workflow-detail-sheet.tsx
+  ec05df2a205dc718 4,27-31,40-48,50,65-96,98-130,133-144,149-234,262-264,281,356-357,365,367,370,373-374
+next-console/components/ui/stepper.tsx
+  ec05df2a205dc718 1-124
+next-console/app/(app)/agent/workflows/new/page.tsx
+  ec05df2a205dc718 1-563
+next-console/app/(app)/agent/workflows/workflows-client.tsx
+  ec05df2a205dc718 7,11,46,99-117,229-232,257
+next-console/app/(app)/agent/chat/chat-message-list.tsx
+  ec05df2a205dc718 33,175-177
+next-console/app/(app)/agent/chat/chat-history-sidebar.tsx
+  ec05df2a205dc718 14,90-91,97,106,201-205,246,255,287,311,392
+next-console/app/(app)/agent/chat/page.tsx
+  ec05df2a205dc718 71,80,83,85-87,98-114,141-143,146-148,160-161,163-180,186,192-207,209-220,246,313,326,328,332
+next-console/components/workflow/workflow-metadata-editor.tsx
+  ec05df2a205dc718 1-211
+next-console/components/workflow/workflow-yaml.ts
+  ec05df2a205dc718 1-174
+next-console/components/workflow/workflow-steps-viewer.tsx
+  ec05df2a205dc718 1-86
+next-console/components/workflow/workflow-steps-editor.tsx
+  ec05df2a205dc718 1-276
+next-console/components/workflow/index.ts
+  ec05df2a205dc718 1-18
+next-console/lib/chat-api.ts
+  ec05df2a205dc718 74-87,152-342,439-440,442-472,474-476,479-480
+next-console/app/(app)/agent/chat/types.ts
+  ec05df2a205dc718 3,35-43
+next-console/app/(app)/agent/chat/use-session-streams.ts
+  ec05df2a205dc718 1-227
+next-console/components/workflow/workflow-types.ts
+  ec05df2a205dc718 1-62
+next-console/app/(app)/agent/chat/use-chat-stream.ts
+  ec05df2a205dc718 9,15,47-64,68,71-74,78-79,81,83-91,100,110-111,113-116,118-119,143-153,156-157,159-163,171,173,175-177,186-189,191-192,266,274-280,287-288,292,323,325-326,328-343,345-354,363-373,375-376,380-477,481-493,496-504,507-514
+next-console/app/(app)/agent/chat/use-chat-sessions.ts
+  ec05df2a205dc718 6,114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.21",
+  "base_commit_sha": "249266c96753e85e21391a0319c65b8018eb09d9",
+  "prompts": {
+    "219f5db128962269": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee82200f-6171-4f56-8a3b-9b162252b42c",
+        "model": "glm-5"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 19,
+      "total_deletions": 7,
+      "accepted_lines": 18,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/552f6d26815b04229583a6f7493a45395805fc6b16c2e28003d539b760084bc1",
+      "token_usage": {
+        "input_tokens": 2346432,
+        "output_tokens": 4880,
+        "cache_read_tokens": 767365,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    },
+    "6d22c779aac5dfb1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e2c6926f-4cc7-4eda-83da-980a189550ab",
+        "model": "glm-5"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 1294,
+      "total_deletions": 313,
+      "accepted_lines": 1099,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/c4690ac28a5f6b0e8e64bd1b780618f924c71211bfa6b9c4ee289f0dc7806fb1",
+      "token_usage": {
+        "input_tokens": 1327806,
+        "output_tokens": 18123,
+        "cache_read_tokens": 410505,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    },
+    "7ab35eece66adb9e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "061ac7bb-f62e-4ea5-b461-bc56ce41dcd1",
+        "model": "glm-5"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/2fc602a0faaaa223b4ccd8fee4c625f190eecf4fa9c99288612a61f9eb7575d5",
+      "token_usage": {
+        "input_tokens": 698502,
+        "output_tokens": 2676,
+        "cache_read_tokens": 439792,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    },
+    "ec05df2a205dc718": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c81d8e13-494b-47da-bb27-43cc387f84e6",
+        "model": "glm-5"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 3933,
+      "total_deletions": 1803,
+      "accepted_lines": 2815,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/1f5156616405bab8713ff0b57f5f1111ce82061960111001f3e66d27e71b6038",
+      "token_usage": {
+        "input_tokens": 16744273,
+        "output_tokens": 93323,
+        "cache_read_tokens": 14213172,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    },
+    "f01487e8bbe12b65": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "592988e9-d4fc-44f5-80a2-5adcad62c9f2",
+        "model": "glm-5"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 24,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/05468ed545a7956b345a48cd81453befbef26e41b864a1da245cb7b5a401b457",
+      "token_usage": {
+        "input_tokens": 53681865,
+        "output_tokens": 110413,
+        "cache_read_tokens": 50779909,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    }
+  }
+}
