@@ -14,6 +14,7 @@ import {
   CopyIcon,
   CpuIcon,
   FolderTreeIcon,
+  KeyIcon,
   LogOutIcon,
   MessageSquareIcon,
   MicIcon,
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { authClient, signOut } from "@/lib/auth-client";
+import { fetchCliTokenInfo } from "@/lib/auth-headers";
 
 interface UserProfileMenuProps {
   user: {
@@ -92,6 +94,8 @@ export function UserProfileMenu({ user }: UserProfileMenuProps) {
   const [signingOut, setSigningOut] = useState(false);
   const [accessTokenCopying, setAccessTokenCopying] = useState(false);
   const [accessTokenCopied, setAccessTokenCopied] = useState(false);
+  const [cliTokenCopying, setCliTokenCopying] = useState(false);
+  const [cliTokenCopied, setCliTokenCopied] = useState(false);
 
   const displayName = user.name || user.username || user.email;
   const initials = displayName
@@ -134,6 +138,20 @@ export function UserProfileMenu({ user }: UserProfileMenuProps) {
     }
   }
 
+  async function handleCopyCliToken() {
+    setCliTokenCopying(true);
+    setCliTokenCopied(false);
+    try {
+      const info = await fetchCliTokenInfo();
+      // Only export the encrypted token - key is hardcoded in CLI binary
+      await navigator.clipboard.writeText(info.encrypted_token);
+      setCliTokenCopied(true);
+      window.setTimeout(() => setCliTokenCopied(false), 2000);
+    } finally {
+      setCliTokenCopying(false);
+    }
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -168,21 +186,38 @@ export function UserProfileMenu({ user }: UserProfileMenuProps) {
             <p className="text-sm font-medium">{displayName}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
-          <button
-            type="button"
-            disabled={accessTokenCopying}
-            onClick={() => void handleCopyAccessToken()}
-            onPointerDown={(e) => e.preventDefault()}
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
-            title={accessTokenCopied ? "已复制" : "复制 Access Token"}
-            aria-label={accessTokenCopied ? "已复制 Access Token" : "复制 Access Token"}
-          >
-            {accessTokenCopied ? (
-              <CheckIcon className="size-4 text-emerald-600" aria-hidden />
-            ) : (
-              <CopyIcon className="size-4" aria-hidden />
-            )}
-          </button>
+          <div className="flex shrink-0 gap-1">
+            <button
+              type="button"
+              disabled={accessTokenCopying}
+              onClick={() => void handleCopyAccessToken()}
+              onPointerDown={(e) => e.preventDefault()}
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+              title={accessTokenCopied ? "已复制" : "复制 Access Token"}
+              aria-label={accessTokenCopied ? "已复制 Access Token" : "复制 Access Token"}
+            >
+              {accessTokenCopied ? (
+                <CheckIcon className="size-4 text-emerald-600" aria-hidden />
+              ) : (
+                <CopyIcon className="size-4" aria-hidden />
+              )}
+            </button>
+            <button
+              type="button"
+              disabled={cliTokenCopying}
+              onClick={() => void handleCopyCliToken()}
+              onPointerDown={(e) => e.preventDefault()}
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+              title={cliTokenCopied ? "已复制 CLI 配置" : "复制 CLI Token 配置"}
+              aria-label={cliTokenCopied ? "已复制 CLI Token 配置" : "复制 CLI Token 配置"}
+            >
+              {cliTokenCopied ? (
+                <CheckIcon className="size-4 text-emerald-600" aria-hidden />
+              ) : (
+                <KeyIcon className="size-4" aria-hidden />
+              )}
+            </button>
+          </div>
         </div>
         <DropdownMenuSeparator />
         {MENU_GROUPS.map((group, gi) => (

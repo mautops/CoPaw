@@ -39,6 +39,7 @@ from .keycloak_token import (
     keycloak_auth_configured,
     verify_keycloak_access_token,
 )
+from .token_crypto import encrypt_cli_token
 from .workspace_subject import sanitize_workspace_owner_segment
 
 logger = logging.getLogger(__name__)
@@ -344,9 +345,15 @@ def apply_keycloak_token_claims_to_request_state(
     token: str,
     payload: dict[str, Any],
 ) -> None:
-    """Set ``request.state`` from verified Keycloak JWT claims."""
+    """Set ``request.state`` from verified Keycloak JWT claims.
+
+    The token is encrypted before storing to prevent direct decoding.
+    Users must use the CLI tool with the shared encryption key to decrypt.
+    """
     t = token.strip()
-    request.state.cli_access_token = t
+    # Encrypt the token before storing - users can't decode without CLI key
+    encrypted_token = encrypt_cli_token(t)
+    request.state.cli_access_token = encrypted_token
     user = _username_from_token_claims(payload)
     if user:
         request.state.user = user

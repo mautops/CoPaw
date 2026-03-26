@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
@@ -16,6 +17,8 @@ from ..auth import (
     update_credentials,
     verify_token,
 )
+from ..keycloak_token import keycloak_auth_configured
+from ..token_crypto import get_token_ttl
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -173,3 +176,51 @@ async def update_profile(req: UpdateProfileRequest, request: Request):
 
     username = req.new_username.strip() if req.new_username else ""
     return LoginResponse(token=token, username=username)
+
+
+class CliTokenResponse(BaseModel):
+    """Response for CLI token endpoint.
+
+    Note: The encryption key is NOT included here for security reasons.
+    The CLI tool must have the key hardcoded in its binary.
+    """
+
+    encrypted_token: str
+    token_ttl: int  # TTL in seconds for the encrypted token
+    keycloak_issuer: Optional[str] = None
+    keycloak_audience: Optional[str] = None
+
+
+@router.get("/cli-token")
+async def get_cli_token(request: Request):
+    """Get encrypted CLI access token and encryption key for CLI tools.
+
+    This endpoint returns the encrypted access token that can be used in
+    shell executor environment variables. The CLI tool needs the encryption
+    key to decrypt the token and verify it against Keycloak JWKS.
+
+    Requires Keycloak authentication.
+    """
+    if not keycloak_auth_configured():
+        raise HTTPException(
+            status_code=503,
+            detail="Keycloak authentication is not configured",
+        )
+
+    encrypted_token = getattr(request.state, "cli_access_token", None)
+    if not encrypted_token:
+        raise HTTPException(
+            status_code=401,
+            detail="No access token available",
+        )
+
+    # Get Keycloak config for CLI
+    keycloak_issuer = os.environ.get("KEYCLOAK_ISSUER", "").strip() or None
+    keycloak_audience = os.environ.get("KEYCLOAK_AUDIENCE", "").strip() or None
+
+    return CliTokenResponse(
+        encrypted_token=encrypted_token,
+        token_ttl=get_token_ttl(),
+        keycloak_issuer=keycloak_issuer,
+        keycloak_audience=keycloak_audience,
+    )
