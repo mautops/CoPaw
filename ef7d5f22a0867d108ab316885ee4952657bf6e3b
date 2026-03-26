@@ -1,0 +1,102 @@
+src/wisecore/app/routers/files.py
+  f01487e8bbe12b65 1-22
+src/wisecore/app/crons/manager.py
+  f01487e8bbe12b65 8,18-23,93,96,99,104-106,175,178,183,292-312
+src/wisecore/app/auth.py
+  f01487e8bbe12b65 388-391
+next-console/components/ui/dialog.tsx
+  f01487e8bbe12b65 41,64
+src/wisecore/app/channels/feishu/channel.py
+  f01487e8bbe12b65 149-152,528-541,1762-1767,1769-1770,1772-1778,1780-1802,1805-1814,1850-1851
+src/wisecore/app/routers/agents.py
+  f01487e8bbe12b65 51,176,188,275,445-508
+src/wisecore/app/crons/heartbeat.py
+  f01487e8bbe12b65 24,34-46,48-57,60-64
+src/wisecore/app/agent_context.py
+  f01487e8bbe12b65 58-59,65-80,102-106
+next-console/app/(app)/settings/agents/agents-client.tsx
+  f01487e8bbe12b65 47,170-177,303,322-327,363-388
+next-console/app/(app)/agent/workflows/workflows-client.tsx
+  f01487e8bbe12b65 166-168,170-173,178-179
+next-console/components/ui/sheet.tsx
+  f01487e8bbe12b65 41,64
+next-console/lib/agents-registry-api.ts
+  f01487e8bbe12b65 8-9,28,39-44,70-77
+src/wisecore/config/config.py
+  f01487e8bbe12b65 438-439,445-447
+src/wisecore/app/multi_agent_manager.py
+  f01487e8bbe12b65 400,402-403,409-415,418,421-426,453
+src/wisecore/app/utils.py
+  f01487e8bbe12b65 1-58
+src/wisecore/agents/utils/message_processing.py
+  f01487e8bbe12b65 113-115,147-154,162,165-166
+src/wisecore/app/channels/telegram/channel.py
+  f01487e8bbe12b65 355-356
+src/wisecore/app/routers/__init__.py
+  f01487e8bbe12b65 25,48
+src/wisecore/app/channels/discord_/channel.py
+  f01487e8bbe12b65 10,45,84-85,111-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "ef7d5f22a0867d108ab316885ee4952657bf6e3b",
+  "prompts": {
+    "7ca7c2b46827fa0a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "55e5e7ef-1d83-4f74-b6cd-c55b62f6f851",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 6,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/07ea484a54fe0bf636ba9c341ca226b742384c0566021653746afcd82b4797a7"
+    },
+    "d012c461b407ec15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3403cd97-0c23-4fa5-874f-6b35d98836e7",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 12,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/49bf84ed170ebabfd2b5d6d00214594afdf29522a8464420d1b254ceb5a4f98c",
+      "token_usage": {
+        "input_tokens": 81749085,
+        "output_tokens": 189198,
+        "cache_read_tokens": 58626452,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    },
+    "f01487e8bbe12b65": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "592988e9-d4fc-44f5-80a2-5adcad62c9f2",
+        "model": "glm-5"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 383,
+      "total_deletions": 79,
+      "accepted_lines": 449,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/11f4fe74724756cfd4da41c7ba1194243bbb47fa24bf76d28db16061e358f6d1",
+      "token_usage": {
+        "input_tokens": 10525192,
+        "output_tokens": 31280,
+        "cache_read_tokens": 10528487,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    }
+  }
+}
