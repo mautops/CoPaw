@@ -1,0 +1,343 @@
+scripts/wheel_build.ps1
+  d012c461b407ec15 1,17
+next-console/lib/workspace-api.ts
+  d012c461b407ec15 1,11,38-40,43-44,84,103
+  7ca7c2b46827fa0a 19-22,25
+next-console/app/(app)/agent/chat/chat-model-selector.tsx
+  d012c461b407ec15 43,75
+next-console/app/(app)/settings/token-usage/token-usage-client.tsx
+  d012c461b407ec15 86
+tests/unit/cli/__init__.py
+  d012c461b407ec15 1-2
+src/wisecore/config/config.py
+  d012c461b407ec15 999,1121
+next-console/lib/auth-headers.ts
+  d012c461b407ec15 1-2,4-21
+src/wisecore/agents/skills/source_index/SKILL.md
+  d012c461b407ec15 2-3,7,15
+src/wisecore/agents/memory/memory_manager.py
+  d012c461b407ec15 107-110
+src/wisecore/cli/app_cmd.py
+  d012c461b407ec15 16,41,59,105,107
+src/wisecore/cli/auth_cmd.py
+  d012c461b407ec15 27
+tests/unit/agents/tools/test_utils.py
+  d012c461b407ec15 1-7,9-232
+src/Dockerfile
+  d012c461b407ec15 1,3,5-6,8-11,14,16-25,27-29,32-34,36,38-78,80,85-86,88,92,94-96,98-102,105-109,115-117
+pyproject.toml
+  7ca7c2b46827fa0a 37-38
+tests/unit/agents/tools/__init__.py
+  d012c461b407ec15 1-2
+README.md
+  d012c461b407ec15 1,7,24,34,36-38,41,44-45,47-49,60-62
+Makefile
+  8c96194df895c426 12-13,15-17,20,23,171,173-174
+  d012c461b407ec15 3-7,10-11,14,18,25-28,30-32,34-36,39,41,44,46,48-137,139-170,172
+tests/unit/app/runner/__init__.py
+  d012c461b407ec15 1-2
+src/wisecore/config/utils.py
+  d012c461b407ec15 41,342-343,345-347,355,360,370
+next-console/development.env.example
+  d012c461b407ec15 6-8
+  7ca7c2b46827fa0a 1-5
+src/wisecore/agents/utils/token_counter.py
+  d012c461b407ec15 197-202
+next-console/lib/agents-registry-api.ts
+  d012c461b407ec15 1
+src/wisecore/agents/utils/tool_message_utils.py
+  d012c461b407ec15 296,379
+next-console/app/(app)/settings/models/models-client.tsx
+  d012c461b407ec15 193
+tests/unit/__init__.py
+  d012c461b407ec15 1,3-4
+.github/workflows/issue-welcome.yml
+  d012c461b407ec15 82,95-96,113-114,121,130-131,137,139,144-145,159,165,173
+scripts/pack/build_macos.sh
+  d012c461b407ec15 2,10-11,16,26,31,59,63,66,86-87,90-91,111-112,115,126-127,129,147,166,172,180
+tests/unit/app/crons/__init__.py
+  d012c461b407ec15 1-2
+next-console/lib/skills-api.ts
+  d012c461b407ec15 1,14-15,27,39
+  7ca7c2b46827fa0a 33-34,37
+next-console/Dockerfile
+  8c96194df895c426 21,32,35,38
+  d012c461b407ec15 1,3,5-8,10-11,14,16-17,22-25,27-31,33,36,39-40,43,45,48,53,57,59-60,63-64,67-70,72,75
+scripts/README.md
+  d012c461b407ec15 11
+docker/dev/docker-compose.yaml
+  7ca7c2b46827fa0a 2-22
+next-console/lib/cron-jobs-api.ts
+  d012c461b407ec15 1
+tests/unit/security/tool_guard/__init__.py
+  d012c461b407ec15 1-2
+tests/unit/app/runner/test_models.py
+  d012c461b407ec15 1-9,11-14,16-142
+next-console/app/(app)/control/channels/channels-client.tsx
+  d012c461b407ec15 386
+tests/integrated/__init__.py
+  d012c461b407ec15 1-8
+docker/.env.example
+  d012c461b407ec15 1,3-12,15-16,18-59
+tests/integrated/test_config_integration.py
+  d012c461b407ec15 1-18,20-45,47-68,70-89,91-94,96-137,139-158,160-164,166-171
+tests/integrated/test_runner_integration.py
+  d012c461b407ec15 1-18,20-51,53-72,74-98,100-133,135-154,156-171,173-188,190-206,208-224
+tests/unit/config/__init__.py
+  d012c461b407ec15 1-2
+tests/integrated/test_auth_integration.py
+  d012c461b407ec15 1-17,19-26,28-54,56-69,71-73,75-87,89-93,95-103,105-108,110-126,128-155
+tests/integrated/conftest.py
+  d012c461b407ec15 1-60,62-87
+CONTRIBUTING.md
+  d012c461b407ec15 1,5,7,19,98,104,114,119,121,131,134,138,140-143,151,157,159,206,209,219-220,250-251,254
+SECURITY.md
+  d012c461b407ec15 3,7,9,19,29,31-32,43,53,55,59,63,67,69,72-74,79,87-89,96,101,103-104,111,113,128,133,137,139,152,156
+docker/docker-compose.yaml
+  d012c461b407ec15 2-27,30-35,37-48,51-54,56-62,65-70,72-83,85-90,92-115,117-121,123-125,127,129-131
+next-console/lib/auth.ts
+  d012c461b407ec15 3-6,32-63,80
+tests/unit/channels/test_schema.py
+  d012c461b407ec15 1-7,9-130
+tests/unit/app/__init__.py
+  d012c461b407ec15 1-2
+src/wisecore/security/tool_guard/utils.py
+  d012c461b407ec15 72,84,107,119
+src/wisecore/security/tool_guard/engine.py
+  d012c461b407ec15 41,63
+tests/unit/providers/__init__.py
+  d012c461b407ec15 1-2
+next-console/app/(app)/agent/workspace/workspace-domain.ts
+  d012c461b407ec15 5
+src/wisecore/agents/tools/browser_control.py
+  d012c461b407ec15 53,187,287,519,663
+next-console/lib/security-api.ts
+  d012c461b407ec15 1
+next-console/app/(app)/agent/mcp/mcp-domain.ts
+  d012c461b407ec15 3
+tests/unit/channels/test_utils.py
+  d012c461b407ec15 1-7,9-140
+next-console/lib/token-usage-api.ts
+  d012c461b407ec15 1
+tests/unit/security/tool_guard/test_rule_guardian.py
+  d012c461b407ec15 1-10,12-16,18-415
+next-console/app/(app)/control/sessions/sessions-domain.ts
+  d012c461b407ec15 2,17
+src/wisecore/agents/react_agent.py
+  d012c461b407ec15 954,960
+src/wisecore/agents/skills_manager.py
+  d012c461b407ec15 642
+next-console/lib/envs-api.ts
+  d012c461b407ec15 1
+src/wisecore/security/skill_scanner/__init__.py
+  d012c461b407ec15 99,101
+scripts/pack/README.md
+  d012c461b407ec15 1,30,38,40-41,51-52,57,63,66,69,72,87-88,90
+scripts/wheel_build.sh
+  d012c461b407ec15 2
+.github/workflows/docker-release.yml
+  d012c461b407ec15 1,23,78,87
+tests/unit/agents/__init__.py
+  d012c461b407ec15 2
+next-console/app/(app)/dashboard/page.tsx
+  d012c461b407ec15 19
+tests/unit/security/skill_scanner/__init__.py
+  d012c461b407ec15 1-2
+.github/ISSUE_TEMPLATE/config.yml
+  d012c461b407ec15 8-9,11-12
+next-console/lib/channels-api.ts
+  d012c461b407ec15 1
+src/wisecore/envs/store.py
+  d012c461b407ec15 26,33,87-88
+src/wisecore/app/auth.py
+  d012c461b407ec15 5,165,170,215-216,231-232
+src/wisecore/utils/telemetry.py
+  d012c461b407ec15 35,41
+next-console/lib/chat-api.ts
+  d012c461b407ec15 3
+  7ca7c2b46827fa0a 76-77,80,193,220
+next-console/lib/mcp-api.ts
+  d012c461b407ec15 1
+.github/ISSUE_TEMPLATE/4-bug_report.md
+  d012c461b407ec15 9,11-12,36
+next-console/app/layout.tsx
+  d012c461b407ec15 25
+.github/workflows/pr-welcome.yml
+  d012c461b407ec15 125-126,143-144,176-177,180,189-190,204,233-234
+next-console/lib/heartbeat-api.ts
+  d012c461b407ec15 1
+next-console/lib/llm-models-api.ts
+  d012c461b407ec15 1
+src/wisecore/agents/command_handler.py
+  d012c461b407ec15 380,448,453-456,490
+.github/ISSUE_TEMPLATE/1-question.md
+  d012c461b407ec15 15,23
+src/wisecore/constant.py
+  d012c461b407ec15 82,89,100,102,104-105,114,118,120,127,133,137,143,154,172,179,191-194,196,200,206,212,221
+tests/unit/providers/test_provider_models.py
+  d012c461b407ec15 1-7,9-14,16-228
+tests/unit/auth/__init__.py
+  d012c461b407ec15 1-2
+CONTRIBUTING_zh.md
+  d012c461b407ec15 1,5,7,19,98,104,114,119,121,131,134,138,140-143,151,157,199,207,210,220-221,251-252,255
+next-console/lib/voice-settings-api.ts
+  d012c461b407ec15 1
+scripts/docker_sync_latest.sh
+  d012c461b407ec15 63
+tests/unit/security/tool_guard/test_file_guardian.py
+  d012c461b407ec15 1-10,12-18,20-59,61-69,71-80,82-364
+src/wisecore/app/keycloak_token.py
+  d012c461b407ec15 10,12,14,16,18,20,51,55,59,63,68,76,88
+tests/unit/app/crons/test_models.py
+  d012c461b407ec15 1-7,9-357
+next-console/app/(app)/agent/workspace/workspace-client.tsx
+  d012c461b407ec15 29,83,97,122,164
+next-console/lib/agent-config-api.ts
+  d012c461b407ec15 1,3
+tests/unit/agents/test_schema.py
+  d012c461b407ec15 1-13,15-26,28-38,40-50
+src/wisecore/app/_app.py
+  d012c461b407ec15 272-294,299,307,332
+next-console/lib/workflow-api.ts
+  d012c461b407ec15 1
+tests/unit/security/__init__.py
+  d012c461b407ec15 1-2
+tests/conftest.py
+  d012c461b407ec15 1,3-27,29-154
+next-console/app/(app)/agent/workflows/workflow-domain.ts
+  d012c461b407ec15 3-4,6
+next-console/app/(app)/agent/workflows/workflows-client.tsx
+  d012c461b407ec15 22,210
+next-console/package.json
+  7ca7c2b46827fa0a 10-13,60,65-70
+next-console/lib/api-utils.ts
+  d012c461b407ec15 1-6,8-61,63-72
+src/wisecore/__init__.py
+  d012c461b407ec15 9
+next-console/lib/workflow-username.ts
+  d012c461b407ec15 16,26,28
+src/wisecore/app/user_primary_agent.py
+  d012c461b407ec15 38-39
+src/wisecore/agents/tool_guard_mixin.py
+  d012c461b407ec15 243,402
+docker/dev.sh
+  d012c461b407ec15 1-3,5-34,36-107,110,113-127,129-138,142-144,148-158,160,162-165,168-179,182-223,225-241,243-286
+next-console/lib/tools-api.ts
+  d012c461b407ec15 1
+next-console/app/(app)/agent/chat/chat-query-keys.ts
+  d012c461b407ec15 1
+src/wisecore/app/migration.py
+  d012c461b407ec15 435
+.pre-commit-config.yaml
+  d012c461b407ec15 64
+next-console/app/(app)/agent/tools/tools-domain.ts
+  d012c461b407ec15 3
+tests/unit/channels/__init__.py
+  d012c461b407ec15 1-2
+scripts/docker_build.sh
+  d012c461b407ec15 4-5,9-10,17,21,25-26,29,31
+.github/workflows/pre-commit.yml
+  d012c461b407ec15 21
+next-console/app/(app)/agent/skills/skills-domain.ts
+  d012c461b407ec15 3
+src/wisecore/utils/logging.py
+  d012c461b407ec15 13-14,178-179
+src/wisecore/agents/skills_hub.py
+  d012c461b407ec15 72,76,81,85,90,94,99,103,138,143,150,157,164
+scripts/pack/build_common.py
+  d012c461b407ec15 5,21,65,78,103,195,217,221,242
+tests/test_package.py
+  d012c461b407ec15 1,3-14,16-23,26,28-32,34-35,37,40
+tests/unit/cli/test_cli_utils.py
+  d012c461b407ec15 1-16,18,20-34,36,38-52,54,56-74,76,78-95,97,99-117,119,121-142,144,146-163,165,167-188,190,192-216,218,220-243,245,247-276,278-281,283-291,293,295-302,304,307-313
+.github/ISSUE_TEMPLATE/5-support_environment.md
+  d012c461b407ec15 17
+.github/workflows/first-time-contributor-welcome.yml
+  d012c461b407ec15 24,39
+src/wisecore/app/routers/auth.py
+  d012c461b407ec15 59
+scripts/run_tests.py
+  d012c461b407ec15 4,159,178,233
+next-console/app/(app)/control/sessions/sessions-client.tsx
+  d012c461b407ec15 28,55,133
+tests/unit/utils/__init__.py
+  d012c461b407ec15 1-2
+.gitignore
+  d012c461b407ec15 89-90
+tests/integrated/test_security_integration.py
+  d012c461b407ec15 1-17,20-21,23-49,51-65,67-110,112-125,127-132,134-154,156-167
+next-console/scripts/ensure-postgres-database.cjs
+  7ca7c2b46827fa0a 1-76
+next-console/app/(app)/agent/chat/page.tsx
+  d012c461b407ec15 26,40
+next-console/tsconfig.json
+  d012c461b407ec15 42
+next-console/components/layout/user-profile-menu.tsx
+  7ca7c2b46827fa0a 13-14,34,93-94,121-136,166-185
+README_zh.md
+  d012c461b407ec15 1,7,24,34,36-38,41,44-45,47-49,60-62
+next-console/app/(app)/agent/workflows/workflow-detail-sheet.tsx
+  d012c461b407ec15 124
+scripts/pack/README_zh.md
+  d012c461b407ec15 1,29,37,39-40,49-50,55,61,64,67,70,85-86,88
+src/wisecore/agents/hooks/memory_compaction.py
+  d012c461b407ec15 200
+next-console/lib/sessions-api.ts
+  d012c461b407ec15 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "bef13bc3c270206ce30b4de98b6a3198e39b835f",
+  "prompts": {
+    "7ca7c2b46827fa0a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "55e5e7ef-1d83-4f74-b6cd-c55b62f6f851",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 940,
+      "total_deletions": 872,
+      "accepted_lines": 617,
+      "overriden_lines": 10,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/07ea484a54fe0bf636ba9c341ca226b742384c0566021653746afcd82b4797a7"
+    },
+    "8c96194df895c426": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8668dd91-93b4-47e4-81b7-53d20f86518a",
+        "model": "default"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 31,
+      "total_deletions": 25,
+      "accepted_lines": 15,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/fd82bcdaaa6ae231d66ce10d88b09744fbc33c7d469e963478461079e08cb4f0"
+    },
+    "d012c461b407ec15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3403cd97-0c23-4fa5-874f-6b35d98836e7",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei <364950776@qq.com>",
+      "messages": [],
+      "total_additions": 1293,
+      "total_deletions": 658430,
+      "accepted_lines": 8589,
+      "overriden_lines": 156,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/38bd631fbe220a5c3bb7ebbb3feb83237f4eecde9337e7275f98c4e92d775d2d",
+      "token_usage": {
+        "input_tokens": 75941739,
+        "output_tokens": 177467,
+        "cache_read_tokens": 55485365,
+        "cache_creation_tokens": 0,
+        "total_cost": null
+      }
+    }
+  }
+}
