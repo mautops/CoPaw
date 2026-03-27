@@ -51,7 +51,7 @@ class Workspace:
     Each Workspace is an independent agent instance with its own:
     - Runner: Processes agent requests
     - ChannelManager: Manages communication channels
-    - MemoryManager: Manages conversation memory
+    - BaseMemoryManager: Manages conversation memory
     - MCPClientManager: Manages MCP tool clients
     - CronManager: Manages scheduled tasks
 
@@ -170,7 +170,9 @@ class Workspace:
         sm.register(
             ServiceDescriptor(
                 name="memory_manager",
-                service_class=MemoryManager,
+                service_class=lambda ws: _resolve_memory_class(
+                    ws._config.running.memory_manager_backend,
+                ),
                 init_args=lambda ws: {
                     "working_dir": str(ws.workspace_dir),
                     "agent_id": ws.agent_id,
@@ -295,7 +297,7 @@ class Workspace:
         Args:
             components: Dict mapping component name to instance.
                 Supported keys:
-                - 'memory_manager': MemoryManager instance
+                - 'memory_manager': BaseMemoryManager instance
                 - 'chat_manager': ChatManager instance
 
         Example:
