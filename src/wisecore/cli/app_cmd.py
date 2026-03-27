@@ -60,13 +60,6 @@ def _default_listen_port() -> int:
 )
 @click.option("--reload", is_flag=True, help="Enable auto-reload (dev only)")
 @click.option(
-    "--workers",
-    default=1,
-    type=int,
-    show_default=True,
-    help="Worker processes",
-)
-@click.option(
     "--log-level",
     default="info",
     type=click.Choice(
@@ -83,15 +76,36 @@ def _default_listen_port() -> int:
     show_default=True,
     help="Path substrings to hide from uvicorn access log (repeatable).",
 )
+@click.option(
+    "--workers",
+    type=int,
+    default=None,
+    help="[DEPRECATED] Number of worker processes. "
+    "This option is deprecated and will be removed in a future version. "
+    "Wisecore always uses 1 worker.",
+)
 def app_cmd(
     host: str,
     port: int,
     reload: bool,
-    workers: int,
+    workers: Optional[int],
     log_level: str,
     hide_access_paths: tuple[str, ...],
 ) -> None:
     """Run Wisecore FastAPI app."""
+    # Handle deprecated --workers parameter
+    if workers is not None:
+        click.echo(
+            "⚠️  WARNING: --workers option is deprecated and will be removed "
+            "in a future version.",
+            err=True,
+        )
+        click.echo(
+            "   Wisecore always uses 1 worker for stability. "
+            "Your specified value will be ignored.",
+            err=True,
+        )
+        click.echo(err=True)
     # Persist last used host/port for other terminals
     if host == "0.0.0.0":
         write_last_api("127.0.0.1", port)
@@ -123,6 +137,6 @@ def app_cmd(
         host=host,
         port=port,
         reload=reload,
-        workers=workers,
+        workers=1,
         log_level=log_level,
     )

@@ -5,6 +5,14 @@ import { mergeAuthHeaders } from "./auth-headers";
 
 export type ChatStatus = "idle" | "running";
 
+/** Turn a backend content URL (path or full URL) into a full URL for display. */
+export function toDisplayUrl(url: string | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("file://")) url = url.replace("file://", "");
+  return `${API_BASE}/api/files/preview/${url.startsWith("/") ? url.slice(1) : url}`;
+}
+
 export interface ChatSpec {
   id: string;
   name: string;

@@ -35,6 +35,15 @@ export function defaultRunning(): AgentsRunningConfig {
     tool_result_compact_recent_threshold: 30000,
     tool_result_compact_retention_days: 7,
     history_max_length: 10000,
+    llm_retry_enabled: true,
+    llm_max_retries: 3,
+    llm_backoff_base: 1.0,
+    llm_backoff_cap: 10.0,
+    llm_max_concurrent: 10,
+    llm_max_qpm: 600,
+    llm_rate_limit_pause: 5.0,
+    llm_rate_limit_jitter: 1.0,
+    llm_acquire_timeout: 300.0,
     embedding_config: defaultEmbedding(),
   };
 }
@@ -122,6 +131,40 @@ export function validateRunning(c: AgentsRunningConfig): string | null {
   }
   if (!Number.isFinite(e.max_batch_size) || e.max_batch_size < 1) {
     return "Embedding 批大小须 >= 1";
+  }
+  // LLM Rate Limiter validation
+  if (
+    !Number.isFinite(c.llm_max_concurrent ?? 10) ||
+    (c.llm_max_concurrent ?? 10) < 1
+  ) {
+    return "最大并发请求数须 >= 1";
+  }
+  if (!Number.isFinite(c.llm_max_qpm ?? 600) || (c.llm_max_qpm ?? 600) < 0) {
+    return "每分钟最大请求数须 >= 0";
+  }
+  if (
+    !Number.isFinite(c.llm_rate_limit_pause ?? 5) ||
+    (c.llm_rate_limit_pause ?? 5) < 1
+  ) {
+    return "限流暂停时长须 >= 1 秒";
+  }
+  if (
+    !Number.isFinite(c.llm_rate_limit_jitter ?? 1) ||
+    (c.llm_rate_limit_jitter ?? 1) < 0
+  ) {
+    return "抖动范围须 >= 0 秒";
+  }
+  if (
+    !Number.isFinite(c.llm_acquire_timeout ?? 300) ||
+    (c.llm_acquire_timeout ?? 300) < 10
+  ) {
+    return "槽位获取超时须 >= 10 秒";
+  }
+  const pause = c.llm_rate_limit_pause ?? 5;
+  const jitter = c.llm_rate_limit_jitter ?? 1;
+  const timeout = c.llm_acquire_timeout ?? 300;
+  if (timeout <= pause + jitter) {
+    return "槽位获取超时须大于限流暂停时长与抖动范围之和";
   }
   return null;
 }

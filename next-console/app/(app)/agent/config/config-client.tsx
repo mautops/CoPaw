@@ -564,6 +564,94 @@ export function AgentConfigClient() {
 
               <Card>
                 <CardHeader>
+                  <CardTitle className="text-base">LLM 并发限流</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4 md:grid-cols-2">
+                  <Field
+                    label="最大并发请求数 (llm_max_concurrent)"
+                    hint="允许同时发出的 LLM 请求上限. 所有 Agent 共享, 仅首次初始化时生效."
+                  >
+                    <Input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={draft.llm_max_concurrent ?? 10}
+                      onChange={(e) => {
+                        const n = parseInt(e.target.value, 10);
+                        if (!Number.isNaN(n))
+                          patchRunning({ llm_max_concurrent: n });
+                      }}
+                    />
+                  </Field>
+                  <Field
+                    label="每分钟最大请求数 (llm_max_qpm)"
+                    hint="60 秒滑动窗口内允许的最大请求数. 0 = 不限制."
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      step={10}
+                      value={draft.llm_max_qpm ?? 600}
+                      onChange={(e) => {
+                        const n = parseInt(e.target.value, 10);
+                        if (!Number.isNaN(n)) patchRunning({ llm_max_qpm: n });
+                      }}
+                    />
+                  </Field>
+                  <Field
+                    label="限流暂停时长 (llm_rate_limit_pause)"
+                    hint="收到 429 时全局暂停的默认时长 (秒)."
+                  >
+                    <Input
+                      type="number"
+                      min={1}
+                      step={0.5}
+                      value={draft.llm_rate_limit_pause ?? 5}
+                      onChange={(e) => {
+                        const n = parseFloat(e.target.value);
+                        if (!Number.isNaN(n))
+                          patchRunning({ llm_rate_limit_pause: n });
+                      }}
+                    />
+                  </Field>
+                  <Field
+                    label="抖动范围 (llm_rate_limit_jitter)"
+                    hint="暂停时长上叠加的随机抖动范围 (秒), 使并发等待者错开唤醒."
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.5}
+                      value={draft.llm_rate_limit_jitter ?? 1}
+                      onChange={(e) => {
+                        const n = parseFloat(e.target.value);
+                        if (!Number.isNaN(n))
+                          patchRunning({ llm_rate_limit_jitter: n });
+                      }}
+                    />
+                  </Field>
+                  <Field
+                    label="槽位获取超时 (llm_acquire_timeout)"
+                    hint="等待获取限流槽位的最长时间 (秒), 超时后抛出错误."
+                    className="md:col-span-2"
+                  >
+                    <Input
+                      type="number"
+                      min={10}
+                      step={10}
+                      value={draft.llm_acquire_timeout ?? 300}
+                      onChange={(e) => {
+                        const n = parseFloat(e.target.value);
+                        if (!Number.isNaN(n))
+                          patchRunning({ llm_acquire_timeout: n });
+                      }}
+                    />
+                  </Field>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
                   <CardTitle className="text-base">系统提示文件</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">

@@ -4,7 +4,7 @@
 Each Workspace represents a standalone agent workspace with its own:
 - Runner (request processing)
 - ChannelManager (communication channels)
-- MemoryManager (conversation memory)
+- BaseMemoryManager (conversation memory)
 - MCPClientManager (MCP tool clients)
 - CronManager (scheduled tasks)
 
@@ -28,13 +28,21 @@ from ..runner.task_tracker import TaskTracker
 from ..mcp import MCPClientManager
 from ..crons.manager import CronManager
 from ..crons.repo.json_repo import JsonJobRepository
-from ...agents.memory import MemoryManager
 from ...config.config import load_agent_config
 
 if TYPE_CHECKING:
-    pass
+    from ...agents.memory import BaseMemoryManager
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_memory_class(backend: str) -> type:
+    """Return the memory manager class for the given backend name."""
+    from ...agents.memory import ReMeLightMemoryManager
+
+    if backend == "remelight":
+        return ReMeLightMemoryManager
+    raise ValueError(f"Unsupported memory manager backend: '{backend}'")
 
 
 class Workspace:

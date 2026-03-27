@@ -51,6 +51,15 @@ export interface AgentsRunningConfig {
   tool_result_compact_recent_threshold: number;
   tool_result_compact_retention_days: number;
   history_max_length: number;
+  llm_retry_enabled?: boolean;
+  llm_max_retries?: number;
+  llm_backoff_base?: number;
+  llm_backoff_cap?: number;
+  llm_max_concurrent?: number;
+  llm_max_qpm?: number;
+  llm_rate_limit_pause?: number;
+  llm_rate_limit_jitter?: number;
+  llm_acquire_timeout?: number;
   embedding_config: EmbeddingConfig;
 }
 
