@@ -1,0 +1,64 @@
+src/copaw/agents/skills/docx/SKILL.md
+  c93aa5d3dbaed838 5-13
+src/copaw/agents/skills/cron/SKILL.md
+  c93aa5d3dbaed838 4-15
+src/copaw/agents/skills/browser_cdp/SKILL.md
+  c93aa5d3dbaed838 4-11,13-16
+src/copaw/agents/skills/copaw_source_index/SKILL.md
+  c93aa5d3dbaed838 4-10,12-15
+src/copaw/agents/skills/browser_visible/SKILL.md
+  c93aa5d3dbaed838 4-11,13-16
+src/copaw/agents/skills/dingtalk_channel/SKILL.md
+  c93aa5d3dbaed838 4-11,13-16
+console/src/pages/Agent/SkillPool/components/SkillPoolListItem.tsx
+  c93aa5d3dbaed838 10,64,79
+src/copaw/agents/skills/xlsx/SKILL.md
+  c93aa5d3dbaed838 5-15
+src/copaw/agents/skills_manager.py
+  c93aa5d3dbaed838 76-77,1282-1283,1289-1295,1321-1322
+console/src/pages/Agent/SkillPool/components/index.ts
+  c93aa5d3dbaed838 6
+src/copaw/agents/skills/multi_agent_collaboration/SKILL.md
+  c93aa5d3dbaed838 4-14
+console/src/pages/Agent/SkillPool/components/SkillPoolCard.tsx
+  c93aa5d3dbaed838 10,67,102
+src/copaw/agents/skills/himalaya/SKILL.md
+  c93aa5d3dbaed838 5-12,14-26
+src/copaw/agents/skills/channel_message/SKILL.md
+  c93aa5d3dbaed838 4-15
+src/copaw/agents/skills/pptx/SKILL.md
+  c93aa5d3dbaed838 5-14
+src/copaw/agents/skills/file_reader/SKILL.md
+  c93aa5d3dbaed838 4-12,14-17
+src/copaw/agents/skills/guidance/SKILL.md
+  c93aa5d3dbaed838 4-11,13-16
+src/copaw/agents/skills/pdf/SKILL.md
+  c93aa5d3dbaed838 5-14
+src/copaw/agents/skills/news/SKILL.md
+  c93aa5d3dbaed838 4-11,13-16
+console/src/api/types/skill.ts
+  c93aa5d3dbaed838 16-17,33-34
+console/src/pages/Agent/SkillPool/components/SkillMeta.tsx
+  c93aa5d3dbaed838 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "31414e2d2395405f5f02924380ffbdac47391ebd",
+  "prompts": {
+    "c93aa5d3dbaed838": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75f68e04-6c9c-4e56-9885-206811fb368b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 236,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/8323ab9eaecfc18e8e0e9c2fc61a859f7cf7086adf01d16c54437484a6acf889"
+    }
+  }
+}
