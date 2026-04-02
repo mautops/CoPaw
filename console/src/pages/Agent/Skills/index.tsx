@@ -6,7 +6,6 @@ import {
   Modal,
   Tooltip,
   Switch,
-  Input,
   Select,
 } from "@agentscope-ai/design";
 import {
@@ -669,7 +668,7 @@ function SkillsPage() {
               allowClear
               maxTagCount="responsive"
               suffixIcon={<SearchOutlined />}
-              dropdownRender={(menu) => (
+              dropdownRender={() => (
                 <div>
                   {allCategories.length > 0 && (
                     <div className={styles.filterGroup}>

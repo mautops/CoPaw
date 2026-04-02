@@ -18,7 +18,6 @@ import dayjs from "dayjs";
 import type { SkillSpec } from "../../../../api/types";
 import { useTranslation } from "react-i18next";
 import styles from "../index.module.less";
-import { getSkillDisplaySource } from "./skillMetadata";
 
 interface SkillCardProps {
   skill: SkillSpec;
@@ -137,8 +136,6 @@ export const SkillCard = React.memo(function SkillCard({
   onDelete,
 }: SkillCardProps) {
   const { t } = useTranslation();
-  const displaySource = getSkillDisplaySource(skill.source);
-  const isBuiltin = displaySource === "builtin";
   const batchMode = selected !== undefined;
 
   const handleToggleClick = (e: React.MouseEvent) => {

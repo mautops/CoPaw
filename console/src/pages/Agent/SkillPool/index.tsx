@@ -931,7 +931,7 @@ function SkillPoolPage() {
                 allowClear
                 maxTagCount="responsive"
                 suffixIcon={<SearchOutlined />}
-                dropdownRender={(menu) => (
+                dropdownRender={() => (
                   <div>
                     {allCategories.length > 0 && (
                       <div className={styles.filterGroup}>

@@ -1293,7 +1293,7 @@ def _read_skill_from_dir(skill_dir: Path, source: str) -> SkillInfo | None:
                 categories = [str(c).strip() for c in raw_categories if c]
             if isinstance(raw_tags, list):
                 tags = [str(t).strip() for t in raw_tags if t]
-            
+
             # Extract emoji from metadata.copaw.emoji
             metadata = post.get("metadata", {})
             if isinstance(metadata, dict):
