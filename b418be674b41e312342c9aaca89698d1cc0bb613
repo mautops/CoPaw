@@ -1,0 +1,25 @@
+console/src/pages/Agent/Skills/index.tsx
+  c673e257fa8d2360 671
+console/src/pages/Agent/SkillPool/index.tsx
+  c673e257fa8d2360 934
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "b418be674b41e312342c9aaca89698d1cc0bb613",
+  "prompts": {
+    "c673e257fa8d2360": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "38c4152c-c028-4d49-86c4-ec7c0e937508",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 6,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
