@@ -139,16 +139,19 @@ function SkillPoolPage() {
     const q = searchQuery.toLowerCase();
 
     // Text search filter
-    const matchesText = !q ||
+    const matchesText =
+      !q ||
       skill.name.toLowerCase().includes(q) ||
       (skill.description || "").toLowerCase().includes(q);
 
     // Category filter
-    const matchesCategory = selectedCategories.length === 0 ||
+    const matchesCategory =
+      selectedCategories.length === 0 ||
       selectedCategories.some((cat) => skill.categories?.includes(cat));
 
     // Tag filter
-    const matchesTag = selectedTags.length === 0 ||
+    const matchesTag =
+      selectedTags.length === 0 ||
       selectedTags.some((tag) => skill.tags?.includes(tag));
 
     return matchesText && matchesCategory && matchesTag;
@@ -1052,7 +1055,9 @@ function SkillPoolPage() {
                         <div className={styles.titleInfoContainer}>
                           <div className={styles.titleRow}>
                             <Tooltip title={skill.name}>
-                              <h3 className={styles.skillTitle}>{skill.name}</h3>
+                              <h3 className={styles.skillTitle}>
+                                {skill.name}
+                              </h3>
                             </Tooltip>
                             <span
                               className={`${styles.statusValue} ${

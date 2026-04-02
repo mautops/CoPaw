@@ -103,16 +103,19 @@ function SkillsPage() {
     const query = searchQuery.toLowerCase();
     return skills.filter((skill) => {
       // Text search filter
-      const matchesText = !query ||
+      const matchesText =
+        !query ||
         skill.name.toLowerCase().includes(query) ||
         (skill.description && skill.description.toLowerCase().includes(query));
 
       // Category filter
-      const matchesCategory = selectedCategories.length === 0 ||
+      const matchesCategory =
+        selectedCategories.length === 0 ||
         selectedCategories.some((cat) => skill.categories?.includes(cat));
 
       // Tag filter
-      const matchesTag = selectedTags.length === 0 ||
+      const matchesTag =
+        selectedTags.length === 0 ||
         selectedTags.some((tag) => skill.tags?.includes(tag));
 
       return matchesText && matchesCategory && matchesTag;

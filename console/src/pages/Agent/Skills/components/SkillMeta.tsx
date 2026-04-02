@@ -5,7 +5,9 @@ interface SkillMetaProps {
   tags?: string[];
 }
 
-export function SkillCategoryBadges({ categories }: Pick<SkillMetaProps, "categories">) {
+export function SkillCategoryBadges({
+  categories,
+}: Pick<SkillMetaProps, "categories">) {
   if (!categories?.length) return null;
   return (
     <>
