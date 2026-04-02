@@ -1,0 +1,34 @@
+console/src/locales/en.json
+  c93aa5d3dbaed838 303-304
+console/src/pages/Agent/SkillPool/index.tsx
+  c93aa5d3dbaed838 52,138-139,155,1170,1188
+console/src/locales/ja.json
+  c93aa5d3dbaed838 247-248
+console/src/locales/zh.json
+  c93aa5d3dbaed838 267-268
+console/src/locales/ru.json
+  c93aa5d3dbaed838 252-253
+console/src/pages/Agent/SkillPool/index.module.less
+  c93aa5d3dbaed838 544-557,578,602-625,977-986,1029
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "2dcb9b5e916488d3d1af928fff6ebfcd89953097",
+  "prompts": {
+    "c93aa5d3dbaed838": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75f68e04-6c9c-4e56-9885-206811fb368b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 430,
+      "total_deletions": 210,
+      "accepted_lines": 300,
+      "overriden_lines": 6,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/8323ab9eaecfc18e8e0e9c2fc61a859f7cf7086adf01d16c54437484a6acf889"
+    }
+  }
+}
