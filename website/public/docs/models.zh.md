@@ -148,6 +148,10 @@ CoPaw 当前支持的云提供商包括：
 - ModelScope
 - DashScope
 - Aliyun Coding Plan
+- Zhipu（BigModel）
+- Zhipu Coding Plan（BigModel）
+- Zhipu（Z.AI）
+- Zhipu Coding Plan（Z.AI）
 - OpenAI
 - Azure OpenAI
 - Anthropic

@@ -143,6 +143,9 @@
     "namePlaceholder": "e.g.: My Agent",
     "descriptionPlaceholder": "Briefly describe this agent's purpose...",
     "workspaceHelp": "Leave empty to auto-generate in ~/.copaw/workspaces/<id>",
+    "dragHandleTooltip": "Drag to reorder agents",
+    "reorderSuccess": "Agent order saved",
+    "reorderFailed": "Failed to save agent order",
     "defaultNotEditable": "Default agent cannot be edited",
     "defaultNotDeletable": "Default agent cannot be deleted",
     "disable": "Disable",
@@ -1084,6 +1087,8 @@
     "chatHistoryTooltip": "Chat history",
     "allChats": "All Chats",
     "createNewChat": "Create New Chat",
+    "statusIdle": "Idle",
+    "statusInProgress": "In progress",
     "disclaimer": "Works for you, grows with you",
     "greeting": "Hello, how can I help you today?",
     "description": "I am a helpful assistant that can help you with your questions.",
@@ -1095,7 +1100,7 @@
         "description": "Clear the conversation context"
       },
       "compact": {
-        "description": "Clear the conversation context and generate a summary of the conversation history"
+        "description": "Compact the conversation context; optional instruction supported"
       },
       "approve": {
         "description": "Approve the pending tool action and continue execution"

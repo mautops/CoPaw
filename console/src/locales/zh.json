@@ -108,6 +108,9 @@
     "namePlaceholder": "例如：我的智能体",
     "descriptionPlaceholder": "简要描述这个智能体的用途...",
     "workspaceHelp": "留空将自动生成在 ~/.copaw/workspaces/<id> 目录",
+    "dragHandleTooltip": "拖拽调整智能体顺序",
+    "reorderSuccess": "智能体顺序已保存",
+    "reorderFailed": "保存智能体顺序失败",
     "defaultNotEditable": "默认智能体不允许编辑",
     "defaultNotDeletable": "默认智能体不允许删除",
     "disable": "禁用",
@@ -1056,6 +1059,8 @@
     "chatHistoryTooltip": "聊天历史",
     "allChats": "全部聊天",
     "createNewChat": "创建新聊天",
+    "statusIdle": "空闲",
+    "statusInProgress": "进行中",
     "disclaimer": "懂你所需，伴你左右",
     "greeting": "你好，我今天能帮你做什么？",
     "description": "我是一个智能助手，可以帮助你解答问题。",
@@ -1067,7 +1072,7 @@
         "description": "清空对话上下文"
       },
       "compact": {
-        "description": "清空对话上下文并生成历史对话摘要"
+        "description": "压缩对话上下文并生成摘要，支持附带说明"
       },
       "approve": {
         "description": "批准待执行的工具操作并继续执行"
