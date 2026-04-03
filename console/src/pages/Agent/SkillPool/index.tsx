@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Button,
   Card,
@@ -112,42 +112,51 @@ function SkillPoolPage() {
     setSelectedPoolSkills(new Set(skills.map((s) => s.name)));
 
   // Extract all unique categories and tags from skills
-  const allCategories = Array.from(
-    new Set(skills.flatMap((skill) => skill.categories || [])),
-  ).sort();
-  const allTags = Array.from(
-    new Set(skills.flatMap((skill) => skill.tags || [])),
-  ).sort();
+  const allCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(skills.flatMap((skill) => skill.categories || [])),
+      ).sort(),
+    [skills],
+  );
+  const allTags = useMemo(
+    () =>
+      Array.from(new Set(skills.flatMap((skill) => skill.tags || []))).sort(),
+    [skills],
+  );
 
   // Parse search tags to separate categories and tags
-  const selectedCategories = searchTags
-    .filter((tag) => tag.startsWith("📂:"))
-    .map((tag) => tag.replace(/^📂:/, ""));
-  const selectedTags = searchTags
-    .filter((tag) => tag.startsWith("🏷️:"))
-    .map((tag) => tag.replace(/^🏷️:/, ""));
+  const selectedCategories = useMemo(
+    () =>
+      searchTags
+        .filter((tag) => tag.startsWith("📂:"))
+        .map((tag) => tag.replace(/^📂:/, "")),
+    [searchTags],
+  );
+  const selectedTags = useMemo(
+    () =>
+      searchTags
+        .filter((tag) => tag.startsWith("🏷️:"))
+        .map((tag) => tag.replace(/^🏷️:/, "")),
+    [searchTags],
+  );
 
-  const filteredSkills = skills.filter((skill) => {
+  const filteredSkills = useMemo(() => {
     const q = searchQuery.toLowerCase();
-
-    // Text search filter
-    const matchesText =
-      !q ||
-      skill.name.toLowerCase().includes(q) ||
-      (skill.description || "").toLowerCase().includes(q);
-
-    // Category filter
-    const matchesCategory =
-      selectedCategories.length === 0 ||
-      selectedCategories.some((cat) => skill.categories?.includes(cat));
-
-    // Tag filter
-    const matchesTag =
-      selectedTags.length === 0 ||
-      selectedTags.some((tag) => skill.tags?.includes(tag));
-
-    return matchesText && matchesCategory && matchesTag;
-  });
+    return skills.filter((skill) => {
+      const matchesText =
+        !q ||
+        skill.name.toLowerCase().includes(q) ||
+        (skill.description || "").toLowerCase().includes(q);
+      const matchesCategory =
+        selectedCategories.length === 0 ||
+        selectedCategories.some((cat) => skill.categories?.includes(cat));
+      const matchesTag =
+        selectedTags.length === 0 ||
+        selectedTags.some((tag) => skill.tags?.includes(tag));
+      return matchesText && matchesCategory && matchesTag;
+    });
+  }, [skills, searchQuery, selectedCategories, selectedTags]);
 
   // Form state for create/edit drawer
   const [form] = Form.useForm();
@@ -940,9 +949,9 @@ function SkillPoolPage() {
                               className={styles.filterOption}
                               onClick={() => {
                                 const tag = `📂:${cat}`;
-                                if (!searchTags.includes(tag)) {
-                                  setSearchTags([...searchTags, tag]);
-                                }
+                                setSearchTags((prev) =>
+                                  prev.includes(tag) ? prev : [...prev, tag],
+                                );
                               }}
                             >
                               {cat}
@@ -963,9 +972,11 @@ function SkillPoolPage() {
                               className={styles.filterOption}
                               onClick={() => {
                                 const tagValue = `🏷️:${tag}`;
-                                if (!searchTags.includes(tagValue)) {
-                                  setSearchTags([...searchTags, tagValue]);
-                                }
+                                setSearchTags((prev) =>
+                                  prev.includes(tagValue)
+                                    ? prev
+                                    : [...prev, tagValue],
+                                );
                               }}
                             >
                               {tag}

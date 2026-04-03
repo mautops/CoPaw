@@ -1294,12 +1294,18 @@ def _read_skill_from_dir(skill_dir: Path, source: str) -> SkillInfo | None:
             if isinstance(raw_tags, list):
                 tags = [str(t).strip() for t in raw_tags if t]
 
-            # Extract emoji from metadata.copaw.emoji
+            # Extract emoji from metadata: prefer metadata.copaw.emoji,
+            # fall back to any metadata.<namespace>.emoji
             metadata = post.get("metadata", {})
             if isinstance(metadata, dict):
                 copaw = metadata.get("copaw", {})
                 if isinstance(copaw, dict):
                     emoji = str(copaw.get("emoji", "") or "")
+                if not emoji:
+                    for ns_val in metadata.values():
+                        if isinstance(ns_val, dict) and ns_val.get("emoji"):
+                            emoji = str(ns_val["emoji"])
+                            break
         except Exception:
             pass
 

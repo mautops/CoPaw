@@ -84,20 +84,34 @@ function SkillsPage() {
   const [searchTags, setSearchTags] = useState<string[]>([]);
 
   // Extract all unique categories and tags from skills
-  const allCategories = Array.from(
-    new Set(skills.flatMap((skill) => skill.categories || [])),
-  ).sort();
-  const allTags = Array.from(
-    new Set(skills.flatMap((skill) => skill.tags || [])),
-  ).sort();
+  const allCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(skills.flatMap((skill) => skill.categories || [])),
+      ).sort(),
+    [skills],
+  );
+  const allTags = useMemo(
+    () =>
+      Array.from(new Set(skills.flatMap((skill) => skill.tags || []))).sort(),
+    [skills],
+  );
 
   // Parse search tags to separate categories and tags
-  const selectedCategories = searchTags
-    .filter((tag) => tag.startsWith("📂:"))
-    .map((tag) => tag.replace(/^📂:/, ""));
-  const selectedTags = searchTags
-    .filter((tag) => tag.startsWith("🏷️:"))
-    .map((tag) => tag.replace(/^🏷️:/, ""));
+  const selectedCategories = useMemo(
+    () =>
+      searchTags
+        .filter((tag) => tag.startsWith("📂:"))
+        .map((tag) => tag.replace(/^📂:/, "")),
+    [searchTags],
+  );
+  const selectedTags = useMemo(
+    () =>
+      searchTags
+        .filter((tag) => tag.startsWith("🏷️:"))
+        .map((tag) => tag.replace(/^🏷️:/, "")),
+    [searchTags],
+  );
 
   const filteredSkills = useMemo(() => {
     const query = searchQuery.toLowerCase();
@@ -685,9 +699,9 @@ function SkillsPage() {
                             className={styles.filterOption}
                             onClick={() => {
                               const tag = `📂:${cat}`;
-                              if (!searchTags.includes(tag)) {
-                                setSearchTags([...searchTags, tag]);
-                              }
+                              setSearchTags((prev) =>
+                                prev.includes(tag) ? prev : [...prev, tag],
+                              );
                             }}
                           >
                             {cat}
@@ -708,9 +722,11 @@ function SkillsPage() {
                             className={styles.filterOption}
                             onClick={() => {
                               const tagValue = `🏷️:${tag}`;
-                              if (!searchTags.includes(tagValue)) {
-                                setSearchTags([...searchTags, tagValue]);
-                              }
+                              setSearchTags((prev) =>
+                                prev.includes(tagValue)
+                                  ? prev
+                                  : [...prev, tagValue],
+                              );
                             }}
                           >
                             {tag}
