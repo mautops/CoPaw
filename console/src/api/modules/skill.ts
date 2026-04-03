@@ -211,6 +211,8 @@ export const skillApi = {
     name: string;
     content: string;
     config?: Record<string, unknown>;
+    categories?: string[];
+    tags?: string[];
   }) =>
     request<{ created: boolean; name: string }>("/skills/pool/create", {
       method: "POST",
@@ -222,6 +224,8 @@ export const skillApi = {
     content: string;
     source_name?: string;
     config?: Record<string, unknown>;
+    categories?: string[];
+    tags?: string[];
   }) =>
     request<{
       success: boolean;

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Button, Drawer, Form, Input } from "@agentscope-ai/design";
+import { Button, Drawer, Form, Input, Select } from "@agentscope-ai/design";
 import { useTranslation } from "react-i18next";
 import type { PoolSkillSpec } from "../../../../api/types";
 import {
@@ -13,9 +13,11 @@ import styles from "../index.module.less";
 interface SkillPoolDrawerProps {
   mode: PoolMode | null;
   activeSkill: PoolSkillSpec | null;
+  allCategories: string[];
+  allTags: string[];
   onClose: () => void;
   onSave: (
-    formValues: { name: string; content: string },
+    formValues: { name: string; content: string; categories?: string[]; tags?: string[] },
     drawerContent: string,
     configText: string,
     setFormFieldsValue: (v: { name: string }) => void,
@@ -26,6 +28,8 @@ interface SkillPoolDrawerProps {
 export function SkillPoolDrawer({
   mode,
   activeSkill,
+  allCategories,
+  allTags,
   onClose,
   onSave,
   validateFrontmatter,
@@ -45,12 +49,14 @@ export function SkillPoolDrawer({
         form.setFieldsValue({
           name: skill.name,
           content: skill.content,
+          categories: skill.categories || [],
+          tags: skill.tags || [],
         });
       } else if (currentMode === "create") {
         setDrawerContent("");
         setConfigText("{}");
         form.resetFields();
-        form.setFieldsValue({ name: "", content: "" });
+        form.setFieldsValue({ name: "", content: "", categories: [], tags: [] });
       }
     },
     [form],
@@ -141,6 +147,28 @@ export function SkillPoolDrawer({
               placeholder: t("skillPool.contentPlaceholder"),
               rows: 12,
             }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="categories"
+          label={t("skillPool.categories")}
+        >
+          <Select
+            mode="tags"
+            placeholder={t("skillPool.categoriesPlaceholder")}
+            options={allCategories.map((c) => ({ label: c, value: c }))}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="tags"
+          label={t("skillPool.tags")}
+        >
+          <Select
+            mode="tags"
+            placeholder={t("skillPool.tagsPlaceholder")}
+            options={allTags.map((t) => ({ label: t, value: t }))}
           />
         </Form.Item>
 

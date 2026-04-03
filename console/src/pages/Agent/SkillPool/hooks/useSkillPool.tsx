@@ -18,6 +18,7 @@ import { getAgentDisplayName } from "../../../../utils/agentDisplayName";
 import {
   getSkillDisplaySource,
   parseFrontmatter,
+  updateFrontmatter,
   useConflictRenameModal,
 } from "../../Skills/components";
 
@@ -602,7 +603,7 @@ export function useSkillPool() {
 
   // ---- Save Skill ----
   const handleSavePoolSkill = async (
-    formValues: { name: string; content: string },
+    formValues: { name: string; content: string; categories?: string[]; tags?: string[] },
     drawerContent: string,
     configText: string,
     setFormFieldsValue: (v: { name: string }) => void,
@@ -619,9 +620,15 @@ export function useSkillPool() {
     }
 
     const skillName = (formValues.name || "").trim();
-    const skillContent = drawerContent || formValues.content;
+    let skillContent = drawerContent || formValues.content;
 
     if (!skillName || !skillContent.trim()) return false;
+
+    // Update frontmatter with categories and tags
+    skillContent = updateFrontmatter(skillContent, {
+      categories: formValues.categories,
+      tags: formValues.tags,
+    });
 
     try {
       const result =
@@ -631,12 +638,16 @@ export function useSkillPool() {
               content: skillContent,
               source_name: activeSkill?.name,
               config: parsedConfig,
+              categories: formValues.categories,
+              tags: formValues.tags,
             })
           : await api
               .createSkillPoolSkill({
                 name: skillName,
                 content: skillContent,
                 config: parsedConfig,
+                categories: formValues.categories,
+                tags: formValues.tags,
               })
               .then((created) => ({
                 success: true,

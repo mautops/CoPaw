@@ -2,6 +2,7 @@ export { SkillCard } from "./SkillCard";
 export {
   SkillDrawer,
   parseFrontmatter,
+  updateFrontmatter,
   type SkillDrawerFormValues,
 } from "./SkillDrawer";
 export { getFileIcon, getSkillVisual } from "./SkillCard";

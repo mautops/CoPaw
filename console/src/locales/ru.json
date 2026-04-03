@@ -254,6 +254,8 @@
     "descriptionLabel": "Описание",
     "categories": "Категории",
     "tags": "Теги",
+    "categoriesPlaceholder": "Выберите или введите категории",
+    "tagsPlaceholder": "Выберите или введите теги",
     "filterByCategory": "Фильтр по категории",
     "filterByTag": "Фильтр по тегу",
     "version": "Версия",

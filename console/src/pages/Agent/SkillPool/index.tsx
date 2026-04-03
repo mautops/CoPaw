@@ -43,6 +43,7 @@ import {
   getPoolBuiltinStatusTone,
   getSkillVisual,
   parseFrontmatter,
+  updateFrontmatter,
   useConflictRenameModal,
   ImportHubModal,
   SkillFilterDropdown,
@@ -227,6 +228,8 @@ function SkillPoolPage() {
     form.setFieldsValue({
       name: "",
       content: "",
+      categories: [],
+      tags: [],
     });
   };
 
@@ -270,6 +273,8 @@ function SkillPoolPage() {
     form.setFieldsValue({
       name: skill.name,
       content: skill.content,
+      categories: skill.categories || [],
+      tags: skill.tags || [],
     });
   };
 
@@ -547,9 +552,15 @@ function SkillPoolPage() {
     }
 
     const skillName = (values.name || "").trim();
-    const skillContent = drawerContent || values.content;
+    let skillContent = drawerContent || values.content;
 
     if (!skillName || !skillContent.trim()) return;
+
+    // Update frontmatter with categories and tags
+    skillContent = updateFrontmatter(skillContent, {
+      categories: values.categories,
+      tags: values.tags,
+    });
 
     try {
       const result =
@@ -559,12 +570,16 @@ function SkillPoolPage() {
               content: skillContent,
               source_name: activeSkill?.name,
               config: parsedConfig,
+              categories: values.categories,
+              tags: values.tags,
             })
           : await api
               .createSkillPoolSkill({
                 name: skillName,
                 content: skillContent,
                 config: parsedConfig,
+                categories: values.categories,
+                tags: values.tags,
               })
               .then((created) => ({
                 success: true,
@@ -1259,7 +1274,6 @@ function SkillPoolPage() {
 
           <Form.Item
             name="content"
-            label="Content"
             rules={[{ required: true, validator: validateFrontmatter }]}
           >
             <MarkdownCopy
@@ -1272,6 +1286,28 @@ function SkillPoolPage() {
                 placeholder: t("skillPool.contentPlaceholder"),
                 rows: 12,
               }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="categories"
+            label={t("skillPool.categories")}
+          >
+            <Select
+              mode="tags"
+              placeholder={t("skillPool.categoriesPlaceholder")}
+              options={allCategories.map((c) => ({ label: c, value: c }))}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="tags"
+            label={t("skillPool.tags")}
+          >
+            <Select
+              mode="tags"
+              placeholder={t("skillPool.tagsPlaceholder")}
+              options={allTags.map((tg) => ({ label: tg, value: tg }))}
             />
           </Form.Item>
 

@@ -36,6 +36,68 @@ export function parseFrontmatter(
   return result;
 }
 
+/**
+ * Update frontmatter in markdown content with new key-value pairs.
+ * If frontmatter doesn't exist, creates it.
+ * Arrays are serialized as YAML arrays.
+ */
+export function updateFrontmatter(
+  content: string,
+  updates: Record<string, string | string[] | undefined>,
+): string {
+  const trimmed = content.trim();
+  let frontmatter: Record<string, string | string[]> = {};
+  let bodyContent = trimmed;
+
+  // Parse existing frontmatter
+  if (trimmed.startsWith("---")) {
+    const endIndex = trimmed.indexOf("---", 3);
+    if (endIndex !== -1) {
+      const frontmatterBlock = trimmed.slice(3, endIndex).trim();
+      bodyContent = trimmed.slice(endIndex + 3).trim();
+
+      // Parse existing frontmatter
+      for (const line of frontmatterBlock.split("\n")) {
+        const colonIndex = line.indexOf(":");
+        if (colonIndex > 0) {
+          const key = line.slice(0, colonIndex).trim();
+          const value = line.slice(colonIndex + 1).trim();
+          frontmatter[key] = value;
+        }
+      }
+    }
+  }
+
+  // Apply updates
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined || (Array.isArray(value) && value.length === 0)) {
+      delete frontmatter[key];
+    } else {
+      frontmatter[key] = value;
+    }
+  }
+
+  // Serialize frontmatter
+  const lines: string[] = [];
+  for (const [key, value] of Object.entries(frontmatter)) {
+    if (Array.isArray(value)) {
+      if (value.length === 0) continue;
+      lines.push(`${key}:`);
+      for (const item of value) {
+        lines.push(`  - ${item}`);
+      }
+    } else {
+      lines.push(`${key}: ${value}`);
+    }
+  }
+
+  if (lines.length === 0) {
+    return bodyContent;
+  }
+
+  return `---\n${lines.join("\n")}\n---\n\n${bodyContent}`;
+}
+
 const CHANNEL_OPTIONS = [
   { label: "all", value: "all" },
   { label: "console", value: "console" },
