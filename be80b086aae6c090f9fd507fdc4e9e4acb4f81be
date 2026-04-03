@@ -1,0 +1,24 @@
+src/copaw/agents/skills_manager.py
+  87afd2144743f032 1271-1285,1314
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "be80b086aae6c090f9fd507fdc4e9e4acb4f81be",
+  "prompts": {
+    "87afd2144743f032": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d5e4113-7beb-4855-b6cb-0caf68a45da5",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 16,
+      "total_deletions": 10,
+      "accepted_lines": 16,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/97e77bd68b03acfc7290742ba09bde93d483339107812fdf1ee3926b90d4a401"
+    }
+  }
+}
