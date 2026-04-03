@@ -1,0 +1,58 @@
+console/src/pages/Agent/SkillPool/hooks/useSkillPool.tsx
+  68f15d4c49743c9e 21,606,623,627-631,641-642,649-650
+console/src/locales/en.json
+  68f15d4c49743c9e 308-309
+console/src/locales/ru.json
+  68f15d4c49743c9e 257-258
+console/src/components/MarkdownCopy/index.module.less
+  68f15d4c49743c9e 15
+console/src/pages/Agent/Skills/components/index.ts
+  68f15d4c49743c9e 5
+console/src/locales/zh.json
+  68f15d4c49743c9e 272-273
+console/src/pages/Agent/Skills/components/SkillDrawer.tsx
+  68f15d4c49743c9e 39-100
+console/src/pages/Agent/SkillPool/components/SkillPoolDrawer.tsx
+  68f15d4c49743c9e 2,16-17,20,31-32,52-53,59,153-174
+console/src/pages/Agent/SkillPool/index.tsx
+  68f15d4c49743c9e 46,231-232,276-277,555,559-563,573-574,581-582,1292-1313
+console/src/api/modules/skill.ts
+  68f15d4c49743c9e 214-215,227-228
+console/src/locales/ja.json
+  68f15d4c49743c9e 252-253
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "9a85ecc088066621f2fc461e1116e046d96a9456",
+  "prompts": {
+    "68f15d4c49743c9e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6c8e3941-b5ab-4919-b95e-20ba3c2e52ec",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 197,
+      "total_deletions": 80,
+      "accepted_lines": 195,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/f6dc6c30f3968604806587d33b77c4e78e94fd1cd000c948b0c1454ec7cbb0fe"
+    },
+    "87afd2144743f032": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d5e4113-7beb-4855-b6cb-0caf68a45da5",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 112,
+      "total_deletions": 131,
+      "accepted_lines": 0,
+      "overriden_lines": 5,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/11083a08f62f4e7f5c1d425423f3f979a010cf3edcdb0eb1b9f2b551797e9246"
+    }
+  }
+}
