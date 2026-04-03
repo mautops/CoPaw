@@ -1,0 +1,28 @@
+console/src/pages/Agent/SkillPool/index.tsx
+  87afd2144743f032 1,115-116,119-120,122-125,129-130,133-134,136-137,140-141,144,146,157-159,952-954,975-978
+src/copaw/agents/skills_manager.py
+  87afd2144743f032 1297-1298,1304-1308
+console/src/pages/Agent/Skills/index.tsx
+  87afd2144743f032 87-88,91-92,94-97,101-102,105-106,108-109,112-113,702-704,725-728
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "3739f838feb4deaf9520424a3c9c028e5e79f2b2",
+  "prompts": {
+    "87afd2144743f032": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d5e4113-7beb-4855-b6cb-0caf68a45da5",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 121,
+      "total_deletions": 66,
+      "accepted_lines": 59,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/bba8682d0104dcad24519f7aa49e45b42e729f91b4e63e4979cd58326a1e09d1"
+    }
+  }
+}
