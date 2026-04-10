@@ -11,6 +11,12 @@ import {
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { useAppShell } from "@/app/(app)/app-shell";
 import { ContentTopbar } from "@/components/layout/content-topbar";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   WORKFLOW_CHAT_EXEC_STORAGE_KEY,
   type WorkflowChatExecPayload,
@@ -19,13 +25,20 @@ import {
   ChatHistorySidebar,
   SIDEBAR_DEFAULT_WIDTH,
 } from "./chat-history-sidebar";
-import { ChatModelSelector } from "./chat-model-selector";
+import { ChatModelSelector, type SelectedModel } from "./chat-model-selector";
+import { ChatAgentSelector } from "./chat-agent-selector";
 import { ChatInput } from "./chat-input";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSearchDialog } from "./chat-search-dialog";
 import { scopeUserFromSessionUser } from "@/lib/workflow-username";
 import { useChatSessions } from "./use-chat-sessions";
 import { useChatStream } from "./use-chat-stream";
+import { useMessageQueue } from "./use-message-queue";
+import { useSuggestions } from "./use-suggestions";
+import { DownloadIcon } from "lucide-react";
+import { llmModelsApi } from "@/lib/llm-models-api";
+import { useQuery } from "@tanstack/react-query";
+import { QK_MODELS_ACTIVE } from "@/app/(app)/settings/models/models-domain";
 
 function ChatPageInner() {
   const router = useRouter();
@@ -52,6 +65,38 @@ function ChatPageInner() {
     SIDEBAR_DEFAULT_WIDTH,
   );
   const [searchOpen, setSearchOpen] = useState(false);
+  const [agentId, setAgentId] = useState<string | null>(null);
+
+  const SELECTED_MODEL_KEY = "chat:selectedModel";
+
+  const [selectedModel, setSelectedModel] = useState<SelectedModel | null>(() => {
+    try {
+      const saved = localStorage.getItem(SELECTED_MODEL_KEY);
+      if (saved) return JSON.parse(saved) as SelectedModel;
+    } catch {}
+    return null;
+  });
+
+  const handleModelChange = useCallback((model: SelectedModel) => {
+    setSelectedModel(model);
+    try {
+      localStorage.setItem(SELECTED_MODEL_KEY, JSON.stringify(model));
+    } catch {}
+  }, []);
+
+  // Initialise selectedModel from the global active model on first load (only if nothing saved locally)
+  const activeQuery = useQuery({
+    queryKey: QK_MODELS_ACTIVE,
+    queryFn: () => llmModelsApi.getActive(),
+    staleTime: 60_000,
+  });
+  useEffect(() => {
+    if (selectedModel) return; // user already picked one (from localStorage or interaction)
+    const slot = activeQuery.data?.active_llm;
+    if (slot?.provider_id && slot?.model) {
+      setSelectedModel({ provider_id: slot.provider_id, model: slot.model });
+    }
+  }, [activeQuery.data, selectedModel]);
 
   const {
     sessions,
@@ -93,7 +138,10 @@ function ChatPageInner() {
     createChat,
     queryClient,
     chatHistory,
+    agentId: agentId ?? undefined,
+    selectedModel,
   });
+
 
   // Reconnect to running sessions on page load
   useEffect(() => {
@@ -158,26 +206,27 @@ function ChatPageInner() {
     }
     if (!payload.markdown?.trim()) return;
 
-    // Clear current session view and create a new one for workflow
+    const textWithInstruction = payload.markdown;
+
+    // forceNewChat always creates a new session regardless of currentChatId,
+    // so resetStreaming/setCurrentChatId are not needed before the call.
+    // Direct call avoids setTimeout capturing a stale handleSubmit closure.
     resetStreaming();
     setCurrentChatId(null);
-
-    // Use setTimeout to ensure state updates are processed before handleSubmit
-    setTimeout(() => {
-      void handleSubmit({
-        text: payload.markdown,
-        files: [],
-        forceNewChat: true,
-        chatName: payload.sessionTitle,
-        workflowExecContext:
-          payload.workflowFilename && payload.userId
-            ? {
-                filename: payload.workflowFilename,
-                userId: payload.userId,
-              }
-            : undefined,
-      });
-    }, 0);
+    void handleSubmit({
+      text: textWithInstruction,
+      files: [],
+      forceNewChat: true,
+      chatName: payload.sessionTitle,
+      meta: payload.meta,
+      workflowExecContext:
+        payload.workflowFilename && payload.userId
+          ? {
+              filename: payload.workflowFilename,
+              userId: payload.userId,
+            }
+          : undefined,
+    });
   }, [
     searchParams,
     router,
@@ -187,8 +236,8 @@ function ChatPageInner() {
     handleSubmit,
   ]);
 
-  const onNewChat = useCallback(async () => {
-    await handleNewChat();
+  const onNewChat = useCallback(() => {
+    void handleNewChat();
   }, [handleNewChat]);
 
   // Simply switch view - no need to stop other sessions' streaming
@@ -209,22 +258,145 @@ function ChatPageInner() {
   // Wrap delete to also clear session stream state
   const onDeleteSessionWithCleanup = useCallback(
     async (id: string) => {
-      // Stop streaming if this session is generating
       handleStop(id);
-      // Clear session state
-      clearSession(id);
-      // Delete from backend
-      await handleDeleteSession(id);
+      try {
+        await handleDeleteSession(id);
+        // Only clear local stream state after confirmed deletion
+        clearSession(id);
+      } catch (err) {
+        // Deletion failed — the session is still alive on the server.
+        // Re-add it to running sessions so a future reconnect is possible
+        // if it was generating when we called handleStop.
+        window.alert(
+          err instanceof Error ? `删除失败：${err.message}` : "删除失败，请重试",
+        );
+      }
     },
     [handleStop, clearSession, handleDeleteSession],
   );
 
+  // Sync selected model to backend before sending — returns a promise so callers
+  // can await it, ensuring setActive completes before streamChat is dispatched.
+  // Always use scope="agent" so the backend triggers an agent hot-reload and
+  // the new model takes effect immediately. When no specific agent is selected
+  // (agentId=null) we target "default", which is the backend's fallback agent.
+  const syncModel = useCallback((): Promise<void> => {
+    if (!selectedModel) return Promise.resolve();
+    return llmModelsApi
+      .setActive({
+        provider_id: selectedModel.provider_id,
+        model: selectedModel.model,
+        scope: "agent",
+        agent_id: agentId ?? "default",
+      })
+      .then(() => {})
+      .catch(() => {});
+  }, [selectedModel, agentId]);
+
+  // ── Per-Session Message Queue ──────────────────────────────────────────────
+  // Callback-driven: consumption is triggered at exactly three points:
+  //   1. enqueue() — if session idle, send immediately
+  //   2. onSend().then(dequeueFor) — after stream completes
+  //   3. restore() — once after userId resolves, drains idle sessions
+  // Zero useEffect, zero reactive state triggers.
+  const onSend = useCallback(
+    async (args: Parameters<typeof handleSubmit>[0]) => {
+      await syncModel();
+      return handleSubmit(args) ?? Promise.resolve();
+    },
+    [syncModel, handleSubmit],
+  );
+
+  const {
+    enqueue,
+    remove: handleRemoveQueued,
+    sendNow: handleSendQueued,
+    uiQueue: messageQueue,
+    restore,
+  } = useMessageQueue({ userId, sessions, isGeneratingSession, onSend });
+
+  // Only show queue items for the currently viewed session
+  const currentSessionQueue = currentChatId
+    ? messageQueue.filter((m) => m.chatId === currentChatId)
+    : [];
+
+  const { welcomeSuggestions, followUpSuggestions } = useSuggestions(
+    messages,
+    status,
+    userId,
+    currentSessionQueue.length > 0,
+    currentChatId,
+  );
+
+  const queueRestoredRef = useRef(false);
+  useEffect(() => {
+    if (queueRestoredRef.current || userId === "default") return;
+    queueRestoredRef.current = true;
+    restore();
+  }, [userId, restore]);
+
+  // Submit or enqueue depending on whether the *target* session is generating.
+  // All non-workflow messages go through enqueue so the dequeue chain is always
+  // established — enqueue sends immediately when idle, queues when generating.
+  const applyModelAndSubmit = useCallback(
+    async (args: Parameters<typeof handleSubmit>[0]) => {
+      // forceNewChat bypasses the queue (workflow execution always creates a new session)
+      if (args.forceNewChat) {
+        await syncModel();
+        return handleSubmit(args);
+      }
+      const targetId = args.targetChatId ?? currentChatId;
+      if (!targetId) {
+        // No session yet — create one via handleSubmit directly (enqueue needs a chatId)
+        await syncModel();
+        return handleSubmit(args);
+      }
+      // Route through enqueue for all other messages.
+      // enqueue() sends immediately if the target session is idle, or queues
+      // it otherwise — in both cases the dequeue chain is properly established.
+      enqueue(targetId, { ...args, targetChatId: targetId });
+    },
+    [currentChatId, handleSubmit, syncModel, enqueue],
+  );
+
   const handleSuggestion = useCallback(
     (text: string) => {
-      handleSubmit({ text, files: [] });
+      void applyModelAndSubmit({ text, files: [] });
     },
-    [handleSubmit],
+    [applyModelAndSubmit],
   );
+
+  // Regenerate: resend last user message to the same chat
+  const handleRegenerate = useCallback(() => {
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUser || !currentChatId || isGenerating) return;
+    void applyModelAndSubmit({
+      text: lastUser.content,
+      files: [],
+      targetChatId: currentChatId,
+    });
+  }, [messages, currentChatId, isGenerating, applyModelAndSubmit]);
+
+  // Download current conversation as Markdown
+  const handleDownload = useCallback(() => {
+    if (messages.length === 0) return;
+    const lines = messages
+      .filter((m) => m.type === "text")
+      .map((m) => {
+        const role = m.role === "user" ? "**用户**" : "**助手**";
+        return `${role}\n\n${m.content}`;
+      });
+    const md = lines.join("\n\n---\n\n");
+    const blob = new Blob([md], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-${currentChatId ?? "export"}.md`;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, [messages, currentChatId]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -255,7 +427,30 @@ function ChatPageInner() {
             onToggleRightSidebar={() => setShowRightSidebar((p) => !p)}
             onSearchOpen={() => setSearchOpen(true)}
             searchPlaceholder="搜索对话..."
-            endSlot={<ChatModelSelector />}
+            startSlot={
+              <ChatAgentSelector agentId={agentId} onAgentChange={setAgentId} />
+            }
+            endSlot={
+              <div className="flex items-center gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      onClick={handleDownload}
+                      disabled={messages.length === 0}
+                    >
+                      <DownloadIcon className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>导出对话</TooltipContent>
+                </Tooltip>
+                <ChatModelSelector
+                  value={selectedModel}
+                  onChange={handleModelChange}
+                />
+              </div>
+            }
           />
 
           <Conversation className="min-h-0 flex-1">
@@ -268,24 +463,11 @@ function ChatPageInner() {
                   title="开始对话"
                   description="发送消息，与 AI 智能体开始聊天"
                 >
-                  <div className="mt-2">
-                    <Suggestions>
-                      <Suggestion
-                        suggestion="你能做什么？"
-                        onClick={handleSuggestion}
-                      />
-                      <Suggestion
-                        suggestion="帮我分析系统运行状态"
-                        onClick={handleSuggestion}
-                      />
-                      <Suggestion
-                        suggestion="查询最新的任务日志"
-                        onClick={handleSuggestion}
-                      />
-                      <Suggestion
-                        suggestion="有哪些可用的工具？"
-                        onClick={handleSuggestion}
-                      />
+                  <div className="mt-2 w-full max-w-5xl px-6">
+                    <Suggestions fill>
+                      {welcomeSuggestions.map((s) => (
+                        <Suggestion key={s} suggestion={s} onClick={handleSuggestion} className="w-full justify-start text-left" />
+                      ))}
                     </Suggestions>
                   </div>
                 </ConversationEmptyState>
@@ -301,6 +483,7 @@ function ChatPageInner() {
                   userImage={user?.image ?? undefined}
                   userName={user?.name ?? undefined}
                   userInitials={userInitials}
+                  onRegenerate={handleRegenerate}
                 />
               )}
             </ConversationContent>
@@ -309,10 +492,13 @@ function ChatPageInner() {
 
           <ChatInput
             status={status}
-            onSubmit={handleSubmit}
+            onSubmit={(msg) => void applyModelAndSubmit(msg)}
             onStop={onStopCurrent}
-            showFollowUpSuggestions={messages.length > 0}
+            followUpSuggestions={followUpSuggestions}
             onSuggestionClick={handleSuggestion}
+            messageQueue={currentSessionQueue}
+            onRemoveQueued={handleRemoveQueued}
+            onSendQueued={handleSendQueued}
           />
         </div>
 

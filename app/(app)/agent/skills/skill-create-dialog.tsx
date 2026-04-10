@@ -50,10 +50,11 @@ export function SkillCreateDialog({
 
         <div className="grid gap-4 py-2">
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="skill-dir-name" className="text-sm font-medium text-muted-foreground">
               目录名
             </label>
             <Input
+              id="skill-dir-name"
               placeholder="my_skill"
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
@@ -63,10 +64,11 @@ export function SkillCreateDialog({
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="skill-content" className="text-sm font-medium text-muted-foreground">
               SKILL.md 正文
             </label>
             <Textarea
+              id="skill-content"
               value={content}
               onChange={(e) => onContentChange(e.target.value)}
               spellCheck={false}

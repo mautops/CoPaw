@@ -5,22 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
-  ActivityIcon,
-  BarChart3Icon,
-  BotIcon,
-  BoxesIcon,
-  CalendarClockIcon,
   CheckIcon,
   CopyIcon,
   CpuIcon,
-  FolderTreeIcon,
   KeyIcon,
   LogOutIcon,
-  MessageSquareIcon,
-  MicIcon,
-  RadioIcon,
-  ShieldIcon,
-  SlidersHorizontalIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,42 +38,9 @@ const MENU_GROUPS: {
   items: { label: string; href: string; icon: LucideIcon }[];
 }[] = [
   {
-    label: "智能体与运行",
-    items: [
-      { label: "工作区", href: "/agent/workspace", icon: FolderTreeIcon },
-      {
-        label: "智能体配置",
-        href: "/agent/config",
-        icon: SlidersHorizontalIcon,
-      },
-    ],
-  },
-  {
-    label: "控制面",
-    items: [
-      { label: "通道", href: "/control/channels", icon: RadioIcon },
-      { label: "会话", href: "/control/sessions", icon: MessageSquareIcon },
-      {
-        label: "定时任务",
-        href: "/control/cron-jobs",
-        icon: CalendarClockIcon,
-      },
-      { label: "心跳", href: "/control/heartbeat", icon: ActivityIcon },
-    ],
-  },
-  {
     label: "平台设置",
     items: [
-      { label: "智能体注册", href: "/settings/agents", icon: BotIcon },
       { label: "模型", href: "/settings/models", icon: CpuIcon },
-      { label: "环境变量", href: "/settings/environments", icon: BoxesIcon },
-      { label: "安全", href: "/settings/security", icon: ShieldIcon },
-      {
-        label: "Token 用量",
-        href: "/settings/token-usage",
-        icon: BarChart3Icon,
-      },
-      { label: "语音转写", href: "/settings/voice", icon: MicIcon },
     ],
   },
 ];

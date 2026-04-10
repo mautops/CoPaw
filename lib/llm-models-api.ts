@@ -87,7 +87,12 @@ export const llmModelsApi = {
 
   getActive: () => apiRequest<ActiveModelsInfo>("/models/active"),
 
-  setActive: (body: { provider_id: string; model: string }) =>
+  setActive: (body: {
+    provider_id: string;
+    model: string;
+    scope?: "global" | "agent";
+    agent_id?: string;
+  }) =>
     apiRequest<ActiveModelsInfo>("/models/active", {
       method: "PUT",
       body: JSON.stringify(body),

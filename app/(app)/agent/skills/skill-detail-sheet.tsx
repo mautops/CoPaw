@@ -80,15 +80,6 @@ export function SkillDetailSheet({
                   {sourceLabel(skill.source)}
                 </span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="shrink-0 text-muted-foreground/70">路径</span>
-                <div
-                  className="flex-1 break-all rounded-md bg-muted/40 px-2.5 py-1.5 font-mono text-xs text-muted-foreground"
-                  title={skill.path}
-                >
-                  {skill.path}
-                </div>
-              </div>
             </div>
 
             {/* Description */}
@@ -106,7 +97,6 @@ export function SkillDetailSheet({
               <Textarea
                 value={editContent}
                 onChange={(e) => onEditContentChange(e.target.value)}
-                readOnly={!customized}
                 disabled={!customized}
                 spellCheck={false}
                 className="min-h-[min(60vh,300px)] resize-none border-0 bg-transparent font-mono text-sm focus-visible:ring-0"

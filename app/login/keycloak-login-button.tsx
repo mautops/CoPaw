@@ -10,7 +10,7 @@ export function KeycloakLoginButton() {
     setLoading(true);
     await authClient.signIn.oauth2({
       providerId: "keycloak",
-      callbackURL: "/dashboard",
+      callbackURL: "/overview",
     });
   }
 

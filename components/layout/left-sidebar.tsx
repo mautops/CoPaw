@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { UserProfileMenu } from "./user-profile-menu";
 import { SidebarNav } from "./sidebar-nav";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 interface LeftSidebarUser {
   name: string;
@@ -13,10 +14,9 @@ interface LeftSidebarUser {
 
 interface LeftSidebarProps {
   user?: LeftSidebarUser | null;
-  appVersion?: string;
 }
 
-export function LeftSidebar({ user, appVersion }: LeftSidebarProps) {
+export function LeftSidebar({ user }: LeftSidebarProps) {
   return (
     <aside className="flex h-full w-56 shrink-0 flex-col border-r border-border/50 bg-card">
       <Link
@@ -38,30 +38,27 @@ export function LeftSidebar({ user, appVersion }: LeftSidebarProps) {
 
       <SidebarNav />
 
-      <div className="border-t border-border/50 px-2 py-3">
-        {appVersion ? (
-          <p
-            className="mb-2 px-2 text-[10px] tabular-nums text-muted-foreground/60"
-            aria-label={`应用版本 ${appVersion}`}
-          >
-            v{appVersion}
-          </p>
-        ) : null}
-        {user ? (
-          <UserProfileMenu user={user} />
-        ) : (
-          <div
-            className="flex items-center gap-3 px-2 py-2"
-            aria-busy="true"
-            aria-label="加载用户信息"
-          >
-            <div className="size-6 rounded-full bg-muted animate-pulse" />
-            <div className="min-w-0 flex-1 space-y-1.5">
-              <div className="h-3 w-24 rounded bg-muted animate-pulse" />
-              <div className="h-2.5 w-32 rounded bg-muted/60 animate-pulse" />
-            </div>
+      <div className="border-t border-border/50 px-2 py-2">
+        <div className="flex items-stretch gap-0.5">
+          <div className="flex-1 min-w-0">
+            {user ? (
+              <UserProfileMenu user={user} />
+            ) : (
+              <div
+                className="flex items-center gap-3 px-2 py-2"
+                aria-busy="true"
+                aria-label="加载用户信息"
+              >
+                <div className="size-6 rounded-full bg-muted animate-pulse" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="h-3 w-24 rounded bg-muted animate-pulse" />
+                  <div className="h-2.5 w-32 rounded bg-muted/60 animate-pulse" />
+                </div>
+              </div>
+            )}
           </div>
-        )}
+          <ThemeSwitcher className="self-stretch w-12" />
+        </div>
       </div>
     </aside>
   );

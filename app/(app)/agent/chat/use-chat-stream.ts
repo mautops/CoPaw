@@ -2,7 +2,6 @@ import type { ChatSpec, ContentPart, ToolCallInfo } from "@/lib/chat-api";
 import { chatApi } from "@/lib/chat-api";
 import { llmModelsApi } from "@/lib/llm-models-api";
 import { workflowApi } from "@/lib/workflow-api";
-import { qkWorkflowRuns } from "@/app/(app)/agent/workflows/workflow-domain";
 import type { ChatStatus, FileUIPart } from "ai";
 import type { QueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
@@ -19,6 +18,7 @@ import {
   dataUrlToFile,
   parseHistory,
   truncateTitle,
+  extractTitle,
 } from "./types";
 
 interface UseChatStreamOptions {
@@ -33,6 +33,8 @@ interface UseChatStreamOptions {
   };
   queryClient: QueryClient;
   chatHistory: { messages: Array<Record<string, unknown>> } | undefined;
+  agentId?: string;
+  selectedModel?: { provider_id: string; model: string } | null;
 }
 
 export function useChatStream({
@@ -43,7 +45,12 @@ export function useChatStream({
   createChat,
   queryClient,
   chatHistory,
+  agentId,
+  selectedModel,
 }: UseChatStreamOptions) {
+  const currentChatIdRef = useRef<string | null>(null);
+  currentChatIdRef.current = currentChatId;
+
   const {
     getSessionState,
     setSessionMessages,
@@ -60,10 +67,10 @@ export function useChatStream({
     markSessionRunning,
     markSessionStopped,
     getRunningSessionsInfo,
-  } = useSessionStreams();
-
-  const currentChatIdRef = useRef<string | null>(null);
-  currentChatIdRef.current = currentChatId;
+  } = useSessionStreams(currentChatIdRef);
+  // Prevents duplicate chat creation if handleSubmit is called concurrently
+  // (e.g. double-click, or workflow setTimeout racing with a re-render).
+  const isCreatingChatRef = useRef(false);
 
   // Load messages from history when currentChatId changes
   useEffect(() => {
@@ -98,6 +105,7 @@ export function useChatStream({
       chatName,
       workflowExecContext,
       targetChatId,
+      meta,
     }: {
       text: string;
       files: FileUIPart[];
@@ -109,6 +117,8 @@ export function useChatStream({
       workflowExecContext?: { filename: string; userId: string };
       /** Target chat ID to send message to (defaults to current chat) */
       targetChatId?: string;
+      /** Optional metadata to attach to the chat */
+      meta?: Record<string, unknown>;
     }) => {
       if (!text.trim()) return;
 
@@ -118,13 +128,15 @@ export function useChatStream({
       // Check if this specific chat is already generating
       if (chatId && isGenerating(chatId)) return;
 
-      let hasActiveLlm = false;
-      try {
-        const active = await llmModelsApi.getActive();
-        const slot = active?.active_llm;
-        hasActiveLlm = Boolean(slot?.provider_id && slot?.model);
-      } catch {
-        hasActiveLlm = false;
+      let hasActiveLlm = Boolean(selectedModel?.provider_id && selectedModel?.model);
+      if (!hasActiveLlm) {
+        try {
+          const active = await llmModelsApi.getActive();
+          const slot = active?.active_llm;
+          hasActiveLlm = Boolean(slot?.provider_id && slot?.model);
+        } catch {
+          hasActiveLlm = false;
+        }
       }
       if (!hasActiveLlm) {
         window.alert(
@@ -141,24 +153,44 @@ export function useChatStream({
       }
 
       // Create chat if needed
+      let newChatSessionId: string | undefined;
       if (!chatId) {
-        const titleForChat = chatName?.trim() || truncateTitle(text);
-        const chatSpec = await createChat.mutateAsync({
-          session_id: nanoid(),
-          name: titleForChat,
-          user_id: userId,
-          channel: DEFAULT_CHANNEL,
-        });
-        chatId = chatSpec.id;
-        setCurrentChatId(chatId);
+        if (isCreatingChatRef.current) return;
+        isCreatingChatRef.current = true;
+        try {
+          const titleForChat = chatName?.trim() || extractTitle(text);
+          const chatSpec = await createChat.mutateAsync({
+            session_id: nanoid(),
+            name: titleForChat,
+            user_id: userId,
+            channel: DEFAULT_CHANNEL,
+            meta,
+          });
+          chatId = chatSpec.id;
+          newChatSessionId = chatSpec.session_id;
+          // Immediately sync the ref so concurrent handleSubmit calls see the new chatId
+          // before the next React render cycle.
+          currentChatIdRef.current = chatId;
+          setCurrentChatId(chatId);
+        } catch {
+          // Chat creation failed — abort silently, do not proceed.
+          return;
+        } finally {
+          isCreatingChatRef.current = false;
+        }
       }
+      if (!chatId) return;
 
       // Now we have a valid chatId
       const resolvedChatId = chatId;
 
       // Get current state for this session
       const currentState = getSessionState(resolvedChatId);
-      const isFirstMessage = currentState.messages.length === 0;
+      const cachedHistory = queryClient.getQueryData<{ messages: unknown[] }>(
+        ["chat", resolvedChatId],
+      );
+      const isFirstMessage =
+        currentState.messages.length === 0 && !cachedHistory?.messages?.length;
 
       // Add user message
       const userMsg: LocalMessage = {
@@ -180,11 +212,16 @@ export function useChatStream({
       let finalThinking = "";
       let finalTools: ToolCallInfo[] = [];
 
-      const titleForChat = chatName?.trim() || truncateTitle(text);
+      const titleForChat = chatName?.trim() || extractTitle(text);
 
       try {
-        const currentSpec = sessions.find((s) => s.id === resolvedChatId);
-        const sessionId = currentSpec?.session_id ?? resolvedChatId;
+        const cachedSessions =
+          queryClient.getQueryData<ChatSpec[]>(chatsListQueryKey(userId)) ?? [];
+        const currentSpec =
+          cachedSessions.find((s) => s.id === resolvedChatId) ??
+          sessions.find((s) => s.id === resolvedChatId);
+        // Prefer the session_id from the just-created chat spec (cache may not have it yet)
+        const sessionId = newChatSessionId ?? currentSpec?.session_id ?? resolvedChatId;
         const resolvedUserId = currentSpec?.user_id ?? userId;
         const channel = currentSpec?.channel ?? DEFAULT_CHANNEL;
 
@@ -194,16 +231,48 @@ export function useChatStream({
         if (workflowExecContext && forceNewChat) {
           try {
             await workflowApi.appendRun(workflowExecContext.filename, {
+              run_id: sessionId,
               user_id: workflowExecContext.userId,
               session_id: sessionId,
+              chat_id: resolvedChatId,
               trigger: "ui_execute",
             });
             void queryClient.invalidateQueries({
-              queryKey: qkWorkflowRuns(workflowExecContext.filename),
+              queryKey: ["workflow", "runs", workflowExecContext.filename],
             });
           } catch {
             /* 不阻断发送 */
           }
+
+          // 追加 step result 指令：session_id 即 run_id，Agent 用 shell 写入步骤结果
+          const stepsFile = `$HOME/.copaw/workflow-runs/${workflowExecContext.filename}/${sessionId}.steps.json`;
+          const stepInstruction = `
+
+---
+**执行要求（系统指令，请严格遵守）：**
+每完成一个步骤后，必须立即使用 execute_shell_command 工具，将该步骤的执行结果写入文件。
+
+步骤结果文件路径：${stepsFile}
+
+写入命令（每步执行后运行，替换尖括号内容）：
+\`\`\`bash
+mkdir -p "$(dirname "${stepsFile}")"
+STEPS_FILE="${stepsFile}"
+NOW=$(python3 -c "from datetime import datetime,timezone; print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))")
+STEP_JSON='{"step_id":"<步骤ID>","step_title":"<步骤名称>","status":"success","started_at":"'$NOW'","finished_at":"'$NOW'","output":"<输出摘要>","error":null}'
+if [ -f "$STEPS_FILE" ]; then
+  python3 -c "import json,sys; d=json.load(open('$STEPS_FILE')); d.append(json.loads(sys.argv[1])); open('$STEPS_FILE','w').write(json.dumps(d,indent=2,ensure_ascii=False))" "$STEP_JSON"
+else
+  python3 -c "import json,sys; open('$STEPS_FILE','w').write(json.dumps([json.loads(sys.argv[1])],indent=2,ensure_ascii=False))" "$STEP_JSON"
+fi
+\`\`\`
+
+- status 只能是 success / failed / skipped 之一
+- error 字段：成功时为 null，失败时填写错误信息
+- started_at / finished_at 由脚本中的 NOW 变量自动记录，禁止手动填写时间
+- 必须在每步完成后立即执行，不可省略
+`;
+          textForApi = textForApi + stepInstruction;
         }
 
         const atWorkflows = uniqueWorkflowFilenames(text);
@@ -219,7 +288,7 @@ export function useChatStream({
                 trigger: "chat_at",
               });
               void queryClient.invalidateQueries({
-                queryKey: qkWorkflowRuns(filename),
+                queryKey: ["workflow", "runs", filename],
               });
             } catch {
               /* 无效路径或未授权时不记录 */
@@ -270,6 +339,9 @@ export function useChatStream({
           session_id: sessionId,
           user_id: resolvedUserId,
           channel,
+          agentId,
+          provider_id: selectedModel?.provider_id,
+          model: selectedModel?.model,
           signal: abort.signal,
           onChunk: (content) => setStreamingContent(resolvedChatId, content),
           onThinkingChunk: (thinking) =>
@@ -283,76 +355,120 @@ export function useChatStream({
         finalThinking = result.thinking;
         finalTools = result.tools;
       } catch (err) {
-        if (err instanceof Error && err.name !== "AbortError") {
-          setStatus(resolvedChatId, "error");
+        if (err instanceof Error && err.name === "AbortError") {
+          // User stopped the stream — discard partial content, clean up quietly.
+          resetStreamingState(resolvedChatId);
+          setStatus(resolvedChatId, "ready");
           markSessionStopped(resolvedChatId);
           return;
         }
-      } finally {
-        // Append final messages
-        const newMessages: LocalMessage[] = [];
-        if (finalThinking) {
-          newMessages.push({
+        // Append an error message so the user sees what went wrong
+        setSessionMessages(resolvedChatId, (prev) => [
+          ...prev,
+          {
             id: nanoid(),
-            role: "assistant",
-            content: finalThinking,
+            role: "assistant" as const,
+            content: `⚠️ 请求失败：${(err as Error).message}`,
             createdAt: Date.now(),
-            type: "thinking",
-          });
-        }
-        for (const tool of finalTools) {
-          newMessages.push({
-            id: nanoid(),
-            role: "assistant",
-            content: "",
-            createdAt: Date.now(),
-            type: "tool",
-            tool,
-          });
-        }
-        if (finalContent) {
-          newMessages.push({
-            id: nanoid(),
-            role: "assistant",
-            content: finalContent,
-            createdAt: Date.now(),
-            type: "text",
-          });
-        }
-        if (newMessages.length > 0) {
-          setSessionMessages(resolvedChatId, (prev) => [...prev, ...newMessages]);
-        }
+            type: "text" as const,
+          },
+        ]);
         resetStreamingState(resolvedChatId);
+        setStatus(resolvedChatId, "error");
         markSessionStopped(resolvedChatId);
+        return;
+      }
 
-        // Update session metadata
-        const updatedAt = new Date().toISOString();
-        if (isFirstMessage) {
-          const currentSpec = sessions.find((s) => s.id === resolvedChatId);
-          if (currentSpec) {
-            const newName = titleForChat;
-            chatApi
-              .updateChat(resolvedChatId, { ...currentSpec, name: newName })
-              .then((updated) => {
-                queryClient.setQueryData<ChatSpec[]>(
-                  chatsListQueryKey(userId),
-                  (prev = []) =>
-                    prev.map((s) => (s.id === resolvedChatId ? updated : s)),
-                );
-              })
-              .catch(() => {});
-          }
-        } else {
+      // Commit final messages (only reached on successful completion)
+      const newMessages: LocalMessage[] = [];
+      if (finalThinking) {
+        newMessages.push({
+          id: nanoid(),
+          role: "assistant",
+          content: finalThinking,
+          createdAt: Date.now(),
+          type: "thinking",
+        });
+      }
+      for (const tool of finalTools) {
+        newMessages.push({
+          id: nanoid(),
+          role: "assistant",
+          content: "",
+          createdAt: Date.now(),
+          type: "tool",
+          tool,
+        });
+      }
+      if (finalContent) {
+        newMessages.push({
+          id: nanoid(),
+          role: "assistant",
+          content: finalContent,
+          createdAt: Date.now(),
+          type: "text",
+        });
+      }
+      if (newMessages.length > 0) {
+        setSessionMessages(resolvedChatId, (prev) => [...prev, ...newMessages]);
+      }
+      resetStreamingState(resolvedChatId);
+      setStatus(resolvedChatId, "ready");
+      markSessionStopped(resolvedChatId);
+
+      // Update session metadata
+      const updatedAt = new Date().toISOString();
+      if (isFirstMessage && !newChatSessionId) {
+        // Pre-created session (e.g. from "New Chat") — rename it to the first message.
+        // Read the spec from the query cache (not the stale `sessions` closure) so
+        // newly created sessions are always found.
+        const cachedSessions =
+          queryClient.getQueryData<ChatSpec[]>(chatsListQueryKey(userId)) ?? [];
+        const currentSpec =
+          cachedSessions.find((s) => s.id === resolvedChatId) ??
+          sessions.find((s) => s.id === resolvedChatId);
+        if (currentSpec) {
+          // Optimistically update the name in cache immediately (before API round-trip)
+          // so the sidebar reflects the new name without waiting for the server.
           queryClient.setQueryData<ChatSpec[]>(
             chatsListQueryKey(userId),
             (prev = []) =>
               prev.map((s) =>
                 s.id === resolvedChatId
-                  ? { ...s, updated_at: updatedAt, status: "idle" }
+                  ? { ...s, name: titleForChat, updated_at: updatedAt }
                   : s,
               ),
           );
+          chatApi
+            .updateChat(resolvedChatId, { name: titleForChat })
+            .then((updated) => {
+              queryClient.setQueryData<ChatSpec[]>(
+                chatsListQueryKey(userId),
+                (prev = []) =>
+                  prev.map((s) => (s.id === resolvedChatId ? updated : s)),
+              );
+            })
+            .catch(() => {
+              // Revert the optimistic update on failure
+              queryClient.setQueryData<ChatSpec[]>(
+                chatsListQueryKey(userId),
+                (prev = []) =>
+                  prev.map((s) =>
+                    s.id === resolvedChatId ? { ...s, name: currentSpec.name } : s,
+                  ),
+              );
+            });
         }
+      } else {
+        queryClient.setQueryData<ChatSpec[]>(
+          chatsListQueryKey(userId),
+          (prev = []) =>
+            prev.map((s) =>
+              s.id === resolvedChatId
+                ? { ...s, updated_at: updatedAt, status: "idle" }
+                : s,
+            ),
+        );
       }
     },
     [
@@ -374,12 +490,17 @@ export function useChatStream({
       setCurrentChatId,
       markSessionRunning,
       markSessionStopped,
+      agentId,
+      selectedModel,
     ],
   );
 
   /** Reconnect to a running session's stream */
   const handleReconnect = useCallback(
     async (chatId: string) => {
+      // Skip if already generating (prevents duplicate concurrent connections)
+      if (isGenerating(chatId)) return false;
+
       const currentSpec = sessions.find((s) => s.id === chatId);
       if (!currentSpec) return false;
 
@@ -387,7 +508,8 @@ export function useChatStream({
       const resolvedUserId = currentSpec.user_id ?? userId;
       const channel = currentSpec.channel ?? DEFAULT_CHANNEL;
 
-      // Setup abort controller
+      // Setup abort controller — abort any existing connection first
+      getSessionState(chatId).abortController?.abort();
       const abort = new AbortController();
       setAbortController(chatId, abort);
       setStatus(chatId, "streaming");
@@ -412,6 +534,7 @@ export function useChatStream({
         if (!result.reconnected) {
           // No running session, just reset
           resetStreamingState(chatId);
+          setStatus(chatId, "ready");
           markSessionStopped(chatId);
           return false;
         }
@@ -451,19 +574,25 @@ export function useChatStream({
         }
 
         resetStreamingState(chatId);
+        setStatus(chatId, "ready");
         markSessionStopped(chatId);
         return true;
       } catch (err) {
+        resetStreamingState(chatId);
         if (err instanceof Error && err.name !== "AbortError") {
           setStatus(chatId, "error");
-          markSessionStopped(chatId);
+        } else {
+          setStatus(chatId, "ready");
         }
+        markSessionStopped(chatId);
         return false;
       }
     },
     [
       sessions,
       userId,
+      isGenerating,
+      getSessionState,
       setStreamingContent,
       setStreamingThinking,
       setIsThinkingStreaming,
@@ -505,7 +634,11 @@ export function useChatStream({
     handleSubmit,
     handleStop,
     handleReconnect,
-    resetStreaming: () => currentChatId && resetStreamingState(currentChatId),
+    resetStreaming: () => {
+      if (!currentChatId) return;
+      resetStreamingState(currentChatId);
+      setStatus(currentChatId, "ready");
+    },
     // Expose for advanced use
     getSessionState,
     setSessionMessages,

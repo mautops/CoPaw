@@ -9,6 +9,68 @@ export interface SkillSpec {
   references: Record<string, unknown>;
   scripts: Record<string, unknown>;
   enabled: boolean;
+  emoji?: string;
+  tags?: string[];
+  categories?: string[];
+  channels?: string[];
+  config?: Record<string, unknown>;
+  version_text?: string;
+  last_updated?: string;
+  // From skill pool manifest (builtin skills)
+  commit_text?: string;
+  protected?: boolean;
+  updated_at?: string;
+  requirements?: {
+    require_bins?: string[];
+    require_envs?: string[];
+  };
+}
+
+/**
+ * Parse YAML front matter from skill content.
+ * Extracts tags and categories which the backend doesn't promote to top-level fields.
+ */
+function parseFrontMatter(content: string): { tags: string[]; categories: string[] } {
+  const result = { tags: [] as string[], categories: [] as string[] };
+  if (!content.startsWith("---")) return result;
+  const end = content.indexOf("---", 3);
+  if (end === -1) return result;
+  const fm = content.slice(3, end);
+
+  for (const key of ["tags", "categories"] as const) {
+    // match "key:\n  - value" block
+    const blockRe = new RegExp(`^${key}:\\s*\\n((?:[ \\t]+-[ \\t]+.+\\n?)*)`, "m");
+    const blockMatch = fm.match(blockRe);
+    if (blockMatch) {
+      result[key] = blockMatch[1]
+        .split("\n")
+        .map((l) => l.replace(/^\s*-\s*/, "").trim())
+        .filter(Boolean);
+      continue;
+    }
+    // match inline "key: [a, b]"
+    const inlineRe = new RegExp(`^${key}:\\s*\\[(.+?)\\]`, "m");
+    const inlineMatch = fm.match(inlineRe);
+    if (inlineMatch) {
+      result[key] = inlineMatch[1]
+        .split(",")
+        .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+        .filter(Boolean);
+    }
+  }
+  return result;
+}
+
+/** Merge front matter tags/categories into each skill, overriding empty API fields */
+function enrichSkills(skills: SkillSpec[]): SkillSpec[] {
+  return skills.map((s) => {
+    const fm = parseFrontMatter(s.content ?? "");
+    return {
+      ...s,
+      tags: s.tags?.length ? s.tags : fm.tags,
+      categories: fm.categories,
+    };
+  });
 }
 
 /** Extended error parser for skills API with security scan support */
@@ -42,7 +104,7 @@ async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const skillsApi = {
-  list: () => apiRequest<SkillSpec[]>("/skills"),
+  list: () => apiRequest<SkillSpec[]>("/skills").then(enrichSkills),
 
   create: (body: {
     name: string;

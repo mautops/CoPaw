@@ -30,19 +30,28 @@ export const WORKFLOW_SUGGESTED_TAGS = [
   "巡检",
 ] as const;
 
-/** 单个步骤 */
+/** 单个步骤（支持嵌套子步骤） */
 export interface WorkflowStep {
   id: string;
   title: string;
+  name?: string;
   description: string;
-  language: string;
-  code: string;
+  type?: string;
+  skill?: string;
+  language?: string;
+  code?: string;
+  instructions?: string;
+  checklist?: string[];
+  threshold?: Record<string, unknown>;
+  /** 子步骤（层级关系，最多两级） */
+  steps?: WorkflowStep[];
 }
 
 /** 工作流完整数据 */
 export interface WorkflowData {
   name: string;
   description: string;
+  icon?: string;
   catalog: string;
   status: string;
   version: string;
@@ -54,9 +63,10 @@ export interface WorkflowData {
 export const DEFAULT_WORKFLOW_DATA: WorkflowData = {
   name: "",
   description: "",
+  icon: "",
   catalog: "",
   status: "draft",
-  version: "1.0",
+  version: "v0.0.1",
   tags: [],
   steps: [],
 };

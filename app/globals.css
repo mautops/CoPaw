@@ -52,6 +52,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Base fallback — theme class selectors below will override these */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -87,7 +88,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+html.dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -120,6 +121,12 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+/* Theme overrides — must come after :root and html.dark */
+@import "../styles/themes/default.css";
+@import "../styles/themes/ocean.css";
+@import "../styles/themes/forest.css";
+@import "../styles/themes/rose.css";
 
 @layer base {
   * {

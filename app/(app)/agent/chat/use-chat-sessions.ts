@@ -1,5 +1,5 @@
-import { type ChatSpec, chatApi } from "@/lib/chat-api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { type ChatSpec, SUGGEST_SESSION_PREFIX, chatApi } from "@/lib/chat-api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { chatsListQueryKey } from "./chat-query-keys";
@@ -15,15 +15,34 @@ export function useChatSessions({
 }) {
   const queryClient = useQueryClient();
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const cleanedRef = useRef(false);
+  // Guards the one-time auto-select on initial load so that manually setting
+  // currentChatId back to null (e.g. "New Chat") is not overridden.
+  const autoSelectedRef = useRef(false);
 
   // ── Queries ──────────────────────────────────────────────────────────────
 
   const listKey = chatsListQueryKey(userId);
 
-  const { data: sessions = [], isPending: sessionsPending } = useQuery({
+  const { data: sessions = [], isPending: sessionsPending, isFetching: sessionsFetching } = useQuery({
     queryKey: listKey,
     queryFn: () => chatApi.listChats(),
   });
+
+  // After the first successful network fetch, silently delete any leftover
+  // suggestions sessions. Wait for isFetching to settle (not just isPending) so
+  // we also catch the case where React Query serves stale cache immediately and
+  // then revalidates — we want to clean up against the fresh data.
+  useEffect(() => {
+    if (cleanedRef.current || sessionsFetching) return;
+    cleanedRef.current = true;
+    const dirty = sessions.filter((s) =>
+      s.session_id.startsWith(SUGGEST_SESSION_PREFIX),
+    );
+    for (const s of dirty) {
+      chatApi.deleteChat(s.id).catch(() => {});
+    }
+  }, [sessions, sessionsFetching]);
 
   const { data: chatHistory } = useQuery({
     queryKey: ["chat", currentChatId],
@@ -32,8 +51,11 @@ export function useChatSessions({
   });
 
   // Sort sessions by updated_at (newest first), then created_at as fallback
+  // Also filter out throwaway sessions created by generateSuggestions
   const sortedSessions = useMemo(() => {
-    return [...sessions].sort((a, b) => {
+    return [...sessions]
+      .filter((s) => !s.session_id.startsWith(SUGGEST_SESSION_PREFIX))
+      .sort((a, b) => {
       const aTime = a.updated_at
         ? new Date(a.updated_at).getTime()
         : a.created_at
@@ -48,13 +70,13 @@ export function useChatSessions({
     });
   }, [sessions]);
 
-  // Select the newest session on initial load (unless workflow-exec handoff)
+  // Auto-select the newest session once on initial load (unless workflow-exec handoff).
+  // The autoSelectedRef ensures this only fires once — subsequent null states
+  // (e.g. user clicking "New Chat") must not be overridden.
   useEffect(() => {
-    if (
-      !skipInitialAutoSelect &&
-      sortedSessions.length > 0 &&
-      currentChatId === null
-    ) {
+    if (autoSelectedRef.current || skipInitialAutoSelect) return;
+    if (sortedSessions.length > 0 && currentChatId === null) {
+      autoSelectedRef.current = true;
       setCurrentChatId(sortedSessions[0].id);
     }
   }, [skipInitialAutoSelect, sortedSessions, currentChatId]);
@@ -104,6 +126,9 @@ export function useChatSessions({
   );
 
   const handleNewChat = useCallback(async () => {
+    // Eagerly create the session so it appears in the sidebar immediately.
+    // The name will be updated to match the first message in use-chat-stream.ts
+    // (isFirstMessage && !newChatSessionId path).
     const chatSpec = await createChat.mutateAsync({
       session_id: nanoid(),
       name: "新对话",
@@ -111,7 +136,6 @@ export function useChatSessions({
       channel: DEFAULT_CHANNEL,
     });
     setCurrentChatId(chatSpec.id);
-    return chatSpec.id;
   }, [createChat, userId]);
 
   const handleDeleteSession = useCallback(
@@ -123,15 +147,13 @@ export function useChatSessions({
 
   const handleRenameSession = useCallback(
     async (id: string, name: string) => {
-      const current = sessions.find((s) => s.id === id);
-      if (!current) return;
-      await updateChat.mutateAsync({ id, data: { ...current, name } });
+      await updateChat.mutateAsync({ id, data: { name } });
     },
-    [updateChat, sessions],
+    [updateChat],
   );
 
   return {
-    sessions,
+    sessions: sortedSessions,
     sessionsPending,
     currentChatId,
     setCurrentChatId,

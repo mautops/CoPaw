@@ -15,4 +15,4 @@ export {
 
 export { WorkflowMetadataEditor } from "./workflow-metadata-editor";
 export { WorkflowStepsEditor } from "./workflow-steps-editor";
-export { WorkflowStepsViewer, WorkflowStepsList } from "./workflow-steps-viewer";
+export { WorkflowStepsViewer } from "./workflow-steps-viewer";

@@ -12,6 +12,8 @@ import {
   CheckIcon,
   XIcon,
   Loader2Icon,
+  LayersIcon,
+  WaypointsIcon,
 } from "lucide-react";
 import { ChevronRightIcon } from "lucide-react";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -110,6 +112,7 @@ function SessionItem({
 }: SessionItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(session.name);
+  const [pendingDelete, setPendingDelete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -146,90 +149,160 @@ function SessionItem({
     [confirmEdit, cancelEdit],
   );
 
-  const handleDelete = useCallback(
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPendingDelete(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(
     async (e: React.MouseEvent) => {
       e.stopPropagation();
+      setPendingDelete(false);
       await onDelete();
     },
     [onDelete],
   );
 
+  const handleDeleteCancel = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPendingDelete(false);
+  }, []);
+
   return (
-    <li>
-      {isEditing ? (
-        <div className="flex items-center gap-1.5 px-2 py-1.5">
-          <Input
-            ref={inputRef}
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="h-8 text-sm"
+    <li className="relative flex items-center">
+      {/* Timeline dot — sits above the through-line (z-10) */}
+      <div className="relative z-10 flex w-8 shrink-0 justify-center">
+        {isGenerating ? (
+          <span className="relative flex size-3 items-center justify-center">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
+            <span className="relative size-2 rounded-full bg-primary" />
+          </span>
+        ) : isActive ? (
+          <span
+            className="size-3 rounded-full bg-primary"
+            style={{ boxShadow: "0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent)" }}
           />
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-7 shrink-0 hover:bg-emerald-500/10 hover:text-emerald-600"
-            onClick={confirmEdit}
-          >
-            <CheckIcon className="size-3.5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-7 shrink-0 hover:bg-muted"
-            onClick={cancelEdit}
-          >
-            <XIcon className="size-3.5" />
-          </Button>
-        </div>
-      ) : (
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={onSelect}
-          onKeyDown={(e) => e.key === "Enter" && onSelect()}
-          className={cn(
-            "group relative flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left",
-            "hover:bg-muted/60",
-            isActive && "bg-muted",
-          )}
-        >
-          {/* Active indicator */}
-          {isActive && (
-            <span className="absolute bottom-1.5 left-0 top-1.5 w-0.5 rounded-r bg-primary" />
-          )}
+        ) : (
+          <span className="size-2.5 rounded-full border-2 border-primary/40 bg-card transition-colors duration-150 group-hover/item:border-primary" />
+        )}
+      </div>
 
-          {isGenerating ? (
-            <Loader2Icon className="size-4 shrink-0 animate-spin text-primary" />
-          ) : (
-            <MessageSquareIcon className="size-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
-          )}
-          <span className="min-w-0 flex-1 truncate text-sm">{session.name}</span>
-
-          {/* Action buttons - pure CSS opacity, no JS state */}
-          <div
-            className="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-              onClick={startEdit}
-              title="重命名"
+      {/* Content */}
+      <div className="group/item min-w-0 flex-1">
+        {isEditing ? (
+          <div className="flex items-center gap-1.5 py-1.5 pr-2">
+            <Input
+              ref={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="h-8 text-sm"
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-7 shrink-0 hover:bg-emerald-500/10 hover:text-emerald-600"
+              onClick={confirmEdit}
             >
-              <PencilIcon className="size-3.5" />
-            </button>
-            <button
-              type="button"
-              className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              onClick={handleDelete}
-              title="删除"
+              <CheckIcon className="size-3.5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-7 shrink-0 hover:bg-muted"
+              onClick={cancelEdit}
             >
-              <Trash2Icon className="size-3.5" />
-            </button>
+              <XIcon className="size-3.5" />
+            </Button>
           </div>
-        </div>
-      )}
+        ) : (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={onSelect}
+            onKeyDown={(e) => e.key === "Enter" && onSelect()}
+            onMouseLeave={() => setPendingDelete(false)}
+            className={cn(
+              "group relative flex w-full cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 pl-1 text-left",
+              "hover:bg-muted/60",
+              isActive && "bg-muted",
+            )}
+          >
+            {isGenerating ? (
+              <Loader2Icon className="size-4 shrink-0 animate-spin text-primary" />
+            ) : session.meta?.cluster_name ? (
+              <LayersIcon className="size-4 shrink-0 text-primary/70" />
+            ) : session.meta?.workflow_filename || session.meta?.workflowFilename ? (
+              <WaypointsIcon className="size-4 shrink-0 text-primary/70" />
+            ) : (
+              <MessageSquareIcon className="size-4 shrink-0 text-muted-foreground/50 group-hover:text-foreground" />
+            )}
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <span className="block truncate text-sm">{session.name}</span>
+              {!!session.meta?.cluster_name && (
+                <span className="block truncate text-[10px] text-muted-foreground/70">
+                  {String(session.meta.cluster_name)}
+                </span>
+              )}
+              {!session.meta?.cluster_name && (session.meta?.workflow_filename || session.meta?.workflowFilename) && (
+                <span className="block truncate text-[10px] text-primary/60">
+                  {String(session.meta.workflow_name ?? session.meta.workflow_filename ?? session.meta.workflowFilename)}
+                </span>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div
+              className={cn(
+                "flex shrink-0 items-center gap-0.5",
+                pendingDelete ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {pendingDelete ? (
+                <>
+                  <button
+                    type="button"
+                    className="flex h-6 items-center gap-1 rounded bg-destructive/10 px-1.5 text-xs font-medium text-destructive hover:bg-destructive/20"
+                    onClick={handleDeleteConfirm}
+                    title="确认删除"
+                  >
+                    <Trash2Icon className="size-3" />
+                    确认
+                  </button>
+                  <button
+                    type="button"
+                    className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                    onClick={handleDeleteCancel}
+                    title="取消"
+                  >
+                    <XIcon className="size-3.5" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                    onClick={startEdit}
+                    title="重命名"
+                  >
+                    <PencilIcon className="size-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    onClick={handleDeleteClick}
+                    title="删除"
+                  >
+                    <Trash2Icon className="size-3.5" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </li>
   );
 }
@@ -275,19 +348,32 @@ function GroupSection({
         {group.label}
       </button>
       {!collapsed && (
-        <ul className="space-y-0.5">
-          {group.sessions.map((session) => (
-            <SessionItem
-              key={session.id}
-              session={session}
-              isActive={session.id === currentSessionId}
-              isGenerating={isGeneratingSession?.(session.id) ?? false}
-              onSelect={() => onSelectSession(session.id)}
-              onDelete={() => onDeleteSession(session.id)}
-              onRename={(name) => onRenameSession(session.id, name)}
-            />
-          ))}
-        </ul>
+        <div className="relative">
+          {/* Through-line: starts and ends at first/last dot center */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-4 z-0 w-0.5 -translate-x-px"
+            style={{
+              top: "17px",
+              bottom: "17px",
+              background:
+                "linear-gradient(to bottom, color-mix(in oklch, var(--primary) 60%, transparent), transparent)",
+            }}
+          />
+          <ul className="space-y-0">
+            {group.sessions.map((session) => (
+              <SessionItem
+                key={session.id}
+                session={session}
+                isActive={session.id === currentSessionId}
+                isGenerating={isGeneratingSession?.(session.id) ?? false}
+                onSelect={() => onSelectSession(session.id)}
+                onDelete={() => onDeleteSession(session.id)}
+                onRename={(name) => onRenameSession(session.id, name)}
+              />
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

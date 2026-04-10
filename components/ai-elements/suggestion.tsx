@@ -1,24 +1,35 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";
 
-export type SuggestionsProps = ComponentProps<typeof ScrollArea>;
+export type SuggestionsProps = ComponentProps<"div"> & {
+  /**
+   * fill — each suggestion stretches to fill equal columns (grid layout).
+   * scroll — horizontal scroll strip, items keep their natural width (default).
+   */
+  fill?: boolean;
+};
 
 export const Suggestions = ({
   className,
   children,
+  fill = false,
   ...props
 }: SuggestionsProps) => (
-  <ScrollArea className="w-full overflow-x-auto whitespace-nowrap" {...props}>
-    <div className={cn("flex w-max flex-nowrap items-center gap-2", className)}>
-      {children}
-    </div>
-    <ScrollBar className="hidden" orientation="horizontal" />
-  </ScrollArea>
+  <div
+    className={cn(
+      fill
+        ? "grid w-full gap-2 grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]"
+        : "flex w-full gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+      className,
+    )}
+    {...props}
+  >
+    {children}
+  </div>
 );
 
 export type SuggestionProps = Omit<ComponentProps<typeof Button>, "onClick"> & {
@@ -41,7 +52,7 @@ export const Suggestion = ({
 
   return (
     <Button
-      className={cn("cursor-pointer rounded-full px-4", className)}
+      className={cn("cursor-pointer rounded-full px-4 shrink-0", className)}
       onClick={handleClick}
       size={size}
       type="button"

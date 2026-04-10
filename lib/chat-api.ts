@@ -70,6 +70,10 @@ export interface StreamParams {
   session_id: string;
   user_id: string;
   channel: string;
+  agentId?: string;
+  /** Override the active model for this request. */
+  provider_id?: string;
+  model?: string;
   signal?: AbortSignal;
   onChunk: (text: string) => void;
   onThinkingChunk?: (text: string) => void;
@@ -202,6 +206,17 @@ async function processStreamResponse(
           : trimmed;
         try {
           const msg = JSON.parse(jsonStr) as Record<string, unknown>;
+
+          // ── Response-level failure (e.g. AGENT_UNKNOWN_ERROR) ────────
+          if (
+            msg.object === "response" &&
+            typeof msg.status === "string" &&
+            msg.status === "failed" &&
+            msg.error
+          ) {
+            const err = msg.error as { code?: string; message?: string };
+            throw new Error(err.message ?? err.code ?? "Agent error");
+          }
 
           // ── Message phase start ──────────────────────────────────────
           if (msg.object === "message" && isLiveMessageStatus(msg.status)) {
@@ -364,6 +379,7 @@ export const chatApi = {
     name?: string;
     channel?: string;
     user_id?: string;
+    meta?: Record<string, unknown>;
   }) =>
     apiRequest<ChatSpec>("/chats", {
       method: "POST",
@@ -381,7 +397,10 @@ export const chatApi = {
   updateChat: (id: string, data: Partial<ChatSpec>) =>
     apiRequest<ChatSpec>(`/chats/${encodeURIComponent(id)}`, {
       method: "PUT",
-      body: JSON.stringify(data),
+      // Backend ChatUpdate only accepts `name` and `pinned` — extra fields are forbidden (422)
+      body: JSON.stringify({
+        ...(data.name !== undefined && { name: data.name }),
+      }),
     }),
 
   deleteChat: (id: string) =>
@@ -417,6 +436,9 @@ export const chatApi = {
     session_id,
     user_id,
     channel,
+    agentId,
+    provider_id,
+    model,
     signal,
     onChunk,
     onThinkingChunk,
@@ -431,6 +453,7 @@ export const chatApi = {
   }> => {
     const headers = await mergeAuthHeaders();
     headers.set("Content-Type", "application/json");
+    if (agentId) headers.set("X-Agent-Id", agentId);
     const res = await fetch(`${API_BASE}/api/console/chat`, {
       method: "POST",
       headers,
@@ -440,6 +463,7 @@ export const chatApi = {
         user_id,
         channel,
         stream: true,
+        ...(provider_id && model ? { provider_id, model } : {}),
       }),
       signal,
     });
@@ -448,8 +472,7 @@ export const chatApi = {
   },
 
   /** Reconnect to an existing streaming session (e.g., after page navigation). */
-  reconnectStream: async ({
-    session_id,
+  reconnectStream: async ({    session_id,
     user_id,
     channel,
     signal,
@@ -488,3 +511,74 @@ export const chatApi = {
     return { ...result, reconnected: true };
   },
 };
+
+// ── Suggestion generation ─────────────────────────────────────────────────────
+
+export const SUGGEST_SESSION_PREFIX = "__suggestions__";
+
+/**
+ * Ask the AI to generate suggestions.
+ * Uses a per-user, per-tab session ID so:
+ * - Multiple tabs don't collide on the same backend session.
+ * - Each tab reuses the same session across calls (at most one session per tab per page-load).
+ * Returns an array of suggestion strings, or [] on any failure.
+ */
+export async function generateSuggestions({
+  prompt,
+  userId,
+  tabId,
+  signal,
+}: {
+  prompt: string;
+  userId: string;
+  /** Unique per-tab ID (e.g. from React useId) to prevent multi-tab collisions. */
+  tabId: string;
+  signal?: AbortSignal;
+}): Promise<string[]> {
+  const headers = await mergeAuthHeaders();
+  headers.set("Content-Type", "application/json");
+
+  // Per-user, per-tab session ID — avoids cross-tab backend collisions while
+  // still reusing one session within the same tab's lifetime.
+  const sessionId = `${SUGGEST_SESSION_PREFIX}${userId}:${tabId}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/console/chat`, {
+      method: "POST",
+      headers,
+      signal,
+      body: JSON.stringify({
+        session_id: sessionId,
+        user_id: userId,
+        channel: "console",
+        stream: true,
+        input: [
+          {
+            id: sessionId,
+            type: "message",
+            role: "user",
+            content: [{ type: "text", text: prompt }],
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) return [];
+
+    // Reuse the existing SSE parser — pass no-op callbacks since we only need the final content
+    const noop = () => {};
+    const { content } = await processStreamResponse(res, signal, noop);
+    const raw = content.trim();
+    // Extract JSON array — model may wrap it in markdown fences
+    const match = raw.match(/\[[\s\S]*\]/);
+    if (!match) return [];
+    const parsed = JSON.parse(match[0]) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+      .slice(0, 4);
+  } catch {
+    return [];
+  }
+}
+

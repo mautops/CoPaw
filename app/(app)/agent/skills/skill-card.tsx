@@ -18,35 +18,32 @@ import {
   ZapIcon,
   Trash2Icon,
   FileCode2Icon,
+  LayersIcon,
+  TagIcon,
 } from "lucide-react";
 
 /** Map skill name keywords to semantic icons */
 function skillIconForName(name: string) {
   const lower = name.toLowerCase();
   const iconClass = "size-5 shrink-0";
-
-  // AI/Agent related
-  if (lower.includes("ai") || lower.includes("agent") || lower.includes("llm")) {
+  if (lower.includes("ai") || lower.includes("agent") || lower.includes("llm"))
     return <SparklesIcon className={cn(iconClass, "text-violet-500")} />;
-  }
-  // Code/Development
-  if (lower.includes("code") || lower.includes("dev") || lower.includes("script")) {
+  if (lower.includes("code") || lower.includes("dev") || lower.includes("script"))
     return <FileCode2Icon className={cn(iconClass, "text-emerald-500")} />;
-  }
-  // Terminal/CLI
-  if (lower.includes("terminal") || lower.includes("cli") || lower.includes("shell")) {
+  if (lower.includes("terminal") || lower.includes("cli") || lower.includes("shell"))
     return <TerminalIcon className={cn(iconClass, "text-slate-600 dark:text-slate-400")} />;
-  }
-  // Automation/Workflow
-  if (lower.includes("workflow") || lower.includes("auto") || lower.includes("pipeline")) {
+  if (lower.includes("workflow") || lower.includes("auto") || lower.includes("pipeline"))
     return <ZapIcon className={cn(iconClass, "text-amber-500")} />;
-  }
-  // Tool/Utility
-  if (lower.includes("tool") || lower.includes("util") || lower.includes("helper")) {
+  if (lower.includes("tool") || lower.includes("util") || lower.includes("helper"))
     return <WrenchIcon className={cn(iconClass, "text-sky-500")} />;
-  }
-  // Default: generic processor icon
   return <CpuIcon className={cn(iconClass, "text-blue-500")} />;
+}
+
+function formatUpdatedAt(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
 export function SkillCard({
@@ -64,6 +61,9 @@ export function SkillCard({
 }) {
   const customized = skill.source === "customized";
   const desc = skill.description?.trim() ? skill.description : "暂无描述";
+  const tags = skill.tags?.filter(Boolean) ?? [];
+  const categories = skill.categories?.filter(Boolean) ?? [];
+  const updatedAt = formatUpdatedAt(skill.last_updated ?? skill.updated_at);
 
   return (
     <Card
@@ -71,10 +71,7 @@ export function SkillCard({
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onOpen();
-        }
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); }
       }}
       aria-label={`${skill.name}, ${skill.enabled ? "已启用" : "未启用"}, ${sourceLabel(skill.source)}`}
       className={cn(
@@ -86,22 +83,39 @@ export function SkillCard({
       )}
     >
       <CardContent className="space-y-3 px-4 pt-4 pb-3">
-        {/* Header: Icon + Name + Status */}
+        {/* Header: Icon + Name + Source + Version + Status */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <div
               className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-lg",
-                skill.enabled
-                  ? "bg-primary/10"
-                  : "bg-muted/50 group-hover:bg-muted/70",
+                "flex size-9 shrink-0 items-center justify-center rounded-lg text-lg",
+                skill.enabled ? "bg-primary/10" : "bg-muted/50 group-hover:bg-muted/70",
               )}
             >
-              {skillIconForName(skill.name)}
+              {skill.emoji ? skill.emoji : skillIconForName(skill.name)}
             </div>
-            <h3 className="truncate text-base font-semibold leading-tight">
-              {skill.name}
-            </h3>
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-base font-semibold leading-tight">
+                {skill.name}
+              </h3>
+              <div className="mt-0.5 flex items-center gap-1.5">
+                <span
+                  className={cn(
+                    "inline-block rounded px-1.5 py-0.5 text-xs font-medium",
+                    customized
+                      ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
+                      : "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-400",
+                  )}
+                >
+                  {sourceLabel(skill.source)}
+                </span>
+                {skill.version_text && (
+                  <span className="font-mono text-xs text-muted-foreground/60">
+                    v{skill.version_text}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Status Badge */}
@@ -116,9 +130,7 @@ export function SkillCard({
             <span
               className={cn(
                 "size-1.5 rounded-full",
-                skill.enabled
-                  ? "animate-pulse bg-emerald-500"
-                  : "bg-muted-foreground/50",
+                skill.enabled ? "animate-pulse bg-emerald-500" : "bg-muted-foreground/50",
               )}
             />
             {skill.enabled ? "已启用" : "未启用"}
@@ -126,107 +138,100 @@ export function SkillCard({
         </div>
 
         {/* Description */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className={cn(
-                "line-clamp-2 min-h-10 cursor-default rounded-md border bg-muted/30 px-2.5 py-2 text-xs leading-relaxed text-muted-foreground",
-              )}
-            >
-              {desc}
-            </div>
-          </TooltipTrigger>
-          {skill.description && (
-            <TooltipContent side="top" className="max-w-[320px] text-sm">
-              {skill.description}
-            </TooltipContent>
-          )}
-        </Tooltip>
+        <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+          {desc}
+        </p>
 
-        {/* Meta: Source + Path */}
-        <div className="flex flex-wrap items-center gap-3 text-xs">
+        {/* Categories */}
+        {categories.length > 0 && (
           <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground/70">来源</span>
-            <span
-              className={cn(
-                "rounded px-1.5 py-0.5 font-medium",
-                customized
-                  ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
-                  : "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-400",
-              )}
-            >
-              {sourceLabel(skill.source)}
-            </span>
+            <LayersIcon className="size-3 shrink-0 text-muted-foreground/50" />
+            <div className="flex flex-wrap gap-1">
+              {categories.map((cat) => (
+                <span
+                  key={cat}
+                  className="rounded-md bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-500/15 dark:text-sky-400"
+                >
+                  {cat}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="truncate rounded bg-muted/40 px-1.5 py-0.5 font-mono text-muted-foreground/80">
-                  {skill.path}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-[400px]">
-                <code className="text-xs">{skill.path}</code>
-              </TooltipContent>
-            </Tooltip>
+        )}
+
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="flex items-center gap-1.5">
+            <TagIcon className="size-3 shrink-0 text-muted-foreground/50" />
+            <div className="flex flex-wrap gap-1">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-md bg-muted/60 px-1.5 py-0.5 text-xs text-muted-foreground"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
 
       {/* Actions Footer */}
       <CardFooter
-        className="justify-end gap-2 border-t border-border/40 bg-transparent px-4 py-2.5"
+        className="items-center justify-between gap-2 border-t border-border/40 bg-transparent px-4 py-2.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={toggling}
-          className={cn(
-            "h-7 px-2.5 text-xs",
-            skill.enabled
-              ? "text-muted-foreground hover:text-destructive"
-              : "text-primary hover:text-primary",
+        {/* Updated at */}
+        {updatedAt ? (
+          <span className="text-xs text-muted-foreground/50">{updatedAt}</span>
+        ) : <span />}
+
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={toggling}
+            className={cn(
+              "h-7 px-2.5 text-xs",
+              skill.enabled
+                ? "text-muted-foreground hover:text-destructive"
+                : "text-primary hover:text-primary",
+            )}
+            onClick={onToggleEnabled}
+          >
+            {toggling ? <span className="opacity-70">处理中...</span>
+              : skill.enabled ? "禁用" : "启用"}
+          </Button>
+          {customized && onRequestDelete && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={skill.enabled}
+                  className={cn(
+                    "size-7",
+                    skill.enabled
+                      ? "cursor-not-allowed opacity-40"
+                      : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                  )}
+                  onClick={(e) => { if (!skill.enabled) onRequestDelete(e); }}
+                >
+                  <Trash2Icon className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {skill.enabled ? "请先禁用后再删除" : "删除此 Skill"}
+              </TooltipContent>
+            </Tooltip>
           )}
-          onClick={onToggleEnabled}
-        >
-          {toggling ? (
-            <span className="opacity-70">处理中...</span>
-          ) : skill.enabled ? (
-            "禁用"
-          ) : (
-            "启用"
-          )}
-        </Button>
-        {customized && onRequestDelete && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                disabled={skill.enabled}
-                className={cn(
-                  "size-7",
-                  skill.enabled
-                    ? "cursor-not-allowed opacity-40"
-                    : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
-                )}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!skill.enabled) onRequestDelete(e);
-                }}
-              >
-                <Trash2Icon className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {skill.enabled ? "请先禁用后再删除" : "删除此 Skill"}
-            </TooltipContent>
-          </Tooltip>
-        )}
+        </div>
       </CardFooter>
     </Card>
   );
 }
+
+

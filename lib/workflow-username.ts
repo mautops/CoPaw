@@ -22,7 +22,3 @@ export function scopeUserFromSessionUser(user: {
   if (!isValidScopeSegment(local)) return null;
   return local;
 }
-
-/** @deprecated Use ``scopeUserFromSessionUser`` */
-export const resolvedWorkflowUsernameFromSessionUser =
-  scopeUserFromSessionUser;

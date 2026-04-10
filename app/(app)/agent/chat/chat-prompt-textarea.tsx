@@ -11,7 +11,6 @@ import {
   matchesSkillFilter,
   QK_SKILLS,
 } from "@/app/(app)/agent/skills/skills-domain";
-import { QK_LIST } from "@/app/(app)/agent/workflows/workflow-domain";
 import { useQuery } from "@tanstack/react-query";
 import {
   useCallback,
@@ -101,7 +100,7 @@ export function ChatPromptTextareaWithMentions({
   });
 
   const workflowsQuery = useQuery({
-    queryKey: QK_LIST,
+    queryKey: ["workflows", "list"],
     queryFn: () => workflowApi.list().then((r) => r.workflows),
     staleTime: 60_000,
   });

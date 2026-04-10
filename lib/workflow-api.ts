@@ -1,4 +1,37 @@
-import { apiRequest } from "./api-utils";
+import { parseErrorMessage } from "./api-utils";
+import { pinyin } from "pinyin-pro";
+
+/**
+ * 将工作流中文名称转换为文件名（不含扩展名）。
+ * 中文 → 拼音全拼，英文/数字保持原样，用连字符连接，全部小写。
+ *
+ * 示例：
+ *   "Artifactory 日常巡检" → "artifactory-ri-chang-xun-jian"
+ *   "ELK 集群健康检查"     → "elk-ji-qun-jian-kang-jian-cha"
+ */
+export function workflowNameToFilename(name: string): string {
+  if (!name.trim()) return "";
+  const converted = pinyin(name.trim(), {
+    toneType: "none",
+    separator: "-",
+    nonZh: "consecutive",
+  });
+  return converted
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** Workflows are served by the Next.js API routes at /api/workflows (local filesystem). */
+async function wfRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`/api/workflows${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...init?.headers },
+  });
+  if (!res.ok) throw new Error(await parseErrorMessage(res));
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
 
 /** Allowed workflow file extensions (Markdown). */
 export const WORKFLOW_MARKDOWN_EXTS = [".md", ".markdown"] as const;
@@ -30,6 +63,7 @@ export function ensureWorkflowMarkdownFilename(raw: string): string {
 export interface WorkflowMeta {
   name?: string | null;
   description?: string | null;
+  icon?: string | null;
   tags: string[];
   category?: string | null;
   /** List/catalog bucket; YAML `catalog` or fallback to `category`. */
@@ -46,6 +80,7 @@ export interface WorkflowInfo {
   modified_time: string;
   name?: string | null;
   description?: string | null;
+  icon?: string | null;
   tags: string[];
   category?: string | null;
   /** Normalized list bucket; null if uncategorized. */
@@ -67,8 +102,10 @@ export interface WorkflowDetailBody {
 
 /** POST /workflows/:filename/runs — append one execution record. */
 export interface WorkflowRunCreate {
+  run_id?: string;
   user_id?: string;
   session_id?: string;
+  chat_id?: string;
   trigger: string;
   status?: string | null;
   /** ISO datetime; omit to let server default to now */
@@ -81,6 +118,8 @@ export interface WorkflowRun {
   workflow_id: string;
   user_id: string;
   session_id: string;
+  /** Chat record ID — used to navigate to the chat session detail */
+  chat_id?: string;
   trigger: string;
   executed_at: string;
   status?: string | null;
@@ -91,12 +130,34 @@ export interface WorkflowRunListResponse {
 }
 
 function workflowPath(filename: string) {
-  return `/workflows/${encodeURIComponent(filename)}`;
+  return `/${encodeURIComponent(filename)}`;
 }
 
 function workflowRunsPath(filename: string) {
   return `${workflowPath(filename)}/runs`;
 }
+
+/** One step execution result, stored in workflow-runs/[filename]/[runId].steps.json */
+export interface WorkflowStepResult {
+  step_id: string;
+  step_title: string;
+  status: "success" | "failed" | "skipped" | "running";
+  started_at: string;
+  finished_at?: string;
+  output?: string;
+  error?: string | null;
+  recorded_at: string;
+}
+
+export interface WorkflowStepResultsResponse {
+  steps: WorkflowStepResult[];
+}
+
+function workflowStepsPath(filename: string, runId: string) {
+  return `${workflowRunsPath(filename)}/${encodeURIComponent(runId)}/steps`;
+}
+
+
 
 function normalizeTags(tags: unknown): string[] {
   if (!Array.isArray(tags)) return [];
@@ -105,7 +166,7 @@ function normalizeTags(tags: unknown): string[] {
 
 export const workflowApi = {
   list: async () => {
-    const r = await apiRequest<WorkflowListResponse>("/workflows");
+    const r = await wfRequest<WorkflowListResponse>("");
     return {
       workflows: r.workflows.map((w) => ({
         ...w,
@@ -119,7 +180,7 @@ export const workflowApi = {
   },
 
   get: async (filename: string) => {
-    const d = await apiRequest<WorkflowDetailBody>(workflowPath(filename));
+    const d = await wfRequest<WorkflowDetailBody>(workflowPath(filename));
     const metaTags = normalizeTags(d.meta?.tags);
     const cat = d.meta?.catalog?.trim() || d.meta?.category?.trim() || null;
     return {
@@ -133,40 +194,46 @@ export const workflowApi = {
   },
 
   create: (body: { filename: string; content: string }) =>
-    apiRequest<{ success: boolean; filename: string; path: string }>(
-      "/workflows",
+    wfRequest<{ success: boolean; filename: string; path: string }>(
+      "",
       { method: "POST", body: JSON.stringify(body) },
     ),
 
   update: (filename: string, content: string) =>
-    apiRequest<{ success: boolean; filename: string; path: string }>(
+    wfRequest<{ success: boolean; filename: string; path: string }>(
       workflowPath(filename),
       { method: "PUT", body: JSON.stringify({ content }) },
     ),
 
   delete: (filename: string) =>
-    apiRequest<{ success: boolean; filename: string }>(workflowPath(filename), {
+    wfRequest<{ success: boolean; filename: string }>(workflowPath(filename), {
       method: "DELETE",
     }),
 
   listRuns: (filename: string) =>
-    apiRequest<WorkflowRunListResponse>(workflowRunsPath(filename)),
-
-  getRun: (filename: string, runId: string) =>
-    apiRequest<WorkflowRun>(
-      `${workflowRunsPath(filename)}/${encodeURIComponent(runId)}`,
-    ),
+    wfRequest<WorkflowRunListResponse>(workflowRunsPath(filename)),
 
   appendRun: (filename: string, body: WorkflowRunCreate) =>
-    apiRequest<WorkflowRun>(workflowRunsPath(filename), {
+    wfRequest<WorkflowRun>(workflowRunsPath(filename), {
       method: "POST",
       body: JSON.stringify({
+        run_id: body.run_id,
         user_id: body.user_id ?? "",
         session_id: body.session_id ?? "",
+        chat_id: body.chat_id ?? "",
         trigger: body.trigger,
-        status: body.status ?? undefined,
+        status: body.status,
         executed_at: body.executed_at ?? undefined,
       }),
+    }),
+
+  listStepResults: (filename: string, runId: string) =>
+    wfRequest<WorkflowStepResultsResponse>(workflowStepsPath(filename, runId)),
+
+  appendStepResult: (filename: string, runId: string, step: Omit<WorkflowStepResult, "recorded_at">) =>
+    wfRequest<WorkflowStepResult>(workflowStepsPath(filename, runId), {
+      method: "POST",
+      body: JSON.stringify(step),
     }),
 };
 

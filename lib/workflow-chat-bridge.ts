@@ -6,4 +6,5 @@ export interface WorkflowChatExecPayload {
   sessionTitle: string;
   workflowFilename: string;
   userId: string;
+  meta?: Record<string, unknown>;
 }

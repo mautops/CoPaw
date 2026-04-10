@@ -1,7 +1,14 @@
 import { authClient } from "./auth-client";
 import { API_BASE } from "./api-utils";
 
-/** Keycloak access token for API (Bearer). Throws if not signed in. */
+/** 重定向到登录页（仅在浏览器端）。调用后应立即中断当前操作。 */
+function redirectToLogin(): void {
+  if (typeof window !== "undefined") {
+    window.location.replace("/login?reason=session_expired");
+  }
+}
+
+/** Keycloak access token for API (Bearer). Token 不可用时重定向到登录页。 */
 export async function mergeAuthHeaders(
   base?: HeadersInit,
 ): Promise<Headers> {
@@ -11,11 +18,9 @@ export async function mergeAuthHeaders(
   });
   const token = data?.accessToken?.trim();
   if (error || !token) {
-    const msg =
-      error && typeof (error as { message?: string }).message === "string"
-        ? (error as { message: string }).message
-        : "Keycloak access token required";
-    throw new Error(msg);
+    redirectToLogin();
+    // throw 确保调用方不会用空 headers 继续请求
+    throw new Error("Session expired — redirecting to login");
   }
   h.set("Authorization", `Bearer ${token}`);
   return h;

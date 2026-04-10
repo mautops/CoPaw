@@ -2,9 +2,10 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ColorThemeInitializer } from "@/components/theme-switcher";
 import { useState } from "react";
 
-/** Root client providers: React Query, Radix Tooltip (avoids per-component TooltipProvider). */
+/** Root client providers: React Query, Radix Tooltip */
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(
     () =>
@@ -17,6 +18,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={client}>
+      <ColorThemeInitializer />
       <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
     </QueryClientProvider>
   );

@@ -1,5 +1,3 @@
-import type { SkillSpec } from "@/lib/skills-api";
-
 export const QK_SKILLS = ["core", "skills", "list"] as const;
 
 /** Default SKILL.md body for new skills (YAML front matter required by backend). */
@@ -13,7 +11,10 @@ description: 简短说明该 skill 的用途与触发时机
 在此编写 skill 正文与步骤说明.
 `;
 
-export function matchesSkillFilter(skill: SkillSpec, query: string): boolean {
+export function matchesSkillFilter(
+  skill: { name: string; description: string; source: string },
+  query: string,
+): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
   if (skill.name.toLowerCase().includes(q)) return true;

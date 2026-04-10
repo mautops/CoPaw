@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,34 +16,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  QK_MODELS_ACTIVE,
   QK_MODELS_PROVIDERS,
   allModelsForProvider,
   eligibleProvidersForSlot,
 } from "@/app/(app)/settings/models/models-domain";
 import type { ProviderInfo } from "@/lib/llm-models-api";
 import { llmModelsApi } from "@/lib/llm-models-api";
-import { CheckIcon, ChevronDownIcon, Loader2Icon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon } from "lucide-react";
+
+export interface SelectedModel {
+  provider_id: string;
+  model: string;
+}
 
 function activeDisplayLabel(
   eligible: ProviderInfo[],
-  providerId: string | undefined,
-  modelId: string | undefined,
+  selected: SelectedModel | null,
 ): string {
-  if (!providerId || !modelId) return "选择模型";
+  if (!selected) return "选择模型";
   for (const p of eligible) {
-    if (p.id !== providerId) continue;
+    if (p.id !== selected.provider_id) continue;
     const models = allModelsForProvider(p);
-    const m = models.find((x) => x.id === modelId);
-    return m?.name || m?.id || modelId;
+    const m = models.find((x) => x.id === selected.model);
+    return m?.name || m?.id || selected.model;
   }
-  return modelId;
+  return selected.model;
 }
 
-export const CORE_MODEL_SWITCHED_EVENT = "core-model-switched";
+interface ChatModelSelectorProps {
+  value: SelectedModel | null;
+  onChange: (model: SelectedModel) => void;
+}
 
-export function ChatModelSelector() {
-  const queryClient = useQueryClient();
+export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const providersQuery = useQuery({
@@ -51,43 +56,15 @@ export function ChatModelSelector() {
     queryFn: () => llmModelsApi.listProviders(),
   });
 
-  const activeQuery = useQuery({
-    queryKey: QK_MODELS_ACTIVE,
-    queryFn: () => llmModelsApi.getActive(),
-    staleTime: 15_000,
-  });
-
   const eligible = useMemo(
     () => eligibleProvidersForSlot(providersQuery.data ?? []),
     [providersQuery.data],
   );
 
-  const activePid = activeQuery.data?.active_llm?.provider_id;
-  const activeMid = activeQuery.data?.active_llm?.model;
-  const label = activeDisplayLabel(eligible, activePid, activeMid);
-
-  const setMutation = useMutation({
-    mutationFn: (body: { provider_id: string; model: string }) =>
-      llmModelsApi.setActive(body),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: QK_MODELS_ACTIVE });
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent(CORE_MODEL_SWITCHED_EVENT));
-      }
-    },
-    onError: (e) => {
-      window.alert(e instanceof Error ? e.message : "切换模型失败");
-    },
-  });
+  const label = activeDisplayLabel(eligible, value);
 
   return (
-    <DropdownMenu
-      open={menuOpen}
-      onOpenChange={(o) => {
-        setMenuOpen(o);
-        if (o) void activeQuery.refetch();
-      }}
-    >
+    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
@@ -95,9 +72,6 @@ export function ChatModelSelector() {
           className="h-8 max-w-[min(14rem,calc(100vw-12rem))] gap-1.5 border-border/60 bg-background/50 px-2.5 text-sm font-medium shadow-sm transition-all duration-200 hover:border-primary/30 hover:bg-background/80 hover:shadow active:scale-[0.98]"
           disabled={providersQuery.isLoading && !providersQuery.data}
         >
-          {setMutation.isPending ? (
-            <Loader2Icon className="size-3.5 shrink-0 animate-spin" />
-          ) : null}
           <span className="min-w-0 flex-1 truncate text-left">
             {providersQuery.isLoading && !providersQuery.data ? "加载…" : label}
           </span>
@@ -105,10 +79,14 @@ export function ChatModelSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide">对话模型</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide">
+          对话模型
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {providersQuery.isError ? (
-          <div className="px-3 py-2.5 text-sm text-destructive">无法加载模型列表</div>
+          <div className="px-3 py-2.5 text-sm text-destructive">
+            无法加载模型列表
+          </div>
         ) : providersQuery.isLoading ? (
           <div className="px-3 py-4 text-center text-sm text-muted-foreground">
             加载中…
@@ -116,9 +94,14 @@ export function ChatModelSelector() {
         ) : eligible.length === 0 ? (
           <div className="space-y-3 px-3 py-3">
             <p className="text-sm text-muted-foreground">
-              没有已配置且含模型的供应商, 请先到设置中配置.
+              没有已配置且含模型的供应商，请先到设置中配置.
             </p>
-            <Button variant="secondary" size="sm" className="w-full transition-all duration-200 hover:shadow-sm active:scale-[0.98]" asChild>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              asChild
+            >
               <Link href="/settings/models">打开模型设置</Link>
             </Button>
           </div>
@@ -130,26 +113,22 @@ export function ChatModelSelector() {
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="max-h-72 overflow-y-auto">
                 {allModelsForProvider(p).map((m) => {
-                  const isActive = p.id === activePid && m.id === activeMid;
+                  const isSelected =
+                    p.id === value?.provider_id && m.id === value?.model;
                   return (
                     <DropdownMenuItem
                       key={m.id}
-                      disabled={setMutation.isPending}
                       className="gap-2 transition-colors duration-150"
-                      onClick={() => {
-                        if (isActive) return;
-                        setMutation.mutate({
-                          provider_id: p.id,
-                          model: m.id,
-                        });
-                      }}
+                      onClick={() =>
+                        onChange({ provider_id: p.id, model: m.id })
+                      }
                     >
                       <span className="min-w-0 flex-1 truncate text-sm">
                         {m.name || m.id}
                       </span>
-                      {isActive ? (
+                      {isSelected && (
                         <CheckIcon className="size-4 shrink-0 text-primary" />
-                      ) : null}
+                      )}
                     </DropdownMenuItem>
                   );
                 })}

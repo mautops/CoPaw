@@ -7,6 +7,8 @@ import {
   BotMessageSquareIcon,
   SparklesIcon,
   WaypointsIcon,
+  ServerIcon,
+  LayoutDashboardIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,11 +17,23 @@ const nav: {
   items: { label: string; href: string; icon: LucideIcon }[];
 }[] = [
   {
+    label: "概览",
+    items: [
+      { label: "概览", href: "/overview", icon: LayoutDashboardIcon },
+    ],
+  },
+  {
     label: "智能体",
     items: [
       { label: "聊天", href: "/agent/chat", icon: BotMessageSquareIcon },
       { label: "工作流", href: "/agent/workflows", icon: WaypointsIcon },
       { label: "Skills", href: "/agent/skills", icon: SparklesIcon },
+    ],
+  },
+  {
+    label: "运维",
+    items: [
+      { label: "公共服务", href: "/services", icon: ServerIcon },
     ],
   },
 ];

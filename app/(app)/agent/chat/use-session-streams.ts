@@ -1,5 +1,6 @@
 import type { ToolCallInfo } from "@/lib/chat-api";
 import type { ChatStatus } from "ai";
+import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LocalMessage, SessionStreamState } from "./types";
 
@@ -47,10 +48,12 @@ function saveRunningSessions(sessions: RunningSessionInfo[]): void {
   }
 }
 
-export function useSessionStreams() {
+export function useSessionStreams(currentChatIdRef: React.RefObject<string | null>) {
   // Map<chatId, SessionStreamState> - stores independent state for each session
   const sessionsRef = useRef<Map<string, SessionStreamState>>(new Map());
-  // Force re-render when current session state changes
+  // Force re-render only when the *currently viewed* session changes.
+  // Background session updates (streaming in other tabs) skip forceUpdate to
+  // avoid re-rendering the entire page tree on every SSE chunk.
   const [, forceUpdate] = useState(0);
 
   const getSessionState = useCallback((chatId: string): SessionStreamState => {
@@ -67,9 +70,14 @@ export function useSessionStreams() {
       const currentState = getSessionState(chatId);
       const newState = updater(currentState);
       sessionsRef.current.set(chatId, newState);
-      forceUpdate((n) => n + 1);
+      // Only trigger a React re-render when the currently viewed session is updated.
+      // Updates to background sessions are stored in the ref and will be picked up
+      // when the user switches to that session (getSessionState reads the ref directly).
+      if (chatId === currentChatIdRef.current) {
+        forceUpdate((n) => n + 1);
+      }
     },
-    [getSessionState],
+    [getSessionState, currentChatIdRef],
   );
 
   const setSessionMessages = useCallback(
@@ -151,7 +159,8 @@ export function useSessionStreams() {
         streamingThinking: "",
         isThinkingStreaming: false,
         streamingTools: [],
-        status: DEFAULT_STATUS,
+        // Status is intentionally NOT reset here — callers set the final status
+        // (e.g. "ready" on success, "error" on failure) after calling this.
       }));
     },
     [updateSessionState],
@@ -173,24 +182,18 @@ export function useSessionStreams() {
     [],
   );
 
-  const hasAnyGenerating = useCallback((): boolean => {
-    for (const state of sessionsRef.current.values()) {
-      if (state.status === "submitted" || state.status === "streaming") {
-        return true;
-      }
-    }
-    return false;
-  }, []);
-
   /** Mark a session as running (persist to sessionStorage) */
   const markSessionRunning = useCallback(
     (chatId: string, sessionId: string, userId: string, channel: string) => {
       const running = getRunningSessions();
-      const existing = running.find((s) => s.chatId === chatId);
-      if (!existing) {
+      const idx = running.findIndex((s) => s.chatId === chatId);
+      if (idx >= 0) {
+        // Update existing entry in case sessionId changed (e.g. reconnect after new send)
+        running[idx] = { chatId, sessionId, userId, channel };
+      } else {
         running.push({ chatId, sessionId, userId, channel });
-        saveRunningSessions(running);
       }
+      saveRunningSessions(running);
     },
     [],
   );
@@ -219,7 +222,6 @@ export function useSessionStreams() {
     resetStreamingState,
     clearSession,
     isGenerating,
-    hasAnyGenerating,
     markSessionRunning,
     markSessionStopped,
     getRunningSessionsInfo,

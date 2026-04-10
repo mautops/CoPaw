@@ -86,6 +86,24 @@ export function truncateTitle(text: string): string {
   return text.length > 40 ? `${text.slice(0, 40)}...` : text;
 }
 
+/**
+ * 从用户输入文本中提取可读标题。
+ * - 跳过 YAML/markdown 代码块和空行
+ * - 取第一行有效文本，截断到 40 字
+ */
+export function extractTitle(text: string): string {
+  const lines = text.split("\n");
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+    // 跳过 YAML 键值行（key: value 或 - item）、代码块标记、markdown 标题
+    if (/^(---|```|#\s|steps:|name:|description:|-\s+id:)/.test(t)) continue;
+    // 有效内容行
+    return t.length > 40 ? `${t.slice(0, 40)}...` : t;
+  }
+  return truncateTitle(text);
+}
+
 // ── File helpers ─────────────────────────────────────────────────────────────
 
 export function dataUrlToFile(
