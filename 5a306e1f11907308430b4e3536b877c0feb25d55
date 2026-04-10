@@ -1,0 +1,443 @@
+app/(app)/agent/chat/use-message-queue.ts
+  ea3978d41e3f559d 1-190
+lib/services-config.ts
+  65608662cc9c23b8 5-18,53-54
+  a13dbd7aad21e56b 46-47,51-52,56-64
+  57a62a85aba458c6 1-2,4,19-39,41-43,48-50,55
+  42c75aed2242dca0 3,40
+  decb332aea24f657 44-45
+app/api/checklist-report/download/route.ts
+  57a62a85aba458c6 1-22
+app/layout.tsx
+  decb332aea24f657 16-26,31-35
+app/(app)/agent/skills/skills-domain.ts
+  2f1b4384ae68126c 14-17
+lib/workflow-api.ts
+  007b3c3be9ebd71f 1,25-34,169,183,197-198,203,209,214,217
+  3139aeff4b99f9ae 2-23,66,83,133
+  65608662cc9c23b8 225
+  decb332aea24f657 105,108,121-122,140-149,151-160,220,223,229-237
+components/layout/content-topbar.tsx
+  42c75aed2242dca0 4,12-13,25-26,39,43,59-64,67,69-87,111-172
+  decb332aea24f657 44-45
+components/workflow/index.ts
+  007b3c3be9ebd71f 18
+lib/services-data.ts
+  57a62a85aba458c6 2-9,17-19,21-23,51
+  65608662cc9c23b8 1,24-50
+  42c75aed2242dca0 10-16
+  a13dbd7aad21e56b 20
+lib/auth-headers.ts
+  007b3c3be9ebd71f 4-11,21-23
+styles/themes/ocean.css
+  decb332aea24f657 1-69
+components/services/checklist-latest-result.tsx
+  57a62a85aba458c6 1-92
+components/workflow/workflow-steps-editor.tsx
+  65608662cc9c23b8 3,20,33-40,45-46,52-56,63,66,74,89,100-168,192-193,212,253,271-392,415,443-449,467-472,575
+  007b3c3be9ebd71f 8,32,41-44,47-48,65,76-77,86-88,90,99,169-191,200-201,211,213,219,239-245,394-414,416-438,463-464,497-498,500-521,577,599
+app/(app)/agent/chat/use-suggestions.ts
+  57a62a85aba458c6 1-2,4-53,59,61-69,71-72,74-95,98-104,116-117,120-123,134,141-149,151-154,156-159,161-166,170,172-195,197-207,213-219
+  ea3978d41e3f559d 3,54-58,60,70,73,96,105,115,118-119,133,138-140,150,155,160,167-169,171,196,208-212
+  b8805ef73a3903b1 97,106-114,124-132,135-137
+styles/themes/default.css
+  decb332aea24f657 1-69
+app/(app)/agent/workflows/new/page.tsx
+  3139aeff4b99f9ae 9,11,19,21,23-26,46,48-50,53-65,70,83-88,91-93,95-96,99-100,104-109,114-121,126-146,148-149,151-152,157-172,174-189,191-205,210
+  007b3c3be9ebd71f 15-17
+  9cd0a412b0bd498c 3,28-31,33-40,51-52,66-69,72-82,111,173,190
+  42c75aed2242dca0 6,10,122-125
+app/api/workflows/[filename]/runs/[runId]/steps/route.ts
+  decb332aea24f657 1-6,23-58,65-73,78-96,98-104,106-110
+  65608662cc9c23b8 7-22,59-64,74-77,97,105
+lib/skills-api.ts
+  42c75aed2242dca0 12-73,107
+app/(app)/agent/skills/skill-create-dialog.tsx
+  2f1b4384ae68126c 53,57,67,71
+components/overview/integration-progress.tsx
+  57a62a85aba458c6 1-61
+app/(app)/agent/chat/use-session-streams.ts
+  ea3978d41e3f559d 3,51,54-56,73-78,80,162-163,189-193,196
+components/services/checklist-history.tsx
+  57a62a85aba458c6 1-105
+app/(app)/agent/workflows/[filename]/page.tsx
+  42c75aed2242dca0 6,250-261,263,265,267,294-301,329,528-531
+  decb332aea24f657 1-3,5,7-249,262,264,266,268-293,302-328,330-438,441-527,532-576,578-662
+  65608662cc9c23b8 4,439-440,577
+lib/chat-api.ts
+  57a62a85aba458c6 382,475,514-516,518-519,524-528,530-533,536-540,544,565,567-584
+  ea3978d41e3f559d 400-403,517,520-523,529,534-535,541-543
+  decb332aea24f657 545-564,566
+  a13dbd7aad21e56b 74-76,440-441,466
+app/(app)/agent/chat/chat-prompt-textarea.tsx
+  007b3c3be9ebd71f 103
+app/(app)/app-shell.tsx
+  decb332aea24f657 82
+  007b3c3be9ebd71f 3-5,43,50-71
+app/(app)/services/[serviceId]/checklists/history/page.tsx
+  57a62a85aba458c6 1-4,7-9,11-17,25,49,70-79,90-112
+  42c75aed2242dca0 6,80-82,84-89
+  a13dbd7aad21e56b 5,10,20-24
+  8b60108953964936 18-19,26-48,50-69,83
+app/(app)/agent/skills/skill-card.tsx
+  42c75aed2242dca0 21-22,29,31,33,35,37,42-48,64-66,74,86,91-92,95-117,133,141-143,145-146,148-158,160-175,177,182,185-220,222-229,231,236
+  2f1b4384ae68126c 221
+styles/themes/rose.css
+  decb332aea24f657 1-64
+app/api/workflows/[filename]/route.ts
+  a13dbd7aad21e56b 21-25
+  3139aeff4b99f9ae 5,8-9,11-18,59,68-75,87,114
+  65608662cc9c23b8 77-80,92-99
+  007b3c3be9ebd71f 1-4,6-7,10,19-20,26-58,60-67,76,81-86,88-91,100-113,115-127
+app/api/services/route.ts
+  42c75aed2242dca0 115
+  a13dbd7aad21e56b 1-33,50-64,96-114,116-121,123-125,127-172
+  decb332aea24f657 87-95,122
+  65608662cc9c23b8 34-49,65-86,126
+app/(app)/agent/chat/use-chat-stream.ts
+  ea3978d41e3f559d 51-53,70-73,158-180,182,189-193,218-222,358-359,361,365-368,370-371,373-375,377,379-380,382-417,419-432,438,442-460,462-471,501-503,511-512,537,577,581,584-585,587,594-595,637-641
+  65608662cc9c23b8 21,215
+  57a62a85aba458c6 108,120-121
+  decb332aea24f657 156,223-224,234,237,246-260,263-271,273-275
+  42c75aed2242dca0 261-262,272
+  007b3c3be9ebd71f 241,291
+  a13dbd7aad21e56b 37,49,131-139,343-344,494
+app/(app)/agent/workflows/page.tsx
+  a13dbd7aad21e56b 4,233,235-236,239-240
+  007b3c3be9ebd71f 1,7-10,132-133,148-166,206-212,214,218-222,227-232,256,263-274,277-280,307,309-310,325-342,344-360,362-371,373-381,383-423,425,439-451
+  3139aeff4b99f9ae 134-147,167-184,186-190,192-196,202-205
+  b8805ef73a3903b1 287,290,293-297
+  decb332aea24f657 5,11-34,36-41,46-113,115-118,120-131,255,275-276,311-324,361,382
+  9cd0a412b0bd498c 3,35,42-45,114,119,185,191,197-201,213,215,223-226,234,237-238,241-254,257-262,281-286,288-289,291-292,298-306,308,424,426-438
+  42c75aed2242dca0 6,343,372
+lib/workflow-chat-bridge.ts
+  decb332aea24f657 9
+app/api/checklist-report/upload/route.ts
+  57a62a85aba458c6 1-38
+styles/themes/forest.css
+  decb332aea24f657 1-64
+app/(app)/agent/workflows/[filename]/runs/[runId]/page.tsx
+  decb332aea24f657 1-5,7-184,193-315
+  42c75aed2242dca0 6,185-192
+app/login/keycloak-login-button.tsx
+  007b3c3be9ebd71f 13
+app/api/workflows/[filename]/runs/route.ts
+  007b3c3be9ebd71f 1,3-6,8,19-20,26,45-52,54,60-65,67,72-73,75-76,78-81,83,86,89-92,95-99
+  65608662cc9c23b8 7,9-16,55-59,68-71,85,93-94
+  3139aeff4b99f9ae 53,66
+  decb332aea24f657 2,17-18,21-25,27-44,74,77,82,84,87-88
+lib/checklist-api.ts
+  57a62a85aba458c6 1-137
+components/overview/stats-card.tsx
+  57a62a85aba458c6 1-26
+lib/overview-stats.ts
+  57a62a85aba458c6 1-63
+app/(app)/settings/models/models-domain.ts
+  57a62a85aba458c6 1-10,19,23
+  9cd0a412b0bd498c 11-18,20-22
+app/(app)/overview/page.tsx
+  65608662cc9c23b8 1,3-243,247-249,254-257,261-267,269-321,323,338,340-349,352-376,378-383,385-391,393-397,401,403-534
+  3139aeff4b99f9ae 268
+  42c75aed2242dca0 333
+  57a62a85aba458c6 2,244-246,250-253,258-260,322,324-332,334-337,339,350-351,377,384,392,398-400,402,535-541
+components/ui/skeleton.tsx
+  57a62a85aba458c6 1-15
+components/workflow/workflow-steps-viewer.tsx
+  3139aeff4b99f9ae 89-97,99,109,166-176,193,197-198,200-254
+  007b3c3be9ebd71f 3,5-14,24-66,68,70,72-88,98,100-103,106-108,110-112,114-120,122-131,133-136,138-144,146-156,159-165,177-192,194-195,199,255-256,259-291,295,297-298,302-314,317-318
+app/(app)/agent/chat/chat-history-sidebar.tsx
+  9b46621ddcc5d2cd 172-183,185-188,190-216,218,220-224,226-228,231-236,238,240-246,252-260,262-302,304-305,351-376
+  65608662cc9c23b8 15-16,217
+  57a62a85aba458c6 115,152-157,160,166-169,225,229,237,239
+  b8805ef73a3903b1 247-251
+components/layout/sidebar-nav.tsx
+  007b3c3be9ebd71f 20-24
+  8b60108953964936 36
+  57a62a85aba458c6 10-11,33-35
+app/providers.tsx
+  decb332aea24f657 5,8,21
+app/(app)/agent/chat/chat-message-list.tsx
+  57a62a85aba458c6 12-13,44,48,50,66,68,74-87,130,230-232,291,301-322,325-336,339-348,373-375,388,391,404,406-407,411-413,416,419,423,426-434,452-454,463-465,481-493,521,524,530,537,541-542,545-551,553-554,556,561-562,567,569,576-579
+  65608662cc9c23b8 24-27,40,73,91,97-103,105-106,120-126,128-129,131,133,139-142,144-145,147-149,152-154,156-160,168-186,188-196,199-229,233-275,279-290,292-298,323-324,337-338,349-354,357-359,362-372,415,425,440,443,445-446,448-451,471-478,499,522,552,555,557-560,563-566,568,570
+  ea3978d41e3f559d 39,41,92-95,104,107-119,355-356,360-361,441-442,444,467-469
+  decb332aea24f657 418,420-422,436,456-461,495,501-515
+app/(app)/services/[serviceId]/page.tsx
+  decb332aea24f657 11,19-21,24,35,43-47,57-58,71,91,533-543,545,547,553-588,614-620,622,624-629,632-640,642-644,674,676,678,712-719,721-725,727,729-731,734-743,745-770,772,822-933,935-944,951,956,968,983-1012,1017-1054,1075,1081,1084,1087,1107-1115,1121,1130,1140,1149,1152,1154,1161,1169-1170,1191,1193-1242,1244,1254-1262,1265-1272,1274,1276-1309,1311-1312,1315-1350,1352,1354,1366-1367,1369-1370,1372-1390,1392-1404
+  3139aeff4b99f9ae 59,1057-1058,1062,1067-1068,1070-1074,1117-1120,1132-1139,1155-1159,1163-1165,1172,1187,1310,1451-1455
+  8b60108953964936 3,82-83,102,165,174,1125,1144,1153,1182
+  57a62a85aba458c6 1-2,7,14-15,56
+  a13dbd7aad21e56b 4-5,9-10,12-13,23,25-34,36-42,54,60-65,72,92-93,945-950,952-955,957-967,969-982,1013-1016,1055-1056,1059-1061,1063-1064,1069,1077-1080,1082-1083,1085-1086,1088,1101-1106,1116,1131,1150-1151,1160,1166-1168,1171,1173-1176,1179,1186,1192,1243,1245-1253,1263-1264,1273,1275,1313-1314,1391,1405-1406
+  42c75aed2242dca0 6,509-532,544,546,548-552,589-613,621,623,630-631,641,645-673,675,677,679-711,934,1122-1124,1126-1129,1141-1143,1145-1148,1180-1181,1183-1185
+  65608662cc9c23b8 8,16-18,22,48-53,55,66-70,73-81,84-90,94-101,103-164,166-173,175-508,720,726,728,732-733,744,771,773-821,1065-1066,1076,1089-1100,1162,1177-1178,1188-1190,1351,1353,1355-1365,1368,1371,1407-1450
+components/services/checklist-run-dialog.tsx
+  57a62a85aba458c6 1-17,26-149
+  3139aeff4b99f9ae 18-25
+app/(app)/agent/chat/chat-input.tsx
+  decb332aea24f657 30,150-156,158-160,162-165,167,170,242-243
+  57a62a85aba458c6 13,23,25,89-90,92-113,119,132,149,168,174,272,275
+  ea3978d41e3f559d 29,121-125,134-136,157,161,166,176-241
+app/api/workflow-file/route.ts
+  57a62a85aba458c6 1-34
+app/(app)/agent/chat/chat-search-highlight.tsx
+  57a62a85aba458c6 1-29
+components/services/service-search-dialog.tsx
+  57a62a85aba458c6 1-37,39-74,76-94,96-106
+  8b60108953964936 38,75,95
+app/api/services/[filename]/route.ts
+  a13dbd7aad21e56b 1-77
+components/services/service-card.tsx
+  3139aeff4b99f9ae 39-40,43,64
+  57a62a85aba458c6 1-36,38,41-42,44-63
+  8b60108953964936 37
+components/theme-switcher.tsx
+  decb332aea24f657 1-111
+components/ai-elements/suggestion.tsx
+  ea3978d41e3f559d 8-14,19,22-32,55
+components/overview/status-chart.tsx
+  57a62a85aba458c6 1-80
+lib/themes.ts
+  decb332aea24f657 1-40
+app/(app)/agent/chat/use-chat-sessions.ts
+  57a62a85aba458c6 36,39,41-44,46,54,56,58
+  ea3978d41e3f559d 1-2,18-21,27,32-35,37-38,40,45,57,73-75,77-79,129-131,150,152,156
+components/workflow/workflow-yaml.ts
+  007b3c3be9ebd71f 3,8-10,13,16-23,35-37,41-44,63-71,102-144,146-162,166,168-180,182-186,190-193,198-199,202-204,209-210,213,215,218,227-228,231,233-234,241,244,258-259,261,263,265,267,269-273,276-279,281-282,284-285,287,289,291-294,296-298,300,302-303,305,309-310,312-313,315-318,320-325,327-328,332
+  3139aeff4b99f9ae 24-34,38-40,45-62,82-84,145,163-165,167,187-189,194-197,200-201,205-208,211-212,214,216-217,219-226,235-237,249,274,280,286
+app/api/workflows/route.ts
+  a13dbd7aad21e56b 70,73,83-85
+  65608662cc9c23b8 86-91,93-104
+  3139aeff4b99f9ae 5,9,13-20,92,106,110,122
+  007b3c3be9ebd71f 1-4,6-8,10-12,21-69,71-72,74-82,105,107-109,111-121,123-172
+lib/services-api.ts
+  57a62a85aba458c6 1-2,5-6,76,81,83,88-95,97-98,100-104,106-107,136-181
+  42c75aed2242dca0 16,53
+  a13dbd7aad21e56b 3,7-15,17-22,24-26,34-52,54-57,59-62,72-75,77-80,82,84-87,96,99,105,108-135
+  decb332aea24f657 23,58
+  65608662cc9c23b8 4,27-33,63-71
+components/workflow/workflow-metadata-editor.tsx
+  3139aeff4b99f9ae 3-4,6,8,10-22,30,36-47,53-54,61,63-66,69-82,84-95,116,121,124-164,167-244,246-267,269-444,446,448-449,452
+lib/checklist-types.ts
+  57a62a85aba458c6 1-61
+app/(app)/agent/chat/chat-context-usage.tsx
+  57a62a85aba458c6 1-75
+components/workflow/workflow-types.ts
+  3139aeff4b99f9ae 37,39-45,54,66,69
+  007b3c3be9ebd71f 33,46-47
+app/(app)/agent/chat/page.tsx
+  65608662cc9c23b8 239
+  9cd0a412b0bd498c 278-279,283-285,292,303-304,345,351
+  decb332aea24f657 209-210
+  ea3978d41e3f559d 36,211-213,216-229,240,267-269,286-288,291,293-302,305-327,329-340,343-344,346-350,352-357,359,467,469,499-501
+  b8805ef73a3903b1 280-282,289-290,328,466
+  9b46621ddcc5d2cd 70-87,94,450
+  a13dbd7aad21e56b 142
+  57a62a85aba458c6 14,16-19,37-38,145,262-266,270-273,369-372,374-377,379-400,433-448,451-453,468,470,486,497
+app/(app)/services/page.tsx
+  8b60108953964936 12,15,25-28,391-396,473,493-497,506-513,517,524,526,548-550,565,582,601-637,644
+  42c75aed2242dca0 3,5,9-10,237,239,241-245,248-252,254-269,271-278,280-367,384,404,434,436,442,474-475,482-487,489-490,492,498,502,504,514-516,518-523,525,527-537,547,558-564,566,569-581,583-600,639-643,645-667,670
+  57a62a85aba458c6 1-2,6,18,470-471,476-477,479,481,488,491,539-546,552-555,557,567-568,668-669,671-672
+  a13dbd7aad21e56b 4,7-8,11,16,19-24,238,240,246-247,253,270,279,368-372,374-377,407-408,419,465-469,472,478,480,499-501,503,505,538,551,556,638
+  b8805ef73a3903b1 13-14,29-236,420-431
+  decb332aea24f657 17,373,378-383,385-390,397-403,405-406,409-418,432-433,435,437-441,443-464
+lib/s3-client.ts
+  57a62a85aba458c6 1-61
+app/globals.css
+  decb332aea24f657 55,91,125-129,146
+components/overview/category-grid.tsx
+  57a62a85aba458c6 1-61
+components/layout/left-sidebar.tsx
+  decb332aea24f657 6,19,41-58,60-61
+app/(app)/agent/skills/page.tsx
+  42c75aed2242dca0 1,4-25,27-178,181-317,330-390,423,427-483
+  2f1b4384ae68126c 3,318-329,391-422,424-426
+app/api/overview/route.ts
+  65608662cc9c23b8 1-93
+app/(app)/agent/chat/types.ts
+  65608662cc9c23b8 89-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.10",
+  "base_commit_sha": "5a306e1f11907308430b4e3536b877c0feb25d55",
+  "prompts": {
+    "007b3c3be9ebd71f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "27bfc7c9-508f-4787-a5d6-a81121c42748",
+        "model": "unknown"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 1998,
+      "total_deletions": 895,
+      "accepted_lines": 1052,
+      "overriden_lines": 0
+    },
+    "2f1b4384ae68126c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a93d788e-d04a-4ce3-a48a-622236f30edb",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 65,
+      "total_deletions": 70,
+      "accepted_lines": 65,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/b5b45c0a15f391a4c250cf856a37aa01f514e5647e47f063c61b1972039a089a"
+    },
+    "3139aeff4b99f9ae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c4e55b1-5248-462d-89ae-0af58bffa25c",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 2705,
+      "total_deletions": 2087,
+      "accepted_lines": 874,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/e83489f0f47214c413408a92862acd63f5df3750710b02f2aa604a8d29254a23"
+    },
+    "42c75aed2242dca0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c89871c-8c1b-4dc8-be62-17cfcbbb3445",
+        "model": "unknown"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 1650,
+      "total_deletions": 886,
+      "accepted_lines": 1260,
+      "overriden_lines": 0
+    },
+    "57a62a85aba458c6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34bee913-9c0f-409c-a3f6-58f89437ce46",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 4282,
+      "total_deletions": 1377,
+      "accepted_lines": 2031,
+      "overriden_lines": 2,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/8a481152f7538595ef86552973e72cf1070545ea44af84c0d2db6eb062dd451a"
+    },
+    "65608662cc9c23b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8558a17-deb9-4881-9dec-5f66072392fd",
+        "model": "unknown"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 2275,
+      "total_deletions": 715,
+      "accepted_lines": 1857,
+      "overriden_lines": 0
+    },
+    "8b60108953964936": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44a4ddaf-6811-4eff-b629-4585fd6d2775",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 135,
+      "total_deletions": 33,
+      "accepted_lines": 133,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/8d98fcf2e8fc08368386fe32efc95408b628b7ebfe92ae04c540bf48367a7395"
+    },
+    "9b46621ddcc5d2cd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cda5eef3-a33a-4646-9b0c-8b15e697ac7d",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 225,
+      "total_deletions": 181,
+      "accepted_lines": 166,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/20b179be64c406f009065c3a9034d8b1449f42e9dba9e67aa50792266f2f30a6"
+    },
+    "9cd0a412b0bd498c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06a2cc89-0149-467b-9c81-71c07f3b27e1",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 142,
+      "total_deletions": 47,
+      "accepted_lines": 139,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/91d735a24901c7eb5b43c2accde166a600915a14c78b7052968a3003f9026666"
+    },
+    "a13dbd7aad21e56b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d2de1aa7-c377-4d12-9843-a68763823847",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 1773,
+      "total_deletions": 1232,
+      "accepted_lines": 532,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/d49a84d20e0f79699d767aaf8f8c8cb46cbae6d6b724bebae37d744decec0a55"
+    },
+    "b8805ef73a3903b1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d628f46-d3ac-4d5d-a7a6-aaf872abfac2",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 266,
+      "total_deletions": 66,
+      "accepted_lines": 263,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/d31667302c13acf997ee45f9669bbae48f16013fc5f7d4a5cb9e64729baad21d"
+    },
+    "decb332aea24f657": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ac4badf-3397-48f8-a9a3-0cca59028874",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 4511,
+      "total_deletions": 2915,
+      "accepted_lines": 2451,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/e19617a57fbe57b1f1db29c629b65d731eebe30922611606bc1225ea667d0005"
+    },
+    "ea3978d41e3f559d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bb9202c2-2afe-4178-8c90-e8dad9ca7b5d",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 1059,
+      "total_deletions": 592,
+      "accepted_lines": 681,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/a5137d5fbe337c21a64bf04c39e8b9e1050f2df844986db5a96041073d9eab3f"
+    }
+  }
+}
