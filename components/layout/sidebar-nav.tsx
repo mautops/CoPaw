@@ -9,6 +9,7 @@ import {
   WaypointsIcon,
   ServerIcon,
   LayoutDashboardIcon,
+  MapIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,12 @@ const nav: {
     label: "运维",
     items: [
       { label: "公共服务", href: "/services", icon: ServerIcon },
+    ],
+  },
+  {
+    label: "产品",
+    items: [
+      { label: "产品蓝图", href: "/roadmap", icon: MapIcon },
     ],
   },
 ];

@@ -8,13 +8,14 @@ import { mergeAuthHeaders } from "./auth-headers";
 
 /**
  * Get the backend API base URL.
- * Reads from NEXT_PUBLIC_API_URL env var, defaults to localhost:8088.
+ * - Server-side: reads API_URL env var (e.g. http://backend:8088 inside Docker).
+ * - Client-side: returns "" so fetch uses same-origin relative paths,
+ *   which Next.js rewrites will proxy to the backend.
  */
 function getApiBaseUrl(): string {
-  const url = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (url) {
-    return url.replace(/\/+$/, "");
-  }
+  if (typeof window !== "undefined") return "";
+  const url = process.env.API_URL?.trim();
+  if (url) return url.replace(/\/+$/, "");
   return "http://localhost:8088";
 }
 

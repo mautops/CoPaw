@@ -1,0 +1,58 @@
+services:
+  # ── 后端: QwenPaw ──────────────────────────────────────────────────────────
+  backend:
+    image: agentscope/qwenpaw:latest
+    ports:
+      - "8088:8088"
+    volumes:
+      - ~/.copaw:/app/working
+      - ~/.copaw.secret:/app/working.secret
+      - ~/.copaw.backup:/app/working.backup
+    networks:
+      - copaw
+    restart: unless-stopped
+
+  # ── 前端: Next.js Console ──────────────────────────────────────────────────
+  console:
+    image: repo.gz.cvte.cn/docker-public/qwenpaw-console:v0.0.3
+    ports:
+      - "3000:3000"
+    environment:
+      - HOSTNAME=0.0.0.0
+      - BETTER_AUTH_URL=https://hiops.gz.cvte.cn
+      - API_URL=http://backend:8088
+      - BETTER_AUTH_SECRET=hRWXicHV8zMzfSfxRDURfXHIoGLtw9zn
+      - DATABASE_URL=postgresql://postgres:H2kd8viVFJ@db:5432/next_console
+      - KEYCLOAK_CLIENT_ID=hi-ops
+      - KEYCLOAK_CLIENT_SECRET=g94qR9K9AYKSPMhjh995Nr9VVNc1DUMy
+      - KEYCLOAK_ISSUER=https://sso.cvte.com/auth/realms/default
+    volumes:
+      - ~/.copaw:/home/nextjs/.copaw
+    depends_on:
+      - backend
+      - db
+    networks:
+      - copaw
+    restart: unless-stopped
+
+  # ── 数据库: PostgreSQL ─────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=H2kd8viVFJ
+      - POSTGRES_DB=next_console
+    ports:
+      - "5432:5432"
+    volumes:
+      - /root/pgdata:/var/lib/postgresql/data
+    networks:
+      - copaw
+    restart: unless-stopped
+
+networks:
+  copaw:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.200.0/24

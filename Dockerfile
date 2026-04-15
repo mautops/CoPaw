@@ -22,8 +22,9 @@ WORKDIR /app
 # 仅复制依赖文件 (利用 Docker 缓存)
 COPY package.json pnpm-lock.yaml* ./
 
-# 安装依赖 (包含 devDependencies，构建需要)
-RUN pnpm install --frozen-lockfile
+# 安装依赖 (包含 devDependencies，构建需要；使用阿里云镜像源加速)
+RUN pnpm config set registry https://registry.npmmirror.com && \
+    pnpm install --frozen-lockfile
 
 # ── 阶段3: 构建 ────────────────────────────────────────────────────────────────
 FROM deps AS builder

@@ -244,7 +244,7 @@ function SessionItem({
                   {String(session.meta.cluster_name)}
                 </span>
               )}
-              {!session.meta?.cluster_name && (session.meta?.workflow_filename || session.meta?.workflowFilename) && (
+              {!session.meta?.cluster_name && !!(session.meta?.workflow_filename || session.meta?.workflowFilename) && (
                 <span className="block truncate text-[10px] text-primary/60">
                   {String(session.meta.workflow_name ?? session.meta.workflow_filename ?? session.meta.workflowFilename)}
                 </span>
