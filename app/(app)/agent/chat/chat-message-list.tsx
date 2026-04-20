@@ -40,14 +40,15 @@ import { BotIcon, CheckCircle2Icon, CheckIcon, ChevronDownIcon, CopyIcon, Refres
 import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LocalMessage } from "./types";
+import { WorkflowCard } from "@/components/workflow";
 
 // ── Avatar helpers ────────────────────────────────────────────────────────────
 
 function BotAvatar() {
   return (
-    <Avatar size="default" className="mt-0.5 shrink-0 size-6 ring-2 ring-border/60 shadow-sm">
+    <Avatar size="default" className="mt-0.5 shrink-0 size-8 ring-2 ring-border/60 shadow-sm">
       <AvatarFallback className="bg-primary/10">
-        <BotIcon className="size-3 text-primary" />
+        <BotIcon className="size-4 text-primary" />
       </AvatarFallback>
     </Avatar>
   );
@@ -63,9 +64,9 @@ function UserAvatar({
   initials: string;
 }) {
   return (
-    <Avatar size="default" className="mt-0.5 shrink-0 size-6 ring-2 ring-border/60 shadow-sm">
+    <Avatar size="default" className="mt-0.5 shrink-0 size-8 ring-2 ring-border/60 shadow-sm">
       <AvatarImage src={image} alt={name ?? "User"} />
-      <AvatarFallback className="bg-muted font-medium text-[10px]">{initials}</AvatarFallback>
+      <AvatarFallback className="bg-muted font-medium text-xs">{initials}</AvatarFallback>
     </Avatar>
   );
 }
@@ -414,23 +415,29 @@ export function ChatMessageList({
 
         // ── User turn ──
         if (turn.kind === "user") {
+          const isWorkflow = Boolean(turn.msg.workflowData);
           return (
             <motion.div
               key={turn.msg.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className={`${mt} flex flex-row-reverse items-start gap-3`}
+              // workflow 卡片：左对齐占满；普通消息：右对齐气泡
+              className={`${mt} flex ${isWorkflow ? "flex-row" : "flex-row-reverse"} items-start gap-3`}
             >
               <UserAvatar image={userImage} name={userName} initials={userInitials} />
-              <div className="flex min-w-0 flex-1 flex-col items-end gap-1">
-                <Message from="user" className="max-w-full">
-                  <MessageContent>
-                    <MessageResponse mode="static" parseIncompleteMarkdown={false}>
-                      {turn.msg.content}
-                    </MessageResponse>
-                  </MessageContent>
-                </Message>
+              <div className={`flex min-w-0 flex-1 flex-col gap-1 ${isWorkflow ? "items-stretch" : "items-end"}`}>
+                {isWorkflow ? (
+                  <WorkflowCard data={turn.msg.workflowData!} />
+                ) : (
+                  <Message from="user" className="max-w-full">
+                    <MessageContent>
+                      <MessageResponse mode="static" parseIncompleteMarkdown={false}>
+                        {turn.msg.content}
+                      </MessageResponse>
+                    </MessageContent>
+                  </Message>
+                )}
                 <Timestamp ts={turn.msg.createdAt} />
               </div>
             </motion.div>

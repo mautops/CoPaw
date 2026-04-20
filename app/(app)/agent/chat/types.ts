@@ -1,6 +1,8 @@
 import type { ToolCallInfo } from "@/lib/chat-api";
 import type { BackendMessage } from "@/lib/chat-api";
 import type { ChatStatus } from "ai";
+import type { WorkflowData } from "@/components/workflow/workflow-types";
+import { parseWorkflowYaml } from "@/components/workflow/workflow-yaml";
 import { nanoid } from "nanoid";
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -30,6 +32,7 @@ export interface LocalMessage {
   createdAt: number;
   type: LocalMessageType;
   tool?: ToolCallInfo;
+  workflowData?: WorkflowData;
 }
 
 /** Streaming state for a single session - supports parallel multi-session output */
@@ -120,6 +123,26 @@ export function dataUrlToFile(
   return new File([bytes], filename, { type: mimeType });
 }
 
+// ── Workflow YAML detection ───────────────────────────────────────────────────
+
+/**
+ * 尝试从用户消息文本中恢复 WorkflowData。
+ * 判定标准：文本以 YAML 顶层键开头，且同时包含 name: 和 steps: 两个关键字段。
+ * 解析失败时静默返回 undefined，不影响消息正常展示。
+ */
+function tryParseWorkflowYaml(text: string): WorkflowData | undefined {
+  if (!text.includes("steps:") || !text.includes("name:")) return undefined;
+  // 必须以 YAML 顶层键（非缩进）开头，排除普通 Markdown
+  if (!/^[a-zA-Z_]\w*:/m.test(text)) return undefined;
+  try {
+    const data = parseWorkflowYaml(text);
+    if (data.steps.length > 0) return data;
+  } catch {
+    // 解析失败，降级为普通文本
+  }
+  return undefined;
+}
+
 // ── History parsing ──────────────────────────────────────────────────────────
 
 export function parseHistory(messages: BackendMessage[]): LocalMessage[] {
@@ -131,12 +154,14 @@ export function parseHistory(messages: BackendMessage[]): LocalMessage[] {
     const role = m.role as string;
 
     if (role === "user") {
+      const content = extractText(m.content);
       loaded.push({
         id: nanoid(),
         role: "user",
-        content: extractText(m.content),
+        content,
         createdAt: Date.now(),
         type: "text",
+        workflowData: tryParseWorkflowYaml(content),
       });
       continue;
     }

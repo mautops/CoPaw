@@ -45,8 +45,10 @@ function ChatPageInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const openSessionParam = searchParams.get("openSession")?.trim() ?? "";
+  // ?s= persists the active chat across refreshes
+  const sParam = searchParams.get("s")?.trim() ?? "";
   const skipInitialAutoSelect =
-    searchParams.get("execWorkflow") === "1" || Boolean(openSessionParam);
+    searchParams.get("execWorkflow") === "1" || Boolean(openSessionParam) || Boolean(sParam);
 
   const { showLeftSidebar, toggleLeftSidebar, user } = useAppShell();
 
@@ -98,6 +100,22 @@ function ChatPageInner() {
     }
   }, [activeQuery.data, selectedModel]);
 
+  // Sync active chat id into URL (?s=) so page refresh restores the same session.
+  // Uses replaceState directly to avoid Next.js router re-renders on every selection.
+  const handleChatIdChange = useCallback(
+    (id: string | null) => {
+      const next = new URLSearchParams(window.location.search);
+      if (id) {
+        next.set("s", id);
+      } else {
+        next.delete("s");
+      }
+      const qs = next.toString();
+      window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
+    },
+    [pathname],
+  );
+
   const {
     sessions,
     sessionsPending,
@@ -110,7 +128,12 @@ function ChatPageInner() {
     handleNewChat,
     handleDeleteSession,
     handleRenameSession,
-  } = useChatSessions({ userId, skipInitialAutoSelect });
+  } = useChatSessions({
+    userId,
+    skipInitialAutoSelect,
+    initialChatId: sParam || undefined,
+    onChatIdChange: handleChatIdChange,
+  });
 
   const pendingOpenSessionRef = useRef<string | null>(null);
   const reconnectAttemptedRef = useRef(false);
@@ -173,7 +196,11 @@ function ChatPageInner() {
       (s) => s.session_id === target || s.id === target,
     );
     pendingOpenSessionRef.current = null;
-    router.replace(pathname);
+    // Remove openSession param but keep others (e.g. ?s=)
+    const next = new URLSearchParams(window.location.search);
+    next.delete("openSession");
+    const qs = next.toString();
+    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
     if (!found) return;
     handleSelectSession(found.id);
     void queryClient.refetchQueries({ queryKey: ["chat", found.id] });
@@ -181,7 +208,6 @@ function ChatPageInner() {
     sessions,
     sessionsPending,
     pathname,
-    router,
     handleSelectSession,
     queryClient,
   ]);
@@ -195,7 +221,11 @@ function ChatPageInner() {
     workflowExecutedRef.current = true;
 
     const raw = sessionStorage.getItem(WORKFLOW_CHAT_EXEC_STORAGE_KEY);
-    router.replace(pathname);
+    // Remove execWorkflow param only, keep others
+    const next = new URLSearchParams(window.location.search);
+    next.delete("execWorkflow");
+    const qs = next.toString();
+    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
     if (!raw) return;
     sessionStorage.removeItem(WORKFLOW_CHAT_EXEC_STORAGE_KEY);
     let payload: WorkflowChatExecPayload;
@@ -206,7 +236,10 @@ function ChatPageInner() {
     }
     if (!payload.markdown?.trim()) return;
 
-    const textWithInstruction = payload.markdown;
+    // 如果有集群提示词，前置注入到消息文本里
+    const textWithInstruction = payload.clusterPrompt?.trim()
+      ? `**集群背景信息（请在执行过程中严格参考）：**\n${payload.clusterPrompt.trim()}\n\n---\n\n${payload.markdown}`
+      : payload.markdown;
 
     // forceNewChat always creates a new session regardless of currentChatId,
     // so resetStreaming/setCurrentChatId are not needed before the call.
@@ -219,6 +252,7 @@ function ChatPageInner() {
       forceNewChat: true,
       chatName: payload.sessionTitle,
       meta: payload.meta,
+      workflowData: payload.workflowData,
       workflowExecContext:
         payload.workflowFilename && payload.userId
           ? {
@@ -229,7 +263,6 @@ function ChatPageInner() {
     });
   }, [
     searchParams,
-    router,
     pathname,
     resetStreaming,
     setCurrentChatId,

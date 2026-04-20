@@ -56,6 +56,7 @@ import {
   WorkflowMetadataEditor,
   WorkflowStepsEditor,
   WorkflowStepsViewer,
+  WorkflowStepResultCard,
   type WorkflowData,
 } from "@/components/workflow";
 
@@ -267,46 +268,28 @@ function RunStatusBadge({ status, steps }: { status?: string | null; steps?: Wor
   return <span className="flex items-center gap-1 text-xs text-muted-foreground"><CircleDotIcon className="size-3.5" />执行中</span>;
 }
 
-function StepResultRow({ step, isLast }: { step: WorkflowStepResult; isLast: boolean }) {
-  const isSuccess = step.status === "success";
-  const isFailed = step.status === "failed";
-  const isRunning = step.status === "running";
+function RunResultSummary({ steps }: { steps: WorkflowStepResult[] }) {
+  const critical = steps.filter((s) => s.result === "critical").length;
+  const warn = steps.filter((s) => s.result === "warn").length;
+  const ok = steps.filter((s) => s.result === "ok").length;
+  if (!critical && !warn && !ok) return null;
   return (
-    <div className="relative flex gap-3">
-      {/* 时间轴线 */}
-      {!isLast && <div className="absolute left-[11px] top-6 bottom-0 w-px bg-border/60" />}
-      {/* 状态圆点 */}
-      <div className={`relative z-10 mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border-2 ${
-        isSuccess ? "border-emerald-500 bg-emerald-500/10" :
-        isFailed ? "border-destructive bg-destructive/10" :
-        isRunning ? "border-blue-500 bg-blue-500/10" :
-        "border-muted-foreground/30 bg-muted/30"
-      }`}>
-        {isSuccess && <CircleCheckIcon className="size-3 text-emerald-500" />}
-        {isFailed && <CircleIcon className="size-3 text-destructive" />}
-        {isRunning && <Loader2Icon className="size-3 animate-spin text-blue-500" />}
-        {!isSuccess && !isFailed && !isRunning && <CircleDotIcon className="size-3 text-muted-foreground/40" />}
-      </div>
-      {/* 内容 */}
-      <div className="min-w-0 flex-1 pb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{step.step_title || step.step_id}</span>
-          {step.started_at && step.finished_at && (() => {
-            const ms = Date.parse(step.finished_at) - Date.parse(step.started_at);
-            if (ms > 0) return (
-              <span className="text-xs text-muted-foreground">
-                {ms < 1000 ? `${ms}ms` : `${Math.round(ms / 1000)}s`}
-              </span>
-            );
-          })()}
-        </div>
-        {step.output && (
-          <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{step.output}</p>
-        )}
-        {step.error && (
-          <p className="mt-1 text-xs text-destructive">{step.error}</p>
-        )}
-      </div>
+    <div className="flex items-center gap-2 text-xs">
+      {critical > 0 && (
+        <span className="flex items-center gap-0.5 font-medium text-destructive">
+          <CircleIcon className="size-3" />{critical} 严重
+        </span>
+      )}
+      {warn > 0 && (
+        <span className="flex items-center gap-0.5 text-yellow-600 dark:text-yellow-400">
+          <CircleDotIcon className="size-3" />{warn} 警告
+        </span>
+      )}
+      {ok > 0 && (
+        <span className="flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400">
+          <CircleCheckIcon className="size-3" />{ok} 正常
+        </span>
+      )}
     </div>
   );
 }
@@ -318,6 +301,7 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
     queryKey: ["workflow", "steps", filename, run.run_id],
     queryFn: () => workflowApi.listStepResults(filename, run.run_id),
     staleTime: 30_000,
+    enabled: expanded,
   });
 
   const steps = stepsQuery.data?.steps ?? [];
@@ -332,6 +316,7 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
             <span className="text-sm font-medium tabular-nums">
               {formatWorkflowTimestamp(run.executed_at)}
             </span>
+            <RunResultSummary steps={steps} />
           </div>
           <p className="text-xs text-muted-foreground">
             {run.trigger === "ui_execute" ? "手动执行" : run.trigger}
@@ -359,7 +344,7 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
         </div>
       </div>
 
-      {/* 展开的步骤时间轴 */}
+      {/* 展开的步骤卡片 */}
       <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
@@ -380,9 +365,15 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
                 <p className="text-xs text-muted-foreground">暂无步骤执行记录</p>
               )}
               {steps.length > 0 && (
-                <div className="pl-1">
+                <div>
                   {steps.map((step, i) => (
-                    <StepResultRow key={step.step_id} step={step} isLast={i === steps.length - 1} />
+                    <WorkflowStepResultCard
+                      key={step.step_id}
+                      result={step}
+                      index={i}
+                      isLast={i === steps.length - 1}
+                      compact
+                    />
                   ))}
                 </div>
               )}
@@ -474,6 +465,7 @@ export default function WorkflowDetailPage() {
       sessionTitle: workflowData.name?.trim() || filename,
       workflowFilename: filename,
       userId,
+      workflowData,
     };
     sessionStorage.setItem(WORKFLOW_CHAT_EXEC_STORAGE_KEY, JSON.stringify(payload));
     router.push("/agent/chat?execWorkflow=1");

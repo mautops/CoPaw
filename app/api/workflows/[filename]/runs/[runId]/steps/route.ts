@@ -28,7 +28,10 @@ function stepsFile(filename: string, runId: string) {
 export interface StepResult {
   step_id: string;
   step_title: string;
+  /** 步骤执行状态：步骤本身是否跑完 */
   status: "success" | "failed" | "skipped" | "running";
+  /** 巡检结果：步骤执行完后发现了什么 */
+  result?: "ok" | "warn" | "critical" | "info";
   started_at: string;
   finished_at?: string;
   output?: string;
@@ -87,6 +90,7 @@ export async function POST(
       step_id: body.step_id,
       step_title: body.step_title ?? body.step_id,
       status: body.status ?? "skipped",
+      result: body.result,
       started_at: body.started_at ?? new Date().toISOString(),
       finished_at: body.finished_at,
       output: body.output,

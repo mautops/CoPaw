@@ -15,6 +15,8 @@ export interface Cluster {
   hosts: string[];
   /** 集群状态 */
   status: ClusterStatus;
+  /** 执行提示词：针对该集群执行工作流时附加的背景信息 */
+  prompt?: string;
 }
 
 export interface QuickAction {

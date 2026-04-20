@@ -52,9 +52,12 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  title,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  /** 可访问性标题，不传时使用 sr-only 兜底标题以满足 Radix 要求 */
+  title?: string;
 }) {
   return (
     <DialogPortal>
@@ -68,6 +71,10 @@ function DialogContent({
         )}
         {...props}
       >
+        {/* sr-only 兜底：当 children 里已有 DialogTitle 时 Radix 会用那个；此处仅作无障碍保底 */}
+        <DialogPrimitive.Title className="sr-only">
+          {title ?? "对话框"}
+        </DialogPrimitive.Title>
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>

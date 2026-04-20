@@ -228,7 +228,7 @@ function SortableStepItem({
           disabled={readOnly}
         />
         <Select
-          value={step.language}
+          value={step.language ?? ""}
           onValueChange={(v) => onUpdate(step.id, { language: v })}
           disabled={readOnly}
         >

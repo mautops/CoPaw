@@ -8,7 +8,7 @@ import { useAppShell } from "@/app/(app)/app-shell";
 import { STATUS_CONFIG, CATEGORY_LABELS, CLUSTER_STATUS_CONFIG } from "@/lib/services-data";
 import { fetchServicesWithAgents, serviceApi } from "@/lib/services-api";
 import { workflowApi, formatWorkflowTimestamp, type WorkflowInfo } from "@/lib/workflow-api";
-import { parseWorkflowYaml, WorkflowStepsViewer } from "@/components/workflow";
+import { parseWorkflowYaml, WorkflowStepsViewer, WorkflowStepResultCard } from "@/components/workflow";
 import { WORKFLOW_CHAT_EXEC_STORAGE_KEY, type WorkflowChatExecPayload } from "@/lib/workflow-chat-bridge";
 import { scopeUserFromSessionUser } from "@/lib/workflow-username";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,6 @@ import {
   HistoryIcon,
   CheckCircle2Icon,
   XCircleIcon,
-  MinusCircleIcon,
   BarChart2Icon,
   LayersIcon,
   PlusIcon,
@@ -51,8 +50,9 @@ import {
   PencilIcon,
   NetworkIcon,
   XIcon,
-} from "lucide-react";
-import type { ServiceCategory, Cluster, ClusterStatus } from "@/lib/services-config";
+  AlertTriangleIcon,
+  InfoIcon,
+} from "lucide-react";import type { ServiceCategory, Cluster, ClusterStatus } from "@/lib/services-config";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -140,6 +140,7 @@ interface ClusterFormValues {
   description: string;
   hostsText: string; // newline-separated IPs
   status: ClusterStatus;
+  prompt: string;
 }
 
 function ClusterFormDialog({
@@ -159,6 +160,7 @@ function ClusterFormDialog({
     description: initial?.description ?? "",
     hostsText: initial?.hosts.join("\n") ?? "",
     status: initial?.status ?? "draft",
+    prompt: initial?.prompt ?? "",
   }));
 
   // Reset when dialog opens with new initial
@@ -169,6 +171,7 @@ function ClusterFormDialog({
         description: initial?.description ?? "",
         hostsText: initial?.hosts.join("\n") ?? "",
         status: initial?.status ?? "draft",
+        prompt: initial?.prompt ?? "",
       });
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -259,6 +262,22 @@ function ClusterFormDialog({
                 </SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* 执行提示词 */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium" htmlFor={`${titleId}-prompt`}>
+              执行提示词
+              <span className="ml-1 font-normal text-muted-foreground">（可选）</span>
+            </label>
+            <Textarea
+              id={`${titleId}-prompt`}
+              placeholder={"针对该集群的背景信息，执行工作流时自动附加。\n例如：该集群为生产环境，主节点 192.168.1.10，请操作前确认影响范围。"}
+              rows={3}
+              className="text-sm resize-none"
+              value={form.prompt}
+              onChange={(e) => setForm((f) => ({ ...f, prompt: e.target.value }))}
+            />
           </div>
         </div>
 
@@ -423,6 +442,7 @@ function ClustersPanelContent({
       description: values.description.trim() || undefined,
       hosts: values.hostsText.split("\n").map((h) => h.trim()).filter(Boolean),
       status: values.status,
+      prompt: values.prompt.trim() || undefined,
     };
     onSave([...clusters, newCluster]);
   }
@@ -438,6 +458,7 @@ function ClustersPanelContent({
               description: values.description.trim() || undefined,
               hosts: values.hostsText.split("\n").map((h) => h.trim()).filter(Boolean),
               status: values.status,
+              prompt: values.prompt.trim() || undefined,
             }
           : c
       )
@@ -549,7 +570,12 @@ function StepRunSummary({
   const failed = steps.filter((s) => s.status === "failed").length;
   const running = latestRun.status === "running" || steps.some((s) => s.status === "running");
   const total = steps.length;
-  const successPct = total > 0 ? Math.round((success / total) * 100) : 0;
+
+  const criticalCount = steps.filter((s) => s.result === "critical").length;
+  const warnCount = steps.filter((s) => s.result === "warn").length;
+  const infoCount = steps.filter((s) => s.result === "info").length;
+  const okCount = steps.filter((s) => s.result === "ok").length;
+  const hasAnyResult = steps.some((s) => s.result);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -568,7 +594,19 @@ function StepRunSummary({
               </span>
             ) : (
               <>
-                {success > 0 && (
+                {criticalCount > 0 && (
+                  <span className="flex items-center gap-0.5 font-medium text-destructive">
+                    <XCircleIcon className="size-3.5" />
+                    {criticalCount} 严重
+                  </span>
+                )}
+                {warnCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-yellow-600 dark:text-yellow-400">
+                    <AlertTriangleIcon className="size-3.5" />
+                    {warnCount} 警告
+                  </span>
+                )}
+                {!criticalCount && !warnCount && success > 0 && (
                   <span className="flex items-center gap-0.5 text-green-600 dark:text-green-400">
                     <CheckCircle2Icon className="size-3.5" />
                     {success}
@@ -577,78 +615,59 @@ function StepRunSummary({
                 {failed > 0 && (
                   <span className="flex items-center gap-0.5 text-destructive">
                     <XCircleIcon className="size-3.5" />
-                    {failed}
+                    {failed} 失败
                   </span>
                 )}
               </>
             )}
           </button>
         </TooltipTrigger>
-        <TooltipContent side="top" className="w-52 p-3" align="start">
-          <p className="mb-2 text-xs font-medium">最近一次执行</p>
-          {total > 0 && (
-            <>
-              <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-green-500 transition-all"
-                  style={{ width: `${successPct}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                  <CheckCircle2Icon className="size-3" />
-                  成功 {success}
-                </span>
-                {failed > 0 && (
-                  <span className="flex items-center gap-1 text-destructive">
-                    <XCircleIcon className="size-3" />
-                    失败 {failed}
-                  </span>
-                )}
-                <span>{success + failed}/{total} 步</span>
-              </div>
-            </>
-          )}
-          <div className="mt-2 text-xs text-muted-foreground">
-            {new Date(latestRun.executed_at).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+        <TooltipContent side="top" className="w-80 p-0 overflow-hidden" align="start">
+          {/* 头部 */}
+          <div className="flex items-center justify-between gap-4 border-b px-3 py-2">
+            <span className="text-xs font-medium">最近一次执行</span>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {new Date(latestRun.executed_at).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+            </span>
           </div>
+          {/* 巡检结果四格 */}
+          {hasAnyResult ? (
+            <div className="flex divide-x">
+              {[
+                { count: criticalCount, label: "严重", activeClass: "text-destructive",                       dot: "bg-rose-500" },
+                { count: warnCount,     label: "警告", activeClass: "text-yellow-600 dark:text-yellow-400",   dot: "bg-yellow-500" },
+                { count: infoCount,     label: "提示", activeClass: "text-blue-600 dark:text-blue-400",       dot: "bg-blue-500" },
+                { count: okCount,       label: "正常", activeClass: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
+              ].map(({ count, label, activeClass, dot }) => (
+                <div key={label} className="flex flex-1 flex-col items-center gap-1 py-3">
+                  <span className={`text-xl font-bold tabular-nums leading-none ${count > 0 ? activeClass : "text-muted-foreground/25"}`}>
+                    {count}
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap">
+                    <span className={`size-1.5 shrink-0 rounded-full ${count > 0 ? dot : "bg-muted-foreground/20"}`} />
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 px-3 py-2.5 text-xs">
+              <span className="text-muted-foreground">共 {total} 步</span>
+              <span className="text-emerald-600 dark:text-emerald-400">{success} 成功</span>
+              {failed > 0 && <span className="text-destructive">{failed} 失败</span>}
+            </div>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 }
 
+// ─── ResultDot — compact inline result indicator ──────────────────────────────
+
 // ─── LastRunStatus — real execution state per step ────────────────────────────
 
-type StepRunStatus = "success" | "failed" | "skipped" | "running" | "pending";
-
-function StepStatusIcon({ status }: { status: StepRunStatus }) {
-  if (status === "success")
-    return <CheckCircle2Icon className="size-4 shrink-0 text-green-500" />;
-  if (status === "failed")
-    return <XCircleIcon className="size-4 shrink-0 text-destructive" />;
-  if (status === "running")
-    return <Loader2Icon className="size-4 shrink-0 animate-spin text-blue-500" />;
-  if (status === "skipped")
-    return <MinusCircleIcon className="size-4 shrink-0 text-muted-foreground/50" />;
-  return <MinusCircleIcon className="size-4 shrink-0 text-muted-foreground/30" />;
-}
-
-const STATUS_LABEL: Record<StepRunStatus, string> = {
-  success: "成功",
-  failed: "失败",
-  skipped: "跳过",
-  running: "运行中",
-  pending: "未执行",
-};
-
-function LastRunStatus({
-  filename,
-  steps,
-}: {
-  filename: string;
-  steps: import("@/components/workflow/workflow-types").WorkflowStep[];
-}) {
+function LastRunStatus({ filename }: { filename: string }) {
   const { latestRun, steps: stepResults, isLoading } = useLastRun(filename);
 
   if (isLoading) {
@@ -668,47 +687,24 @@ function LastRunStatus({
     );
   }
 
-  // 以 workflow 定义的步骤顺序为主，merge 真实结果
-  const resultMap = new Map(stepResults.map((r) => [r.step_id, r]));
-
   return (
-    <div className="space-y-1">
-      <p className="mb-2 text-xs text-muted-foreground">
+    <div>
+      <p className="mb-3 text-xs text-muted-foreground">
         {new Date(latestRun.executed_at).toLocaleString("zh-CN")}
       </p>
-      {steps.map((step) => {
-        const result = resultMap.get(step.id);
-        const status: StepRunStatus = result
-          ? (result.status as StepRunStatus)
-          : "pending";
-        return (
-          <div
-            key={step.id}
-            className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm"
-          >
-            <StepStatusIcon status={status} />
-            <span className="min-w-0 flex-1 truncate text-foreground/80">
-              {step.title || step.name || step.id}
-            </span>
-            <span className={cn(
-              "shrink-0 text-xs",
-              status === "success" && "text-green-600 dark:text-green-400",
-              status === "failed" && "text-destructive",
-              status === "running" && "text-blue-500",
-              (status === "pending" || status === "skipped") && "text-muted-foreground",
-            )}>
-              {STATUS_LABEL[status]}
-            </span>
-            {result?.finished_at && result?.started_at && (
-              <span className="shrink-0 text-xs text-muted-foreground/50">
-                {Math.round(
-                  (new Date(result.finished_at).getTime() - new Date(result.started_at).getTime()) / 1000
-                )}s
-              </span>
-            )}
-          </div>
-        );
-      })}
+      {stepResults.length === 0 ? (
+        <p className="text-xs text-muted-foreground">暂无步骤执行记录</p>
+      ) : (
+        stepResults.map((step, i) => (
+          <WorkflowStepResultCard
+            key={step.step_id}
+            result={step}
+            index={i}
+            isLast={i === stepResults.length - 1}
+            compact
+          />
+        ))
+      )}
     </div>
   );
 }
@@ -721,12 +717,14 @@ function WorkflowRow({
   onRemove,
   onExecute,
   isPending,
+  serviceId,
 }: {
   filename: string;
   clusters: Cluster[];
   onRemove: () => void;
   onExecute: (raw: string, name: string, cluster?: Cluster) => void;
   isPending: boolean;
+  serviceId: string;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [clusterPickOpen, setClusterPickOpen] = useState(false);
@@ -770,13 +768,19 @@ function WorkflowRow({
         </div>
         {/* 主操作：执行 + 集群选择下拉 + 历史 */}
         <div className="flex shrink-0 items-center gap-2">
+          {/* 图表 */}
+          <Link href={`/agent/workflows/${encodeURIComponent(filename)}/stats?from=/services/${serviceId}`}>
+            <Button size="icon-sm" variant="outline" className="text-muted-foreground" title="查看执行图表">
+              <BarChart2Icon className="size-3.5" />
+            </Button>
+          </Link>
           {/* 分体按钮：左侧直接执行，右侧选集群执行 */}
           <div className="flex items-center">
             <Button
               size="sm"
               className="gap-1.5 rounded-r-none border-r-0"
               disabled={isLoading || !detail}
-              onClick={() => onExecute(detail!.raw, wfData?.name ?? "")}
+              onClick={() => onExecute(detail!.raw, wfData?.name ?? "", runningClusters[0])}
             >
               <PlayIcon className="size-3.5" />
               执行
@@ -831,7 +835,7 @@ function WorkflowRow({
       {/* 底部行：图表按钮 + 步骤状态摘要 + Tags + 查看 + 解绑 */}
       <div className="flex items-center gap-2 px-4 pb-3">
         {/* 图表按钮 */}
-        <Link href={`/agent/workflows/${encodeURIComponent(filename)}/stats`}>
+        <Link href={`/agent/workflows/${encodeURIComponent(filename)}/stats?from=/services/${serviceId}`}>
           <Button size="icon-sm" variant="ghost" className="shrink-0 text-muted-foreground" title="查看图表">
             <BarChart2Icon className="size-3.5" />
           </Button>
@@ -931,7 +935,7 @@ function WorkflowRow({
                 </TabsContent>
 
                 <TabsContent value="last-run" className="m-0 px-4 pb-4 pt-3">
-                  <LastRunStatus filename={filename} steps={wfData.steps} />
+                  <LastRunStatus filename={filename} />
                 </TabsContent>
               </Tabs>
             </div>
@@ -1368,12 +1372,15 @@ export default function ServiceDetailPage() {
                               sessionTitle,
                               workflowFilename: wfFilename,
                               userId,
+                              workflowData: parseWorkflowYaml(raw),
+                              clusterPrompt: cluster?.prompt,
                               meta,
                             };
                             sessionStorage.setItem(WORKFLOW_CHAT_EXEC_STORAGE_KEY, JSON.stringify(payload));
                             router.push("/agent/chat?execWorkflow=1");
                           }}
                           isPending={bindMutation.isPending}
+                          serviceId={serviceId}
                         />
                       ))}
                     </motion.div>

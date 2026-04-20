@@ -30,6 +30,18 @@ export const WORKFLOW_SUGGESTED_TAGS = [
   "巡检",
 ] as const;
 
+/**
+ * 步骤巡检结果判断条件。
+ * AI 执行时根据此配置判断 result 字段（ok/warn/critical/info）。
+ * 示例：{ warn: "队列积压 > 1000", critical: "服务不可用 或 队列积压 > 50000" }
+ */
+export interface StepResultCriteria {
+  ok?: string;
+  info?: string;
+  warn?: string;
+  critical?: string;
+}
+
 /** 单个步骤（支持嵌套子步骤） */
 export interface WorkflowStep {
   id: string;
@@ -43,6 +55,8 @@ export interface WorkflowStep {
   instructions?: string;
   checklist?: string[];
   threshold?: Record<string, unknown>;
+  /** 巡检结果判断条件，AI 执行时依据此字段填写 result */
+  result_criteria?: StepResultCriteria;
   /** 子步骤（层级关系，最多两级） */
   steps?: WorkflowStep[];
 }

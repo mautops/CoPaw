@@ -62,6 +62,14 @@ function serializeStep(step: WorkflowStep, indent: string, depth = 0): string[] 
       lines.push(`${indent}    ${key}: ${JSON.stringify(value)}`);
     }
   }
+  if (step.result_criteria) {
+    lines.push(`${indent}  result_criteria:`);
+    for (const [key, value] of Object.entries(step.result_criteria)) {
+      if (value !== undefined) {
+        lines.push(`${indent}    ${key}: ${JSON.stringify(value)}`);
+      }
+    }
+  }
   if (step.steps && step.steps.length > 0) {
     lines.push(`${indent}  steps:`);
     for (const sub of step.steps) {
@@ -177,6 +185,31 @@ function parseStepLines(
         const { steps: subSteps, nextIdx } = parseStepLines(lines, i, attrIndent + 2, depth + 1);
         step.steps = subSteps.length > 0 ? subSteps : undefined;
         i = nextIdx;
+        continue;
+      }
+
+      if (attrLineIndent === attrIndent && (attrTrimmed === "threshold:" || attrTrimmed === "result_criteria:")) {
+        const blockKey = attrTrimmed === "threshold:" ? "threshold" : "result_criteria";
+        const blockIndent = attrIndent + 2;
+        const blockObj: Record<string, unknown> = {};
+        i++;
+        while (i < lines.length) {
+          const bLine = lines[i];
+          if (bLine === undefined) break;
+          if (!bLine.trim()) { i++; continue; }
+          const bIndent = bLine.search(/\S/);
+          if (bIndent < blockIndent) break;
+          const bMatch = bLine.trim().match(/^(\w+):\s*(.*)$/);
+          if (bMatch) {
+            const [, k, v] = bMatch as [string, string, string];
+            try { blockObj[k] = JSON.parse(v); } catch { blockObj[k] = v; }
+          }
+          i++;
+        }
+        if (Object.keys(blockObj).length > 0) {
+          if (blockKey === "threshold") step.threshold = blockObj;
+          else step.result_criteria = blockObj as import("./workflow-types").StepResultCriteria;
+        }
         continue;
       }
 

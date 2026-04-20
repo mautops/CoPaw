@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -20,6 +21,7 @@ import {
   Loader2Icon,
   PlusIcon,
   PlayIcon,
+  BarChart2Icon,
   WaypointsIcon,
   FileTextIcon,
   TagIcon,
@@ -75,6 +77,7 @@ function WorkflowSearch({
   );
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <Command shouldFilter={false}>
       <CommandInput
         placeholder="搜索名称、文件名、标签、目录..."
         value={q}
@@ -103,6 +106,7 @@ function WorkflowSearch({
           ))}
         </CommandGroup>
       </CommandList>
+      </Command>
     </CommandDialog>
   );
 }
@@ -121,6 +125,7 @@ function WorkflowCard({
   onExecute: (w: WorkflowInfo) => void;
 }) {
   const tags = w.tags ?? [];
+  const router = useRouter();
   return (
     <div
       role="button"
@@ -183,7 +188,19 @@ function WorkflowCard({
 
       {/* 执行按钮 */}
       {isActiveStatus(w.status) && (
-        <div className="mt-auto flex justify-end">
+        <div className="mt-auto flex justify-end gap-1.5">
+          <Button
+            size="icon-sm"
+            variant="outline"
+            className="shrink-0 text-muted-foreground"
+            title="查看执行图表"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/agent/workflows/${encodeURIComponent(w.filename)}/stats`);
+            }}
+          >
+            <BarChart2Icon className="size-3" />
+          </Button>
           <Button
             size="sm"
             variant="default"
@@ -290,6 +307,7 @@ export default function WorkflowsPage() {
           sessionTitle: workflowDisplayName,
           workflowFilename: w.filename,
           userId,
+          workflowData: wfData,
           meta: {
             source: "workflow",
             workflow_filename: w.filename,

@@ -15,4 +15,5 @@ export {
 
 export { WorkflowMetadataEditor } from "./workflow-metadata-editor";
 export { WorkflowStepsEditor } from "./workflow-steps-editor";
-export { WorkflowStepsViewer } from "./workflow-steps-viewer";
+export { WorkflowStepsViewer, WorkflowCard } from "./workflow-steps-viewer";
+export { WorkflowStepResultCard, ResultBadge, durationLabel } from "./workflow-step-result-card";

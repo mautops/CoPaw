@@ -8,17 +8,38 @@ import { DEFAULT_CHANNEL } from "./types";
 export function useChatSessions({
   userId,
   skipInitialAutoSelect = false,
+  initialChatId,
+  onChatIdChange,
 }: {
   userId: string;
   /** When true, do not auto-pick newest session (e.g. chat opened with ?execWorkflow=1). */
   skipInitialAutoSelect?: boolean;
+  /** Chat id to restore on mount (e.g. from URL param ?s=). */
+  initialChatId?: string;
+  /** Called whenever the active chat changes so the caller can sync the URL. */
+  onChatIdChange?: (id: string | null) => void;
 }) {
   const queryClient = useQueryClient();
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [currentChatId, setCurrentChatIdRaw] = useState<string | null>(
+    initialChatId ?? null,
+  );
   const cleanedRef = useRef(false);
   // Guards the one-time auto-select on initial load so that manually setting
   // currentChatId back to null (e.g. "New Chat") is not overridden.
   const autoSelectedRef = useRef(false);
+
+  // If initialChatId is provided we treat it as already auto-selected
+  useEffect(() => {
+    if (initialChatId) autoSelectedRef.current = true;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const setCurrentChatId = useCallback(
+    (id: string | null) => {
+      setCurrentChatIdRaw(id);
+      onChatIdChange?.(id);
+    },
+    [onChatIdChange],
+  );
 
   // ── Queries ──────────────────────────────────────────────────────────────
 
@@ -79,7 +100,18 @@ export function useChatSessions({
       autoSelectedRef.current = true;
       setCurrentChatId(sortedSessions[0].id);
     }
-  }, [skipInitialAutoSelect, sortedSessions, currentChatId]);
+  }, [skipInitialAutoSelect, sortedSessions, currentChatId, setCurrentChatId]);
+
+  // When restoring from ?s=, validate the id exists once sessions are loaded.
+  // If the session no longer exists, fall through to auto-select newest.
+  useEffect(() => {
+    if (!initialChatId || sessionsPending) return;
+    const exists = sortedSessions.some((s) => s.id === initialChatId);
+    if (!exists && sortedSessions.length > 0 && !autoSelectedRef.current) {
+      autoSelectedRef.current = true;
+      setCurrentChatId(sortedSessions[0].id);
+    }
+  }, [initialChatId, sessionsPending, sortedSessions, setCurrentChatId]);
 
   // ── Mutations ────────────────────────────────────────────────────────────
 
@@ -122,7 +154,7 @@ export function useChatSessions({
       if (id === currentChatId) return;
       setCurrentChatId(id);
     },
-    [currentChatId],
+    [currentChatId, setCurrentChatId],
   );
 
   const handleNewChat = useCallback(async () => {
