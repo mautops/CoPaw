@@ -52,7 +52,7 @@ export function SidebarNav() {
     <nav className="flex-1 overflow-y-auto px-2 py-3">
       {nav.map((group) => (
         <div key={group.label} className="mb-4">
-          <p className="mb-1 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+          <p className="sidebar-group-label mb-1 px-2 text-xs font-medium uppercase tracking-wider">
             {group.label}
           </p>
           {group.items.map(({ label, href, icon: Icon }) => {
@@ -62,13 +62,13 @@ export function SidebarNav() {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors",
+                  "sidebar-nav-item flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors",
                   active
-                    ? "bg-accent font-medium text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                    ? "sidebar-nav-active font-medium"
+                    : "sidebar-nav-idle",
                 )}
               >
-                <Icon className="size-4 shrink-0" />
+                <Icon className={cn("sidebar-nav-icon size-4 shrink-0", active && "text-current")} />
                 {label}
               </Link>
             );

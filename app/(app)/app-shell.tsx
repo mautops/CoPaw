@@ -76,6 +76,13 @@ export function AppShell({
     >
       <div className="flex h-screen overflow-hidden">
         <div
+          className="pointer-events-none fixed inset-0 z-0"
+          style={{
+            backgroundImage: "radial-gradient(circle, oklch(0.78 0.18 162 / 0.20) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div
           className="shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out"
           style={{ width: showLeftSidebar ? LEFT_WIDTH : 0 }}
         >

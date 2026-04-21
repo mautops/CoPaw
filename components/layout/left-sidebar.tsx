@@ -18,10 +18,10 @@ interface LeftSidebarProps {
 
 export function LeftSidebar({ user }: LeftSidebarProps) {
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col border-r border-border/50 bg-card">
+    <aside className="sidebar-root flex h-full w-56 shrink-0 flex-col">
       <Link
         href="/agent/chat"
-        className="flex items-center gap-3 px-4 py-5 transition-all duration-200 hover:bg-accent/50 active:scale-[0.99]"
+        className="sidebar-header flex items-center gap-3 px-4 py-5 transition-all duration-200 active:scale-[0.99]"
       >
         <span className="text-3xl leading-none" aria-hidden>
           🦀
@@ -34,11 +34,11 @@ export function LeftSidebar({ user }: LeftSidebarProps) {
         </div>
       </Link>
 
-      <div className="border-t border-border/50" />
+      <div className="sidebar-selector" />
 
       <SidebarNav />
 
-      <div className="border-t border-border/50 px-2 py-2">
+      <div className="sidebar-footer px-2 py-2">
         <div className="flex items-stretch gap-0.5">
           <div className="flex-1 min-w-0">
             {user ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ShieldIcon, ArrowRightIcon } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 export function KeycloakLoginButton() {
@@ -18,25 +19,23 @@ export function KeycloakLoginButton() {
     <button
       onClick={handleLogin}
       disabled={loading}
-      className="flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80 disabled:pointer-events-none disabled:opacity-50"
+      className="btn-gradient group flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold disabled:pointer-events-none disabled:opacity-60"
     >
-      <KeycloakIcon />
-      {loading ? "Redirecting..." : "Continue with Keycloak SSO"}
+      {loading ? (
+        <>
+          <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          正在跳转至 Keycloak...
+        </>
+      ) : (
+        <>
+          <ShieldIcon className="size-4" strokeWidth={2} />
+          通过 Keycloak SSO 登录
+          <ArrowRightIcon className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </>
+      )}
     </button>
-  );
-}
-
-function KeycloakIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 64 64"
-      width="18"
-      height="18"
-      fill="currentColor"
-    >
-      <path d="M32 4L6 18v28l26 14 26-14V18L32 4zm0 6.5l19.5 10.5v21L32 52.5 12.5 42V21L32 10.5z" />
-      <path d="M22 24h8v16h-8zM34 24h8v16h-8z" />
-    </svg>
   );
 }
