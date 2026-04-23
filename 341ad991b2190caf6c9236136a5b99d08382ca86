@@ -1,0 +1,189 @@
+app/(app)/agent/chat/chat-model-selector.tsx
+  872a8f57f0c4c0b7 43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.10",
+  "base_commit_sha": "341ad991b2190caf6c9236136a5b99d08382ca86",
+  "prompts": {
+    "06e464401656a5a9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b56f5e51-80b7-4b0d-a7f5-a29b9e67241a",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 3,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/f7390883c1ecb032f3fa00737c2fc3e2cde578bad37dd6b903de64aa6dbf2909"
+    },
+    "16aa9626ad2ae042": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ecc92c2a-1ae9-4731-811b-d9eb3ddea4b8",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1586,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/a2309ee4a175870d97ff5cd8fd118269281d271c9583f6f840e507fb6fba2426"
+    },
+    "19a13b9f454d2eb4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48bcd5a7-ab6d-48c4-947c-75e699193e18",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 15,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/090596613d2d50883781387d30ac2d7bd99a77691904ace6675cdae980775b0a"
+    },
+    "305b93d586913953": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7454a3e7-7107-4e5c-ab4c-6d45bed45775",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 103,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/963940982bb675e5bbe8316a81f56194f8d769c8e8d46448abb3f14e88931199"
+    },
+    "57a62a85aba458c6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34bee913-9c0f-409c-a3f6-58f89437ce46",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 11,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/8a481152f7538595ef86552973e72cf1070545ea44af84c0d2db6eb062dd451a"
+    },
+    "637908e610993f85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "942b4ba5-8107-4de3-b135-e79dcc62a485",
+        "model": "claude-opus-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 9,
+      "overriden_lines": 0
+    },
+    "872a8f57f0c4c0b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1a3adca7-3349-470e-acf9-e5d6ae1de1b7",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 3,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/09e2e3ee361e1a3f5561d96dd0cee0346a4b306d09fff7970b017c624ab9744c"
+    },
+    "88ac03a1b813fcfc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "90a4eedb-3110-402c-87f6-3e768a2e68cd",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "89024bcd2e0b395d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6098616d-1479-438c-a1e2-1612b255e373",
+        "model": "claude-opus-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/351feef14627bbdbd2efcb5ed218be97b28e9a402668bc0d9a1ca0f975fa7780"
+    },
+    "a36b9c702c35834b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "99118d81-e40a-4afe-a2b9-2f2f73cf426a",
+        "model": "<synthetic>"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 17,
+      "overriden_lines": 0
+    },
+    "afb32749a487ba58": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f96859a9-e6c0-4add-a3a1-f0416d593e0c",
+        "model": "claude-opus-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 80,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/a39eec0cdf1de1d1190cb5599cc5b140dd7a34403d0797fdd59b8b77b5f88284"
+    },
+    "b8aa54f343ae4e91": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c9c3947b-0e7d-44e8-a3b2-7b01dac60e04",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/398d8bc0beffa20b3d325c639909b8e87432892e9122c5e8662fb99b80f3118d"
+    },
+    "dea0e9f9f53db305": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "22569058-848c-42af-b81d-8f88dbc8c8e6",
+        "model": "claude-opus-4.7"
+      },
+      "human_author": "BigFei",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 5172,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.gz.cvte.cn/cas/7217648d852830630fcf560c4791dab89ded206f266dd57b43016253bfc11022"
+    }
+  }
+}
