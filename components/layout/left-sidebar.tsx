@@ -27,8 +27,11 @@ export function LeftSidebar({ user }: LeftSidebarProps) {
           🦀
         </span>
         <div className="min-w-0">
-          <p className="text-lg font-semibold tracking-tight text-foreground">
+          <p className="flex items-baseline gap-1.5 text-lg font-semibold tracking-tight text-foreground">
             Hi-Ops
+            <span className="rounded bg-muted px-1 py-px font-mono text-[10px] font-normal text-muted-foreground/70">
+              v0.1.0
+            </span>
           </p>
           <p className="text-xs text-muted-foreground">DevOps Platform</p>
         </div>
