@@ -84,6 +84,10 @@ function ChatPageInner() {
     return null;
   });
 
+  // Stable ref so the effect below can read the current value without depending on it
+  const selectedModelRef = useRef(selectedModel);
+  useEffect(() => { selectedModelRef.current = selectedModel; }, [selectedModel]);
+
   const handleModelChange = useCallback((model: SelectedModel) => {
     setSelectedModel(model);
     try {
@@ -105,9 +109,10 @@ function ChatPageInner() {
   useEffect(() => {
     const slot = activeQuery.data?.active_llm;
     if (!slot?.provider_id || !slot.model) return;
+    const current = selectedModelRef.current;
 
     // If no model selected yet, use the backend default
-    if (!selectedModel) {
+    if (!current) {
       setSelectedModel({ provider_id: slot.provider_id, model: slot.model });
       return;
     }
@@ -117,8 +122,8 @@ function ChatPageInner() {
       const eligible = eligibleProvidersForSlot(providersQuery.data);
       const exists = eligible.some(
         (p) =>
-          p.id === selectedModel.provider_id &&
-          allModelsForProvider(p).some((m) => m.id === selectedModel.model),
+          p.id === current.provider_id &&
+          allModelsForProvider(p).some((m) => m.id === current.model),
       );
       if (!exists) {
         setSelectedModel({ provider_id: slot.provider_id, model: slot.model });
@@ -130,7 +135,7 @@ function ChatPageInner() {
         } catch {}
       }
     }
-  }, [activeQuery.data, providersQuery.data, selectedModel]);
+  }, [activeQuery.data, providersQuery.data]);
 
   // Sync active chat id into URL (?s=) so page refresh restores the same session.
   // Uses replaceState directly to avoid Next.js router re-renders on every selection.
