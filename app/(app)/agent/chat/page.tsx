@@ -530,6 +530,9 @@ function ChatPageInner() {
                 <ChatModelSelector
                   value={selectedModel}
                   onChange={handleModelChange}
+                  providers={providersQuery.data ?? []}
+                  isLoading={providersQuery.isLoading}
+                  isError={providersQuery.isError}
                 />
               </div>
             }

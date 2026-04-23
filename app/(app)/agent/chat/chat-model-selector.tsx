@@ -3,15 +3,12 @@
 import Link from "next/link";
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
-  QK_MODELS_PROVIDERS,
   allModelsForProvider,
   eligibleProvidersForSlot,
 } from "@/app/(app)/settings/models/models-domain";
 import type { ProviderInfo } from "@/lib/llm-models-api";
-import { llmModelsApi } from "@/lib/llm-models-api";
 import { CheckIcon, ChevronDownIcon, ChevronLeftIcon } from "lucide-react";
 
 export interface SelectedModel {
@@ -26,8 +23,7 @@ function activeDisplayLabel(
   if (!selected) return "选择模型";
   for (const p of eligible) {
     if (p.id !== selected.provider_id) continue;
-    const models = allModelsForProvider(p);
-    const m = models.find((x) => x.id === selected.model);
+    const m = allModelsForProvider(p).find((x) => x.id === selected.model);
     return m?.name || m?.id || selected.model;
   }
   return selected.model;
@@ -36,9 +32,18 @@ function activeDisplayLabel(
 interface ChatModelSelectorProps {
   value: SelectedModel | null;
   onChange: (model: SelectedModel) => void;
+  providers: ProviderInfo[];
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
-export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
+export function ChatModelSelector({
+  value,
+  onChange,
+  providers,
+  isLoading,
+  isError,
+}: ChatModelSelectorProps) {
   const [open, setOpen] = useState(false);
   const [panelTop, setPanelTop] = useState(0);
   const [panelRight, setPanelRight] = useState(0);
@@ -46,14 +51,9 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const providersQuery = useQuery({
-    queryKey: QK_MODELS_PROVIDERS,
-    queryFn: () => llmModelsApi.listProviders(),
-  });
-
   const eligible = useMemo(
-    () => eligibleProvidersForSlot(providersQuery.data ?? []),
-    [providersQuery.data],
+    () => eligibleProvidersForSlot(providers),
+    [providers],
   );
 
   const label = activeDisplayLabel(eligible, value);
@@ -72,7 +72,6 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
     setHoveredProvider(null);
   }, []);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -87,7 +86,6 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, [open, closePanel]);
 
-  // Close on scroll / resize
   useEffect(() => {
     if (!open) return;
     window.addEventListener("scroll", closePanel, true);
@@ -103,12 +101,7 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
       ? createPortal(
           <div
             ref={panelRef}
-            style={{
-              position: "fixed",
-              top: panelTop,
-              right: panelRight,
-              zIndex: 99999,
-            }}
+            style={{ position: "fixed", top: panelTop, right: panelRight, zIndex: 99999 }}
             className="min-w-44 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-foreground/10"
           >
             <p className="px-2.5 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -116,25 +109,16 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
             </p>
             <div className="mx-1 mb-1 h-px bg-border" />
 
-            {providersQuery.isError ? (
-              <p className="px-3 py-2 text-sm text-destructive">
-                无法加载模型列表
-              </p>
-            ) : providersQuery.isLoading ? (
-              <p className="px-3 py-4 text-center text-sm text-muted-foreground">
-                加载中…
-              </p>
+            {isError ? (
+              <p className="px-3 py-2 text-sm text-destructive">无法加载模型列表</p>
+            ) : isLoading ? (
+              <p className="px-3 py-4 text-center text-sm text-muted-foreground">加载中…</p>
             ) : eligible.length === 0 ? (
               <div className="space-y-2 px-3 py-3">
                 <p className="text-sm text-muted-foreground">
                   没有已配置且含模型的供应商，请先到设置中配置.
                 </p>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full"
-                  asChild
-                >
+                <Button variant="secondary" size="sm" className="w-full" asChild>
                   <Link href="/settings/models" onClick={closePanel}>
                     打开模型设置
                   </Link>
@@ -145,7 +129,6 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
                 const isProviderActive = p.id === value?.provider_id;
                 const models = allModelsForProvider(p);
                 const isHovered = hoveredProvider === p.id;
-
                 return (
                   <div
                     key={p.id}
@@ -153,7 +136,6 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
                     onMouseEnter={() => setHoveredProvider(p.id)}
                     onMouseLeave={() => setHoveredProvider(null)}
                   >
-                    {/* Provider row */}
                     <div
                       className={
                         "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors " +
@@ -166,23 +148,19 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
                       <ChevronLeftIcon className="size-3.5 shrink-0 opacity-40" />
                     </div>
 
-                    {/* Model submenu — visible when this provider is hovered */}
                     {isHovered && (
                       <div
                         style={{ zIndex: 99999 }}
                         className="absolute right-full top-0 mr-1.5 min-w-52 max-h-72 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg ring-1 ring-foreground/10"
                       >
                         {models.map((m) => {
-                          const isActive =
-                            isProviderActive && m.id === value?.model;
+                          const isActive = isProviderActive && m.id === value?.model;
                           return (
                             <div
                               key={m.id}
                               className={
                                 "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors " +
-                                (isActive
-                                  ? "bg-accent/60 font-medium text-accent-foreground "
-                                  : "") +
+                                (isActive ? "bg-accent/60 font-medium text-accent-foreground " : "") +
                                 "hover:bg-accent hover:text-accent-foreground"
                               }
                               onMouseDown={(e) => {
@@ -191,12 +169,8 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
                                 closePanel();
                               }}
                             >
-                              <span className="min-w-0 flex-1 truncate">
-                                {m.name || m.id}
-                              </span>
-                              {isActive && (
-                                <CheckIcon className="size-3.5 shrink-0 text-primary" />
-                              )}
+                              <span className="min-w-0 flex-1 truncate">{m.name || m.id}</span>
+                              {isActive && <CheckIcon className="size-3.5 shrink-0 text-primary" />}
                             </div>
                           );
                         })}
@@ -217,16 +191,14 @@ export function ChatModelSelector({ value, onChange }: ChatModelSelectorProps) {
         ref={triggerRef}
         type="button"
         onClick={() => (open ? closePanel() : openPanel())}
-        disabled={providersQuery.isLoading && !providersQuery.data}
+        disabled={isLoading && providers.length === 0}
         className={
           "inline-flex h-8 max-w-[min(14rem,calc(100vw-12rem))] items-center gap-1.5 rounded-md border bg-background/50 px-2.5 text-sm font-medium shadow-sm transition-all duration-200 hover:bg-background/80 hover:shadow active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 " +
-          (open
-            ? "border-primary/30 bg-background/80"
-            : "border-border/60 hover:border-primary/30")
+          (open ? "border-primary/30 bg-background/80" : "border-border/60 hover:border-primary/30")
         }
       >
         <span className="min-w-0 flex-1 truncate text-left">
-          {providersQuery.isLoading && !providersQuery.data ? "加载…" : label}
+          {isLoading && providers.length === 0 ? "加载…" : label}
         </span>
         <ChevronDownIcon
           className={
