@@ -3,6 +3,8 @@
 import {
   Confirmation,
   ConfirmationAccepted,
+  ConfirmationAction,
+  ConfirmationActions,
   ConfirmationRejected,
   ConfirmationRequest,
   ConfirmationTitle,
@@ -36,7 +38,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ToolCallInfo } from "@/lib/chat-api";
 import type { ChatStatus, DynamicToolUIPart } from "ai";
 import { AssistantPlanOrText } from "./chat-assistant-plan";
-import { BotIcon, CheckCircle2Icon, CheckIcon, ChevronDownIcon, CopyIcon, RefreshCcwIcon, WrenchIcon, XCircleIcon } from "lucide-react";
+import { BotIcon, CheckCircle2Icon, CheckIcon, ChevronDownIcon, CopyIcon, RefreshCcwIcon, ShieldAlertIcon, WrenchIcon, XCircleIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LocalMessage } from "./types";
@@ -148,16 +150,21 @@ function ToolRow({
   index,
   isLast,
   defaultOpen,
+  onApprove,
+  onDeny,
 }: {
   tool: ToolCallInfo;
   index: number;
   isLast: boolean;
   defaultOpen: boolean;
+  onApprove?: () => void;
+  onDeny?: () => void;
 }) {
   const uiState = toolUiState(tool);
   const done = isToolDone(tool);
   const isError = uiState === "output-error";
   const isRunning = !done;
+  const isWaitingApproval = uiState === "approval-requested";
 
   const showHitl =
     tool.hitlApproval &&
@@ -173,15 +180,19 @@ function ToolRow({
           "mt-2.5 flex size-3.5 shrink-0 items-center justify-center rounded-full border",
           isError
             ? "border-red-400 bg-red-400/20 text-red-500"
-            : isRunning
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-green-500 bg-green-500/10 text-green-600 dark:text-green-400",
+            : isWaitingApproval
+              ? "border-amber-400 bg-amber-400/20 text-amber-500"
+              : isRunning
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-green-500 bg-green-500/10 text-green-600 dark:text-green-400",
         ].join(" ")}>
           {isError
             ? <XCircleIcon className="size-2.5" />
-            : isRunning
-              ? <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-              : <CheckCircle2Icon className="size-2.5" />}
+            : isWaitingApproval
+              ? <ShieldAlertIcon className="size-2.5" />
+              : isRunning
+                ? <span className="size-1.5 animate-pulse rounded-full bg-primary" />
+                : <CheckCircle2Icon className="size-2.5" />}
         </span>
         {!isLast && (
           <span className="mt-0.5 w-px flex-1 bg-border/60" style={{ minHeight: 12 }} />
@@ -208,7 +219,15 @@ function ToolRow({
               >
                 <ConfirmationRequest>
                   <ConfirmationTitle>此工具调用需通过安全策略确认</ConfirmationTitle>
-                  <p className="text-muted-foreground">请按助手在对话中的说明在会话里回复以批准或拒绝.</p>
+                  <p className="text-sm text-muted-foreground mt-1">请检查工具参数后选择是否允许执行。</p>
+                  <ConfirmationActions>
+                    <ConfirmationAction variant="outline" onClick={onDeny}>
+                      拒绝
+                    </ConfirmationAction>
+                    <ConfirmationAction onClick={onApprove}>
+                      批准执行
+                    </ConfirmationAction>
+                  </ConfirmationActions>
                 </ConfirmationRequest>
                 <ConfirmationAccepted>
                   <p className="text-muted-foreground">已批准并执行.</p>
@@ -232,31 +251,52 @@ function ToolRow({
 }
 
 /** 整组折叠容器 */
-function ToolCallGroup({ tools }: { tools: ToolCallInfo[] }) {
+function ToolCallGroup({
+  tools,
+  onApprove,
+  onDeny,
+}: {
+  tools: ToolCallInfo[];
+  onApprove?: () => void;
+  onDeny?: () => void;
+}) {
   if (tools.length === 0) return null;
 
   const allDone = tools.every(isToolDone);
   const hasError = tools.some((t) => toolUiState(t) === "output-error");
+  const hasApprovalPending = tools.some((t) => toolUiState(t) === "approval-requested");
   const doneCount = tools.filter(isToolDone).length;
 
   // 摘要行文字
-  const summaryText = allDone
-    ? `使用了 ${tools.length} 个工具`
-    : `执行中 · ${doneCount}/${tools.length}`;
+  const pendingTool = hasApprovalPending ? tools.find((t) => toolUiState(t) === "approval-requested") : undefined;
+  const summaryText = pendingTool
+    ? `等待审批 · ${pendingTool.name}`
+    : allDone
+      ? `使用了 ${tools.length} 个工具`
+      : `执行中 · ${doneCount}/${tools.length}`;
 
   // 摘要图标颜色
   const summaryColor = hasError
     ? "text-red-500"
-    : allDone
-      ? "text-green-600 dark:text-green-400"
-      : "text-primary";
+    : hasApprovalPending
+      ? "text-amber-500"
+      : allDone
+        ? "text-green-600 dark:text-green-400"
+        : "text-primary";
 
   return (
-    <Collapsible defaultOpen={false} className="my-2">
+    <Collapsible defaultOpen={hasApprovalPending} className="my-2">
       {/* Summary header — always visible */}
       <CollapsibleTrigger className="group flex w-full items-center gap-2 rounded-md px-1 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
-        <WrenchIcon className={["size-3.5 shrink-0", summaryColor].join(" ")} />
+        {hasApprovalPending
+          ? <ShieldAlertIcon className={["size-3.5 shrink-0", summaryColor].join(" ")} />
+          : <WrenchIcon className={["size-3.5 shrink-0", summaryColor].join(" ")} />}
         <span className="flex-1 text-left font-medium">{summaryText}</span>
+        {hasApprovalPending && (
+          <span className="mr-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+            待审批
+          </span>
+        )}
         <ChevronDownIcon className="size-3 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
 
@@ -268,8 +308,9 @@ function ToolCallGroup({ tools }: { tools: ToolCallInfo[] }) {
             tool={tool}
             index={i}
             isLast={i === tools.length - 1}
-            /* 始终折叠，用户手动展开查看详情 */
-            defaultOpen={false}
+            defaultOpen={toolUiState(tool) === "approval-requested"}
+            onApprove={toolUiState(tool) === "approval-requested" ? onApprove : undefined}
+            onDeny={toolUiState(tool) === "approval-requested" ? onDeny : undefined}
           />
         ))}
       </CollapsibleContent>
@@ -300,7 +341,49 @@ function AgentTextBlock({
   );
 }
 
-// ── Turn grouping ─────────────────────────────────────────────────────────────
+// ── Approval detection ───────────────────────────────────────────────────────
+// The backend emits a plain text message saying "type /approve to approve"
+// when a tool-guard approval is pending. Detect it and render action buttons.
+
+const APPROVAL_WAIT_PATTERNS = [
+  /⏳\s*(等待审批|Waiting for approval|承認待ち|Ожидание подтверждения)/,
+  /\/approve/i,
+];
+
+function isApprovalWaitMessage(text: string): boolean {
+  return APPROVAL_WAIT_PATTERNS.every((p) => p.test(text));
+}
+
+function ApprovalActionBar({
+  onApprove,
+  onDeny,
+}: {
+  onApprove?: () => void;
+  onDeny?: () => void;
+}) {
+  return (
+    <div className="mt-3 flex items-center gap-2 border-t pt-3">
+      <ShieldAlertIcon className="size-4 shrink-0 text-amber-500" />
+      <span className="flex-1 text-sm text-muted-foreground">请确认是否允许此工具调用继续执行</span>
+      <button
+        type="button"
+        onClick={onDeny}
+        className="inline-flex h-8 items-center rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        拒绝
+      </button>
+      <button
+        type="button"
+        onClick={onApprove}
+        className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        批准执行
+      </button>
+    </div>
+  );
+}
+
+
 
 type AssistantTurn = {
   kind: "assistant";
@@ -387,6 +470,8 @@ interface ChatMessageListProps {
   userName?: string;
   userInitials: string;
   onRegenerate?: () => void;
+  onApprove?: () => void;
+  onDeny?: () => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -403,6 +488,8 @@ export function ChatMessageList({
   userName,
   userInitials,
   onRegenerate,
+  onApprove,
+  onDeny,
 }: ChatMessageListProps) {
   const turns = groupIntoTurns(messages);
   const gap = "mt-4";
@@ -458,6 +545,7 @@ export function ChatMessageList({
 
         const turnText = extractTurnText(turn.parts);
         const isLastAssistant = isLastTurn && !isGenerating;
+        const isPendingApproval = isLastAssistant && isApprovalWaitMessage(turnText);
 
         return (
           <motion.div
@@ -477,12 +565,17 @@ export function ChatMessageList({
                   )}
 
                   {/* Layer 1: Tool calls */}
-                  {toolInfos.length > 0 && <ToolCallGroup tools={toolInfos} />}
+                  {toolInfos.length > 0 && <ToolCallGroup tools={toolInfos} onApprove={onApprove} onDeny={onDeny} />}
 
                   {/* Layer 2: Agent text */}
                   {textParts.map((p) => (
                     <AgentTextBlock key={p.id} content={p.content} />
                   ))}
+
+                  {/* Approval action bar — shown when backend is waiting for /approve */}
+                  {isPendingApproval && (
+                    <ApprovalActionBar onApprove={onApprove} onDeny={onDeny} />
+                  )}
                 </MessageContent>
               </Message>
               <div className="flex items-center gap-2">
@@ -518,6 +611,8 @@ export function ChatMessageList({
             isThinkingStreaming={isThinkingStreaming}
             streamingTools={streamingTools}
             mt={turns.length === 0 ? "" : gap}
+            onApprove={onApprove}
+            onDeny={onDeny}
           />
         </motion.div>
       )}
@@ -535,6 +630,8 @@ function StreamingTurn({
   isThinkingStreaming,
   streamingTools,
   mt,
+  onApprove,
+  onDeny,
 }: {
   status: ChatStatus;
   streamingContent: string;
@@ -542,6 +639,8 @@ function StreamingTurn({
   isThinkingStreaming: boolean;
   streamingTools: ToolCallInfo[];
   mt: string;
+  onApprove?: () => void;
+  onDeny?: () => void;
 }) {
   const showShimmer =
     status === "submitted" &&
@@ -569,7 +668,7 @@ function StreamingTurn({
 
             {/* Layer 1: Tool calls（带序号） */}
             {streamingTools.length > 0 && (
-              <ToolCallGroup tools={streamingTools} />
+              <ToolCallGroup tools={streamingTools} onApprove={onApprove} onDeny={onDeny} />
             )}
 
             {/* Layer 2: Agent 文本（独立区域） */}
@@ -579,6 +678,11 @@ function StreamingTurn({
                 isStreaming={status === "streaming"}
                 isAnimating={status === "streaming"}
               />
+            )}
+
+            {/* Approval action bar — shown when streaming content contains the wait message */}
+            {streamingContent && isApprovalWaitMessage(streamingContent) && (
+              <ApprovalActionBar onApprove={onApprove} onDeny={onDeny} />
             )}
           </MessageContent>
         </Message>

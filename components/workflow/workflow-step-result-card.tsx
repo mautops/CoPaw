@@ -178,7 +178,7 @@ export function WorkflowStepResultCard({
 
           {/* 标题 */}
           <p className={cn("min-w-0 flex-1 truncate font-medium", compact ? "text-sm" : "text-sm")}>
-            {result.step_title || result.step_id}
+            {result.step_title || result.step_name || result.step_id}
           </p>
 
           {/* 执行状态 badge */}

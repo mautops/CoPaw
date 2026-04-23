@@ -68,6 +68,7 @@ function normalizeClusters(val: unknown): Array<{
   description?: string;
   hosts: string[];
   status: string;
+  prompt?: string;
 }> {
   if (!Array.isArray(val)) return [];
   return val
@@ -80,6 +81,7 @@ function normalizeClusters(val: unknown): Array<{
         ? c.hosts.filter((h): h is string => typeof h === "string")
         : [],
       status: typeof c.status === "string" ? c.status : "draft",
+      prompt: typeof c.prompt === "string" ? c.prompt : undefined,
     }))
     .filter((c) => c.name.length > 0);
 }

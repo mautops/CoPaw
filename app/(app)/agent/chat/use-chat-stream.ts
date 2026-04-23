@@ -128,8 +128,11 @@ export function useChatStream({
       // Determine which chat to use
       let chatId = targetChatId ?? (forceNewChat ? null : currentChatIdRef.current);
 
-      // Check if this specific chat is already generating
-      if (chatId && isGenerating(chatId)) return;
+      // Check if this specific chat is already generating.
+      // /approve and /deny must bypass this guard — the backend handles them
+      // as high-priority control commands while a tool-guard is pending.
+      const isApprovalCommand = /^\s*\/(approve|deny|daemon\s+approve|daemon\s+deny)\s*$/i.test(text);
+      if (chatId && isGenerating(chatId) && !isApprovalCommand) return;
 
       let hasActiveLlm = Boolean(selectedModel?.provider_id && selectedModel?.model);
       if (!hasActiveLlm) {

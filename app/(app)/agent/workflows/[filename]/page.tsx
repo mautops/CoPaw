@@ -301,7 +301,6 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
     queryKey: ["workflow", "steps", filename, run.run_id],
     queryFn: () => workflowApi.listStepResults(filename, run.run_id),
     staleTime: 30_000,
-    enabled: expanded,
   });
 
   const steps = stepsQuery.data?.steps ?? [];

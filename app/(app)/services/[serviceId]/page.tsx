@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Command,
   CommandDialog,
@@ -115,6 +115,7 @@ function setYamlClusters(raw: string, clusters: Cluster[]): string {
       c.hosts.length > 0
         ? `    hosts:\n${c.hosts.map((h) => `      - ${yamlStr(h)}`).join("\n")}`
         : `    hosts: []`,
+      c.prompt ? `    prompt: ${yamlStr(c.prompt)}` : null,
     ].filter(Boolean).join("\n")),
   ].join("\n");
   filtered.push(block);
@@ -186,6 +187,9 @@ function ClusterFormDialog({
           <DialogTitle id={titleId}>
             {isEdit ? "编辑集群" : "新增集群"}
           </DialogTitle>
+          <DialogDescription>
+            {isEdit ? "修改集群配置信息" : "填写集群基本信息，完成后点击保存"}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-1">

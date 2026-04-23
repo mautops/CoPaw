@@ -141,6 +141,8 @@ function workflowRunsPath(filename: string) {
 export interface WorkflowStepResult {
   step_id: string;
   step_title: string;
+  /** 兼容旧格式：旧版本写入的是 step_name 字段 */
+  step_name?: string;
   /** 步骤执行状态：步骤本身是否跑完 */
   status: "success" | "failed" | "skipped" | "running";
   /** 巡检结果：步骤执行完后发现了什么 */

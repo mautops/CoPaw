@@ -38,7 +38,12 @@ import { useSuggestions } from "./use-suggestions";
 import { DownloadIcon } from "lucide-react";
 import { llmModelsApi } from "@/lib/llm-models-api";
 import { useQuery } from "@tanstack/react-query";
-import { QK_MODELS_ACTIVE } from "@/app/(app)/settings/models/models-domain";
+import {
+  QK_MODELS_ACTIVE,
+  QK_MODELS_PROVIDERS,
+  eligibleProvidersForSlot,
+  allModelsForProvider,
+} from "@/app/(app)/settings/models/models-domain";
 
 function ChatPageInner() {
   const router = useRouter();
@@ -92,13 +97,40 @@ function ChatPageInner() {
     queryFn: () => llmModelsApi.getActive(),
     staleTime: 60_000,
   });
+  const providersQuery = useQuery({
+    queryKey: QK_MODELS_PROVIDERS,
+    queryFn: () => llmModelsApi.listProviders(),
+    staleTime: 60_000,
+  });
   useEffect(() => {
-    if (selectedModel) return; // user already picked one (from localStorage or interaction)
     const slot = activeQuery.data?.active_llm;
-    if (slot?.provider_id && slot?.model) {
+    if (!slot?.provider_id || !slot.model) return;
+
+    // If no model selected yet, use the backend default
+    if (!selectedModel) {
       setSelectedModel({ provider_id: slot.provider_id, model: slot.model });
+      return;
     }
-  }, [activeQuery.data, selectedModel]);
+
+    // If providers loaded and the saved model is no longer available, fall back to backend default
+    if (providersQuery.data) {
+      const eligible = eligibleProvidersForSlot(providersQuery.data);
+      const exists = eligible.some(
+        (p) =>
+          p.id === selectedModel.provider_id &&
+          allModelsForProvider(p).some((m) => m.id === selectedModel.model),
+      );
+      if (!exists) {
+        setSelectedModel({ provider_id: slot.provider_id, model: slot.model });
+        try {
+          localStorage.setItem(
+            SELECTED_MODEL_KEY,
+            JSON.stringify({ provider_id: slot.provider_id, model: slot.model }),
+          );
+        } catch {}
+      }
+    }
+  }, [activeQuery.data, providersQuery.data, selectedModel]);
 
   // Sync active chat id into URL (?s=) so page refresh restores the same session.
   // Uses replaceState directly to avoid Next.js router re-renders on every selection.
@@ -410,6 +442,18 @@ function ChatPageInner() {
     });
   }, [messages, currentChatId, isGenerating, applyModelAndSubmit]);
 
+  // Approval button handlers — send /approve or /deny directly, bypassing
+  // the isGenerating guard (same as typing the command in the input).
+  const handleApprove = useCallback(() => {
+    if (!currentChatId) return;
+    void handleSubmit({ text: "/approve", files: [], targetChatId: currentChatId });
+  }, [currentChatId, handleSubmit]);
+
+  const handleDeny = useCallback(() => {
+    if (!currentChatId) return;
+    void handleSubmit({ text: "/deny", files: [], targetChatId: currentChatId });
+  }, [currentChatId, handleSubmit]);
+
   // Download current conversation as Markdown
   const handleDownload = useCallback(() => {
     if (messages.length === 0) return;
@@ -517,6 +561,8 @@ function ChatPageInner() {
                   userName={user?.name ?? undefined}
                   userInitials={userInitials}
                   onRegenerate={handleRegenerate}
+                  onApprove={handleApprove}
+                  onDeny={handleDeny}
                 />
               )}
             </ConversationContent>

@@ -30,6 +30,7 @@ interface ServiceFileInfo {
     description?: string;
     hosts: string[];
     status: string;
+    prompt?: string;
   }>;
 }
 
@@ -67,6 +68,7 @@ function toServiceInfo(f: ServiceFileInfo): ServiceInfo {
           description: c.description,
           hosts: c.hosts,
           status: (c.status as ClusterStatus) ?? 'draft',
+          prompt: c.prompt,
         } satisfies Cluster))
       : undefined,
   };

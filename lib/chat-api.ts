@@ -286,6 +286,8 @@ async function processStreamResponse(
               if (isNew) {
                 toolsOrder.push(data.call_id);
                 onToolStart?.({ ...tool });
+              } else {
+                onToolUpdate?.({ ...tool });
               }
             } else if (subType === "tool_output" && data.call_id) {
               const tool = toolsMap.get(data.call_id);
