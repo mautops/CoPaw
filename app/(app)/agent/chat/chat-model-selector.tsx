@@ -40,7 +40,7 @@ interface ChatModelSelectorProps {
 export function ChatModelSelector({
   value,
   onChange,
-  providers,
+  providers = [],
   isLoading,
   isError,
 }: ChatModelSelectorProps) {
