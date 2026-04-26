@@ -21,6 +21,8 @@ import {
   WORKFLOW_CHAT_EXEC_STORAGE_KEY,
   type WorkflowChatExecPayload,
 } from "@/lib/workflow-chat-bridge";
+import { WORKFLOW_CLUSTER_PREFIX } from "@/lib/prompts";
+import { buildReportStep } from "@/lib/workflow-report-step";
 import {
   ChatHistorySidebar,
   SIDEBAR_DEFAULT_WIDTH,
@@ -273,10 +275,23 @@ function ChatPageInner() {
     }
     if (!payload.markdown?.trim()) return;
 
+    // 如果开启了自动报告，且 steps 末尾没有 s3c 步骤，动态追加报告步骤
+    let markdown = payload.markdown;
+    if (payload.autoReport && payload.workflowData) {
+      const steps = payload.workflowData.steps ?? [];
+      const hasReportStep = steps.some((s) => s.skill === "s3c");
+      if (!hasReportStep) {
+        const reportStepYaml = buildReportStep(payload.workflowData);
+        markdown = markdown.trimEnd() + "\n" + reportStepYaml;
+      }
+    }
+
     // 如果有集群提示词，前置注入到消息文本里
     const textWithInstruction = payload.clusterPrompt?.trim()
-      ? `**集群背景信息（请在执行过程中严格参考）：**\n${payload.clusterPrompt.trim()}\n\n---\n\n${payload.markdown}`
-      : payload.markdown;
+      ? WORKFLOW_CLUSTER_PREFIX
+          .replace("{{CLUSTER_PROMPT}}", payload.clusterPrompt.trim())
+          .replace("{{WORKFLOW_MARKDOWN}}", markdown)
+      : markdown;
 
     // forceNewChat always creates a new session regardless of currentChatId,
     // so resetStreaming/setCurrentChatId are not needed before the call.

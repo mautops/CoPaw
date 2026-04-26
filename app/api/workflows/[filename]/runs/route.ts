@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { readdir, readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
-import os from "os";
+import { WORKING_DIR } from "@/lib/copaw-paths";
+import { createLogger } from "@/lib/logger";
 
-const RUNS_DIR = path.join(os.homedir(), ".copaw", "workflow-runs");
+const log = createLogger("api:workflows:runs");
+
+const RUNS_DIR = path.join(WORKING_DIR, "workflow-runs");
 const WORKFLOW_EXTS = [".yaml", ".yml", ".md", ".markdown"];
 
 function safeWorkflowFilename(raw: string): string | null {
@@ -54,9 +57,14 @@ export async function GET(
 ) {
   const { filename: rawFilename } = await params;
   const filename = safeWorkflowFilename(rawFilename);
-  if (!filename) return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  log.info(`GET runs for ${rawFilename}`);
+  if (!filename) {
+    log.warn(`invalid filename: ${rawFilename}`);
+    return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  }
 
   const runs = await readAllRuns(filename);
+  log.info(`returning ${runs.length} runs for ${filename}`);
   return NextResponse.json({ runs });
 }
 
@@ -67,7 +75,11 @@ export async function POST(
 ) {
   const { filename: rawFilename } = await params;
   const filename = safeWorkflowFilename(rawFilename);
-  if (!filename) return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  log.info(`POST run for ${rawFilename}`);
+  if (!filename) {
+    log.warn(`invalid filename: ${rawFilename}`);
+    return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  }
 
   try {
     const body = (await req.json()) as {
@@ -78,6 +90,7 @@ export async function POST(
       trigger?: string;
       status?: string;
       executed_at?: string;
+      report?: string | null;
     };
     const sessionId = body.session_id || body.run_id || crypto.randomUUID();
     const run = {
@@ -89,11 +102,14 @@ export async function POST(
       trigger: body.trigger ?? "manual",
       executed_at: body.executed_at ?? new Date().toISOString(),
       status: body.status ?? null,
+      report: body.report ?? null,
     };
     await mkdir(workflowDir(filename), { recursive: true });
     await writeFile(runFile(filename, sessionId), JSON.stringify(run, null, 2), "utf-8");
+    log.info(`created run ${sessionId} for ${filename}`);
     return NextResponse.json(run);
   } catch (err) {
+    log.error(`POST run for ${filename} failed`, err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

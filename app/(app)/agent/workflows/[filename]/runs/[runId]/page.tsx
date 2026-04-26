@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ContentTopbar, TopbarBreadcrumb } from "@/components/layout/content-topbar";
 import { useAppShell } from "@/app/(app)/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   MessageSquareIcon,
   CheckCircle2Icon,
@@ -14,7 +16,9 @@ import {
   Loader2Icon,
   ActivityIcon,
   AlertTriangleIcon,
+  FileTextIcon,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { workflowApi, formatWorkflowTimestamp } from "@/lib/workflow-api";
 import { WorkflowStepResultCard } from "@/components/workflow";
 
@@ -25,6 +29,25 @@ export default function WorkflowRunDetailPage() {
   const filename = decodeURIComponent(rawFilename);
   const router = useRouter();
   const { showLeftSidebar, toggleLeftSidebar } = useAppShell();
+
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportContent, setReportContent] = useState<string | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
+
+  async function openReport(reportKey: string) {
+    setReportOpen(true);
+    if (reportContent !== null) return;
+    setReportLoading(true);
+    try {
+      const res = await fetch(`/api/s3-file?key=${encodeURIComponent(reportKey)}`);
+      if (!res.ok) throw new Error(await res.text());
+      setReportContent(await res.text());
+    } catch {
+      setReportContent("报告加载失败，请稍后重试。");
+    } finally {
+      setReportLoading(false);
+    }
+  }
 
   const runsQuery = useQuery({
     queryKey: ["workflow", "runs", filename],
@@ -78,17 +101,30 @@ export default function WorkflowRunDetailPage() {
           />
         }
         endSlot={
-          run?.chat_id ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => router.push(`/agent/chat?openSession=${run.chat_id}`)}
-            >
-              <MessageSquareIcon className="size-3.5" />
-              查看对话
-            </Button>
-          ) : undefined
+          <div className="flex items-center gap-2">
+            {run?.report && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => openReport(run.report!)}
+              >
+                <FileTextIcon className="size-3.5" />
+                巡检报告
+              </Button>
+            )}
+            {run?.chat_id ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => router.push(`/agent/chat?openSession=${run.chat_id}`)}
+              >
+                <MessageSquareIcon className="size-3.5" />
+                查看对话
+              </Button>
+            ) : undefined}
+          </div>
         }
       />
 
@@ -225,6 +261,36 @@ export default function WorkflowRunDetailPage() {
           </div>
         )}
       </div>
+
+      {/* 报告 Sheet */}
+      <Sheet open={reportOpen} onOpenChange={setReportOpen}>
+        <SheetContent className="flex w-full flex-col gap-0 p-0">
+          <SheetHeader className="border-b px-6 py-4">
+            <SheetTitle className="flex items-center gap-2 text-sm">
+              <FileTextIcon className="size-4 text-muted-foreground" />
+              巡检报告
+              {run?.report && (
+                <span className="ml-1 font-mono text-xs text-muted-foreground opacity-60">{run.report}</span>
+              )}
+            </SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="flex-1">
+            <div className="px-6 py-5">
+              {reportLoading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2Icon className="size-4 animate-spin" />
+                  加载报告中...
+                </div>
+              )}
+              {!reportLoading && reportContent && (
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{reportContent}</ReactMarkdown>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

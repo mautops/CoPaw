@@ -95,6 +95,9 @@ export function buildWorkflowYaml(data: WorkflowData): string {
   }
   lines.push(`status: ${JSON.stringify(data.status || "draft")}`);
   lines.push(`version: ${JSON.stringify(data.version || "1.0")}`);
+  if (data.auto_report) {
+    lines.push(`auto_report: true`);
+  }
 
   if (data.tags.length > 0) {
     lines.push("tags:");
@@ -337,6 +340,8 @@ export function parseWorkflowYaml(yaml: string): WorkflowData {
           } catch {
             data.version = value;
           }
+        } else if (key === "auto_report") {
+          data.auto_report = value === "true";
         }
       }
       i++;

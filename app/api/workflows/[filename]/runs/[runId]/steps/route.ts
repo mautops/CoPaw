@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
-import os from "os";
+import { WORKING_DIR } from "@/lib/copaw-paths";
+import { createLogger } from "@/lib/logger";
 
-const RUNS_DIR = path.join(os.homedir(), ".copaw", "workflow-runs");
+const log = createLogger("api:workflows:steps");
+
+const RUNS_DIR = path.join(WORKING_DIR, "workflow-runs");
 const WORKFLOW_EXTS = [".yaml", ".yml", ".md", ".markdown"];
 
 function safeWorkflowFilename(raw: string): string | null {
@@ -62,9 +65,14 @@ export async function GET(
   const { filename: rawFilename, runId: rawRunId } = await params;
   const filename = safeWorkflowFilename(rawFilename);
   const runId = safeRunId(rawRunId);
-  if (!filename || !runId) return NextResponse.json({ error: "invalid parameters" }, { status: 400 });
+  log.info(`GET steps ${rawFilename}/${rawRunId}`);
+  if (!filename || !runId) {
+    log.warn(`invalid parameters: filename=${rawFilename} runId=${rawRunId}`);
+    return NextResponse.json({ error: "invalid parameters" }, { status: 400 });
+  }
 
   const steps = await readSteps(filename, runId);
+  log.info(`returning ${steps.length} steps for ${filename}/${runId}`);
   return NextResponse.json({ steps });
 }
 
@@ -77,7 +85,11 @@ export async function POST(
   const { filename: rawFilename, runId: rawRunId } = await params;
   const filename = safeWorkflowFilename(rawFilename);
   const runId = safeRunId(rawRunId);
-  if (!filename || !runId) return NextResponse.json({ error: "invalid parameters" }, { status: 400 });
+  log.info(`POST step ${rawFilename}/${rawRunId}`);
+  if (!filename || !runId) {
+    log.warn(`invalid parameters: filename=${rawFilename} runId=${rawRunId}`);
+    return NextResponse.json({ error: "invalid parameters" }, { status: 400 });
+  }
 
   try {
     const body = (await req.json()) as Partial<StepResult>;
@@ -107,8 +119,10 @@ export async function POST(
     }
 
     await writeSteps(filename, runId, steps);
+    log.info(`upserted step ${step.step_id} (${step.status}) for ${filename}/${runId}`);
     return NextResponse.json(step);
   } catch (err) {
+    log.error(`POST step for ${filename}/${runId} failed`, err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

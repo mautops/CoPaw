@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Loader2Icon,
   PlayIcon,
@@ -35,9 +36,11 @@ import {
   MessageSquareIcon,
   ExternalLinkIcon,
   ChevronDownIcon,
+  FileTextIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
+import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import {
   workflowApi,
@@ -82,10 +85,12 @@ function MetaSidebar({
   data,
   filename,
   runsCount,
+  onToggleAutoReport,
 }: {
   data: WorkflowData;
   filename: string;
   runsCount: number | undefined;
+  onToggleAutoReport: (enabled: boolean) => void;
 }) {
   const status = data.status || "draft";
 
@@ -164,6 +169,40 @@ function MetaSidebar({
           </div>
         </>
       )}
+
+      <Separator />
+
+      {/* 自动报告开关 */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <FileTextIcon className="size-3.5" />
+            自动巡检报告
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={data.auto_report ?? false}
+            onClick={() => onToggleAutoReport(!(data.auto_report ?? false))}
+            className={cn(
+              "relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              data.auto_report ? "bg-primary" : "bg-input",
+            )}
+          >
+            <span
+              className={cn(
+                "pointer-events-none inline-block size-3.5 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200",
+                data.auto_report ? "translate-x-3.5" : "translate-x-0",
+              )}
+            />
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {data.auto_report
+            ? "执行时自动追加报告上传步骤"
+            : "不自动生成报告"}
+        </p>
+      </div>
     </aside>
   );
 }
@@ -296,6 +335,9 @@ function RunResultSummary({ steps }: { steps: WorkflowStepResult[] }) {
 
 function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
   const [expanded, setExpanded] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportContent, setReportContent] = useState<string | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
 
   const stepsQuery = useQuery({
     queryKey: ["workflow", "steps", filename, run.run_id],
@@ -304,6 +346,21 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
   });
 
   const steps = stepsQuery.data?.steps ?? [];
+
+  async function openReport() {
+    setReportOpen(true);
+    if (reportContent !== null) return;
+    setReportLoading(true);
+    try {
+      const res = await fetch(`/api/s3-file?key=${encodeURIComponent(run.report!)}`);
+      if (!res.ok) throw new Error(await res.text());
+      setReportContent(await res.text());
+    } catch {
+      setReportContent("报告加载失败，请稍后重试。");
+    } finally {
+      setReportLoading(false);
+    }
+  }
 
   return (
     <div className="border-b last:border-b-0">
@@ -324,10 +381,21 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
         </div>
         {/* 操作 */}
         <div className="flex shrink-0 items-center gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={!run.report}
+            className={cn("gap-1 text-xs text-muted-foreground", !run.report && "opacity-30")}
+            onClick={run.report ? openReport : undefined}
+          >
+            <FileTextIcon className="size-3.5" />
+            报告
+          </Button>
           {run.chat_id && (
             <Link href={`/agent/chat?openSession=${run.chat_id}`}>
-              <Button size="icon-sm" variant="ghost" title="查看对话" className="text-muted-foreground">
+              <Button size="sm" variant="ghost" className="gap-1 text-xs text-muted-foreground">
                 <MessageSquareIcon className="size-3.5" />
+                对话
               </Button>
             </Link>
           )}
@@ -380,6 +448,34 @@ function RunRow({ run, filename }: { run: WorkflowRun; filename: string }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 报告 Sheet */}
+      <Sheet open={reportOpen} onOpenChange={setReportOpen}>
+        <SheetContent className="flex w-full flex-col gap-0 p-0">
+          <SheetHeader className="border-b px-6 py-4">
+            <SheetTitle className="flex items-center gap-2 text-sm">
+              <FileTextIcon className="size-4 text-muted-foreground" />
+              巡检报告
+              <span className="ml-1 font-mono text-xs text-muted-foreground opacity-60">{run.report}</span>
+            </SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="flex-1">
+            <div className="px-6 py-5">
+              {reportLoading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2Icon className="size-4 animate-spin" />
+                  加载报告中...
+                </div>
+              )}
+              {!reportLoading && reportContent && (
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{reportContent}</ReactMarkdown>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -459,15 +555,25 @@ export default function WorkflowDetailPage() {
   async function handleExecute() {
     const userId = scopeUserFromSessionUser(user ?? {}) ?? "default";
     const detail = await workflowApi.get(filename);
+    // Always parse the freshly-fetched raw to avoid stale React state (e.g. auto_report
+    // toggled but React Query refetch not yet complete when Execute is clicked).
+    const freshWorkflowData = parseWorkflowYaml(detail.raw);
     const payload: WorkflowChatExecPayload = {
       markdown: detail.raw,
-      sessionTitle: workflowData.name?.trim() || filename,
+      sessionTitle: freshWorkflowData.name?.trim() || filename,
       workflowFilename: filename,
       userId,
-      workflowData,
+      workflowData: freshWorkflowData,
+      autoReport: freshWorkflowData.auto_report ?? false,
     };
     sessionStorage.setItem(WORKFLOW_CHAT_EXEC_STORAGE_KEY, JSON.stringify(payload));
     router.push("/agent/chat?execWorkflow=1");
+  }
+
+  async function handleToggleAutoReport(enabled: boolean) {
+    const updated = { ...workflowData, auto_report: enabled };
+    await workflowApi.update(filename, buildWorkflowYaml(updated));
+    await queryClient.invalidateQueries({ queryKey: ["workflow", "detail", filename] });
   }
 
   const title =
@@ -561,6 +667,7 @@ export default function WorkflowDetailPage() {
                 data={workflowData}
                 filename={filename}
                 runsCount={runsQuery.data?.length}
+                onToggleAutoReport={handleToggleAutoReport}
               />
 
               {/* Right main */}

@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { readdir, readFile, stat, writeFile, mkdir } from "fs/promises";
 import path from "path";
-import os from "os";
 import yaml from "yaml";
+import { WORKING_DIR } from "@/lib/copaw-paths";
+import { createLogger } from "@/lib/logger";
 
-const SERVICES_DIR = path.join(os.homedir(), ".copaw", "services");
+const log = createLogger("api:services");
+
+const SERVICES_DIR = path.join(WORKING_DIR, "services");
 const YAML_EXTS = [".yaml", ".yml"];
 
 function isYamlFile(name: string) {
@@ -43,9 +46,8 @@ async function collectServices() {
         modified_time: String(Math.floor(s.mtimeMs / 1000)),
         meta,
       });
-    } catch {
-      // Skip malformed YAML files instead of failing the entire list
-      console.warn(`[services] skipping malformed file: ${entry.name}`);
+    } catch (err) {
+      log.warn(`skipping malformed file: ${entry.name}`, err);
     }
   }
 
@@ -100,8 +102,10 @@ function nullStr(val: unknown): string | null {
 
 // GET /api/services  — list all service YAML files
 export async function GET() {
+  log.info("GET /api/services");
   try {
     const items = await collectServices();
+    log.info(`returning ${items.length} services`);
     const services = items.map(({ filename, path: p, size, created_time, modified_time, meta }) => {
       // Fallback id to filename stem if not declared in YAML
       const stem = path.parse(filename).name;
@@ -130,12 +134,14 @@ export async function GET() {
     });
     return NextResponse.json({ services });
   } catch (err) {
+    log.error("GET /api/services failed", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
 
 // POST /api/services  — create a new service YAML file
 export async function POST(req: Request) {
+  log.info("POST /api/services");
   try {
     const { filename, content } = (await req.json()) as {
       filename?: string;
@@ -162,6 +168,7 @@ export async function POST(req: Request) {
 
     await writeFile(full, content ?? "", "utf-8");
     const s = await stat(full);
+    log.info(`created service: ${safe}`);
     return NextResponse.json({
       success: true,
       filename: safe,
@@ -169,6 +176,7 @@ export async function POST(req: Request) {
       size: s.size,
     });
   } catch (err) {
+    log.error("POST /api/services failed", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

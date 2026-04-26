@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { readFile, writeFile, unlink, stat } from "fs/promises";
 import path from "path";
-import os from "os";
 import yaml from "yaml";
+import { WORKING_DIR } from "@/lib/copaw-paths";
+import { createLogger } from "@/lib/logger";
 
-const WORKFLOWS_DIR = path.join(os.homedir(), ".copaw", "workflows");
+const log = createLogger("api:workflows:[filename]");
+
+const WORKFLOWS_DIR = path.join(WORKING_DIR, "workflows");
 const YAML_EXTS = [".yaml", ".yml"];
 const MD_EXTS = [".md", ".markdown"];
 
@@ -60,7 +63,11 @@ export async function GET(
 ) {
   const { filename: rawFilename } = await params;
   const filename = safeFilename(rawFilename);
-  if (!filename) return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  log.info(`GET ${rawFilename}`);
+  if (!filename) {
+    log.warn(`invalid filename: ${rawFilename}`);
+    return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  }
 
   const full = path.join(WORKFLOWS_DIR, filename);
   try {
@@ -76,7 +83,11 @@ export async function GET(
     return NextResponse.json({ content: raw, raw, meta });
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code === "ENOENT") return NextResponse.json({ error: "not found" }, { status: 404 });
+    if (code === "ENOENT") {
+      log.warn(`not found: ${filename}`);
+      return NextResponse.json({ error: "not found" }, { status: 404 });
+    }
+    log.error(`GET ${filename} failed`, err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
@@ -88,13 +99,18 @@ export async function PUT(
 ) {
   const { filename: rawFilename } = await params;
   const filename = safeFilename(rawFilename);
-  if (!filename) return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  log.info(`PUT ${rawFilename}`);
+  if (!filename) {
+    log.warn(`invalid filename: ${rawFilename}`);
+    return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  }
 
   const full = path.join(WORKFLOWS_DIR, filename);
   // PUT is update-only — file must already exist
   try {
     await stat(full);
   } catch {
+    log.warn(`PUT target not found: ${filename}`);
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 
@@ -102,8 +118,10 @@ export async function PUT(
     const { content } = (await req.json()) as { content?: string };
     await writeFile(full, content ?? "", "utf-8");
     const s = await stat(full);
+    log.info(`updated workflow: ${filename} (${s.size} bytes)`);
     return NextResponse.json({ success: true, filename, path: full, size: s.size });
   } catch (err) {
+    log.error(`PUT ${filename} failed`, err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
@@ -115,13 +133,19 @@ export async function DELETE(
 ) {
   const { filename: rawFilename } = await params;
   const filename = safeFilename(rawFilename);
-  if (!filename) return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  log.info(`DELETE ${rawFilename}`);
+  if (!filename) {
+    log.warn(`invalid filename: ${rawFilename}`);
+    return NextResponse.json({ error: "invalid filename" }, { status: 400 });
+  }
 
   const full = path.join(WORKFLOWS_DIR, filename);
   try {
     await unlink(full);
+    log.info(`deleted workflow: ${filename}`);
     return NextResponse.json({ success: true, filename });
-  } catch {
+  } catch (err) {
+    log.error(`DELETE ${filename} failed`, err);
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 }

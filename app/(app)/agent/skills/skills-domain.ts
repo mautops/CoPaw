@@ -1,15 +1,9 @@
+import { SKILL_DEFAULT_TEMPLATE } from "@/lib/prompts";
+
 export const QK_SKILLS = ["core", "skills", "list"] as const;
 
 /** Default SKILL.md body for new skills (YAML front matter required by backend). */
-export const DEFAULT_NEW_SKILL_MARKDOWN = `---
-name: my_skill
-description: 简短说明该 skill 的用途与触发时机
----
-
-# 标题
-
-在此编写 skill 正文与步骤说明.
-`;
+export const DEFAULT_NEW_SKILL_MARKDOWN = SKILL_DEFAULT_TEMPLATE;
 
 export function matchesSkillFilter(
   skill: { name: string; description: string; source: string },

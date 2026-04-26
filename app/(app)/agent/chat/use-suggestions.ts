@@ -1,4 +1,5 @@
 import { generateSuggestions } from "@/lib/chat-api";
+import { SUGGESTIONS_WELCOME, SUGGESTIONS_FOLLOWUP } from "@/lib/prompts";
 import type { ChatStatus } from "ai";
 import { useEffect, useRef, useState } from "react";
 import type { LocalMessage } from "./types";
@@ -22,29 +23,13 @@ const FOLLOWUP_FALLBACK = [
 // ── Prompts ───────────────────────────────────────────────────────────────────
 
 function buildWelcomePrompt(): string {
-  return `你是一个 AI 运维助手。
-请生成 4 条用户初次见面最可能提问的问题，要求：
-- 每条不超过 20 字
-- 简短、具体、可操作
-- 覆盖不同使用场景
-只输出 JSON 字符串数组，不要任何解释。例如：["问题1","问题2","问题3","问题4"]`;
+  return SUGGESTIONS_WELCOME;
 }
 
-function buildFollowUpPrompt(
-  userMsg: string,
-  assistantMsg: string,
-): string {
-  const u = userMsg.slice(0, 300);
-  const a = assistantMsg.slice(0, 500);
-  return `根据以下对话，生成 3 条用户可能的追问：
-用户：${u}
-助手：${a}
-
-要求：
-- 每条不超过 20 字
-- 与上文强相关
-- 不重复用户已问过的内容
-只输出 JSON 字符串数组，不要任何解释。例如：["追问1","追问2","追问3"]`;
+function buildFollowUpPrompt(userMsg: string, assistantMsg: string): string {
+  return SUGGESTIONS_FOLLOWUP
+    .replace("{{USER_MSG}}", userMsg.slice(0, 300))
+    .replace("{{ASSISTANT_MSG}}", assistantMsg.slice(0, 500));
 }
 
 // ── Cache key ─────────────────────────────────────────────────────────────────

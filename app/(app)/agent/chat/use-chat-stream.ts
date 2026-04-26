@@ -20,6 +20,7 @@ import {
   truncateTitle,
   extractTitle,
 } from "./types";
+import STEP_INSTRUCTION_TEMPLATE from "@/lib/prompts/workflow-step-instruction";
 
 interface UseChatStreamOptions {
   userId: string;
@@ -279,58 +280,11 @@ export function useChatStream({
             }
           }
 
-          const stepInstruction = `
-
----
-**执行要求（系统指令，请严格遵守）：**
-
-⚠️ **强制串行执行**：必须一步一步执行，**完整完成当前步骤（含输出结果块）后，才能开始下一步骤**。禁止在当前步骤结果块输出之前提及或描述后续步骤。
-
-每执行一个步骤时，严格按以下顺序完成三件事：
-
-**1. 步骤开始前**，用 shell 记录开始时间：
-\`\`\`bash
-STEP_START=$(python3 -c "from datetime import datetime,timezone; print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))")
-\`\`\`
-
-**2. 步骤完成后**，写入步骤结果文件（使用 execute_shell_command 工具）：
-
-步骤结果文件路径：${stepsFile}
-
-\`\`\`bash
-mkdir -p "$(dirname "${stepsFile}")"
-STEPS_FILE="${stepsFile}"
-STEP_END=$(python3 -c "from datetime import datetime,timezone; print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))")
-STEP_JSON='{"step_id":"实际步骤ID","step_title":"实际步骤名称","status":"success或failed","result":"ok或warn或critical或info","started_at":"'$STEP_START'","finished_at":"'$STEP_END'","output":"实际输出摘要","error":null或"错误信息"}'
-if [ -f "$STEPS_FILE" ]; then
-  python3 -c "import json,sys; d=json.load(open('$STEPS_FILE')); d.append(json.loads(sys.argv[1])); open('$STEPS_FILE','w').write(json.dumps(d,indent=2,ensure_ascii=False))" "$STEP_JSON"
-else
-  python3 -c "import json,sys; open('$STEPS_FILE','w').write(json.dumps([json.loads(sys.argv[1])],indent=2,ensure_ascii=False))" "$STEP_JSON"
-fi
-\`\`\`
-
-**3. 步骤完成后，立即在当前步骤文字说明紧接着**输出结果块（在进入下一步骤之前必须先输出此块）：
-
-\`\`\`workflow-step-result
-{"step_id":"实际步骤ID","step_title":"实际步骤名称","status":"success","result":"ok","started_at":"2025-01-01T00:00:00Z","finished_at":"2025-01-01T00:00:05Z","output":"实际输出摘要","error":null}
-\`\`\`
-
-**字段填写规则（禁止照抄示例值，必须根据实际执行结果填写）：**
-- **status**：步骤本身是否执行完成
-  - \`success\`：步骤正常执行完毕（即使发现异常，只要步骤本身跑完就是 success）
-  - \`failed\`：步骤执行过程中出错（工具调用失败、命令报错等）
-  - \`skipped\`：步骤被跳过
-- **result**：步骤执行后发现的业务巡检结果（必填，不可省略）
-  - \`ok\`：一切正常，无异常
-  - \`info\`：有提示性信息，无需立即处理
-  - \`warn\`：发现警告，需要关注（如队列积压、资源使用偏高等）
-  - \`critical\`：发现严重问题，需要立即处理（如服务不可用、数据异常、超过阈值的 CRITICAL 告警等）
-${stepCriteriaSection}- **error**：成功时为 null，执行失败时填写错误信息
-- **output**：该步骤的关键输出摘要（100字以内，包含核心数据和发现的问题）
-- **started_at / finished_at**：ISO 8601 UTC 格式（如 2025-01-01T12:00:00Z）
-- **每个步骤的结果块必须紧跟在该步骤的执行说明之后立即输出，不得推迟到后续步骤之后**
-- 三件事必须在每步执行时完成，不可省略
-`;
+          const stepInstruction = "\n" + STEP_INSTRUCTION_TEMPLATE
+            .replace(/\{\{STEPS_FILE\}\}/g, stepsFile)
+            .replace("{{STEP_CRITERIA}}", stepCriteriaSection)
+            .replace("{{WORKFLOW_FILENAME}}", workflowExecContext.filename)
+            .replace("{{RUN_ID}}", sessionId);
           textForApi = textForApi + stepInstruction;
         }
 
@@ -413,6 +367,25 @@ ${stepCriteriaSection}- **error**：成功时为 null，执行失败时填写错
         finalContent = result.content;
         finalThinking = result.thinking;
         finalTools = result.tools;
+
+        // Extract S3_REPORT_KEY from AI output and write it back to the run record.
+        // This is the authoritative path — the curl fallback in the agent instruction
+        // may silently fail when the agent runs in a remote/container environment.
+        if (workflowExecContext && forceNewChat && finalContent) {
+          const keyMatch = finalContent.match(/S3_REPORT_KEY=([\w.\-/~@:+]+)/);
+          if (keyMatch?.[1]) {
+            try {
+              await workflowApi.patchRun(workflowExecContext.filename, sessionId, {
+                report: keyMatch[1],
+              });
+              void queryClient.invalidateQueries({
+                queryKey: ["workflow", "runs", workflowExecContext.filename],
+              });
+            } catch {
+              /* 写回失败不阻断 */
+            }
+          }
+        }
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
           // User stopped the stream — discard partial content, clean up quietly.

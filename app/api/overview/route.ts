@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { readdir, readFile } from "fs/promises";
 import path from "path";
-import os from "os";
+import { WORKING_DIR } from "@/lib/copaw-paths";
+import { createLogger } from "@/lib/logger";
 
-const RUNS_DIR = path.join(os.homedir(), ".copaw", "workflow-runs");
+const log = createLogger("api:overview");
+
+const RUNS_DIR = path.join(WORKING_DIR, "workflow-runs");
 const WORKFLOW_EXTS = [".yaml", ".yml", ".md", ".markdown"];
 
 interface RunRecord {
@@ -57,8 +60,10 @@ async function collectAllRuns(): Promise<RunRecord[]> {
 
 // GET /api/overview — aggregated stats for the overview page
 export async function GET() {
+  log.info("GET /api/overview");
   try {
     const runs = await collectAllRuns();
+    log.info(`collected ${runs.length} total runs for stats`);
 
     const total = runs.length;
     const success = runs.filter((r) => r.status === "success").length;
@@ -88,6 +93,7 @@ export async function GET() {
       recentRuns: recent,
     });
   } catch (err) {
+    log.error("GET /api/overview failed", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

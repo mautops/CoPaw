@@ -71,6 +71,8 @@ export interface WorkflowData {
   version: string;
   tags: string[];
   steps: WorkflowStep[];
+  /** 执行完成后自动生成并上传 S3 巡检报告 */
+  auto_report?: boolean;
 }
 
 /** 默认工作流数据 */

@@ -1,5 +1,8 @@
 import { parseErrorMessage } from "./api-utils";
 import { pinyin } from "pinyin-pro";
+import { createLogger } from "./logger";
+
+const log = createLogger("lib:workflow-api");
 
 /**
  * 将工作流中文名称转换为文件名（不含扩展名）。
@@ -24,11 +27,16 @@ export function workflowNameToFilename(name: string): string {
 
 /** Workflows are served by the Next.js API routes at /api/workflows (local filesystem). */
 async function wfRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  log.debug(`${init?.method ?? "GET"} /api/workflows${path}`);
   const res = await fetch(`/api/workflows${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
-  if (!res.ok) throw new Error(await parseErrorMessage(res));
+  if (!res.ok) {
+    const msg = await parseErrorMessage(res);
+    log.error(`${init?.method ?? "GET"} /api/workflows${path} → ${res.status}: ${msg}`);
+    throw new Error(msg);
+  }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
@@ -110,6 +118,8 @@ export interface WorkflowRunCreate {
   status?: string | null;
   /** ISO datetime; omit to let server default to now */
   executed_at?: string | null;
+  /** S3 key of the inspection report (e.g. s3-copaw-prod/inspections/xxx.md) */
+  report?: string | null;
 }
 
 /** One persisted workflow run (backend `workflow_id` is the filename). */
@@ -123,6 +133,8 @@ export interface WorkflowRun {
   trigger: string;
   executed_at: string;
   status?: string | null;
+  /** S3 key of the inspection report */
+  report?: string | null;
 }
 
 export interface WorkflowRunListResponse {
@@ -229,7 +241,14 @@ export const workflowApi = {
         trigger: body.trigger,
         status: body.status,
         executed_at: body.executed_at ?? undefined,
+        report: body.report ?? undefined,
       }),
+    }),
+
+  patchRun: (filename: string, runId: string, patch: { report?: string | null; status?: string | null }) =>
+    wfRequest<WorkflowRun>(`${workflowRunsPath(filename)}/${encodeURIComponent(runId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
     }),
 
   listStepResults: (filename: string, runId: string) =>

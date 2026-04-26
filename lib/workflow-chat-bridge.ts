@@ -11,5 +11,7 @@ export interface WorkflowChatExecPayload {
   workflowData?: WorkflowData;
   /** 集群实例提示词，执行时作为系统背景信息注入 */
   clusterPrompt?: string;
+  /** 执行完成后自动生成并上传 S3 巡检报告 */
+  autoReport?: boolean;
   meta?: Record<string, unknown>;
 }

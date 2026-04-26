@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { readdir, readFile, stat, writeFile, mkdir } from "fs/promises";
 import path from "path";
-import os from "os";
 import yaml from "yaml";
+import { WORKING_DIR } from "@/lib/copaw-paths";
+import { createLogger } from "@/lib/logger";
 
-const WORKFLOWS_DIR = path.join(os.homedir(), ".copaw", "workflows");
+const log = createLogger("api:workflows");
+
+const WORKFLOWS_DIR = path.join(WORKING_DIR, "workflows");
 const MD_EXTS = [".md", ".markdown"];
 const YAML_EXTS = [".yaml", ".yml"];
 
@@ -99,8 +102,7 @@ async function collectWorkflows() {
         meta,
       });
     } catch {
-      // Skip malformed files instead of failing the entire list
-      console.warn(`[workflows] skipping malformed file: ${entry.name}`);
+      log.warn(`skipping malformed file: ${entry.name}`);
     }
   }
 
@@ -109,8 +111,10 @@ async function collectWorkflows() {
 
 // GET /api/workflows  — list all workflow files (markdown and yaml)
 export async function GET() {
+  log.info("GET /api/workflows");
   try {
     const items = await collectWorkflows();
+    log.info(`returning ${items.length} workflows`);
     const workflows = items.map(({ filename, path: p, size, created_time, modified_time, meta }) => ({
       filename,
       path: p,
@@ -128,12 +132,14 @@ export async function GET() {
     }));
     return NextResponse.json({ workflows });
   } catch (err) {
+    log.error("GET /api/workflows failed", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
 
 // POST /api/workflows  — create a new workflow file
 export async function POST(req: Request) {
+  log.info("POST /api/workflows");
   try {
     const { filename, content } = (await req.json()) as {
       filename?: string;
@@ -160,6 +166,7 @@ export async function POST(req: Request) {
 
     await writeFile(full, content ?? "", "utf-8");
     const s = await stat(full);
+    log.info(`created workflow: ${safe}`);
     return NextResponse.json({
       success: true,
       filename: safe,
@@ -167,6 +174,7 @@ export async function POST(req: Request) {
       size: s.size,
     });
   } catch (err) {
+    log.error("POST /api/workflows failed", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
