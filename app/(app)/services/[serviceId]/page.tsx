@@ -722,6 +722,7 @@ function WorkflowRow({
   onExecute,
   isPending,
   serviceId,
+  isNotStarted,
 }: {
   filename: string;
   clusters: Cluster[];
@@ -729,6 +730,7 @@ function WorkflowRow({
   onExecute: (raw: string, name: string, cluster?: Cluster) => void;
   isPending: boolean;
   serviceId: string;
+  isNotStarted: boolean;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [clusterPickOpen, setClusterPickOpen] = useState(false);
@@ -774,7 +776,7 @@ function WorkflowRow({
         <div className="flex shrink-0 items-center gap-2">
           {/* 图表 */}
           <Link href={`/agent/workflows/${encodeURIComponent(filename)}/stats?from=/services/${serviceId}`}>
-            <Button size="icon-sm" variant="outline" className="text-muted-foreground" title="查看执行图表">
+            <Button size="icon-sm" variant={isNotStarted ? "ghost" : "outline"} className="text-muted-foreground" title="查看执行图表">
               <BarChart2Icon className="size-3.5" />
             </Button>
           </Link>
@@ -782,6 +784,7 @@ function WorkflowRow({
           <div className="flex items-center">
             <Button
               size="sm"
+              variant={isNotStarted ? "ghost" : "default"}
               className="gap-1.5 rounded-r-none border-r-0"
               disabled={isLoading || !detail}
               onClick={() => onExecute(detail!.raw, wfData?.name ?? "", runningClusters[0])}
@@ -793,6 +796,7 @@ function WorkflowRow({
               <PopoverTrigger asChild>
                 <Button
                   size="sm"
+                  variant={isNotStarted ? "ghost" : "default"}
                   className="rounded-l-none px-1.5"
                   disabled={isLoading || !detail || runningClusters.length === 0}
                   title={runningClusters.length === 0 ? "无运行中的集群" : "选择目标集群执行"}
@@ -828,7 +832,7 @@ function WorkflowRow({
             </Popover>
           </div>
           <Link href={historyHref}>
-            <Button size="sm" variant="outline" className="gap-1.5">
+            <Button size="sm" variant={isNotStarted ? "ghost" : "outline"} className="gap-1.5">
               <HistoryIcon className="size-3.5" />
               历史
             </Button>
@@ -1166,6 +1170,7 @@ export default function ServiceDetailPage() {
   }
 
   const statusCfg = STATUS_CONFIG[service.integrationStatus] ?? STATUS_CONFIG.not_started;
+  const isNotStarted = service.integrationStatus === "not_started";
   const hasAgent = !!service.capabilities?.agent;
   const wfDelay = hasAgent ? 0.12 : 0.06;
 
@@ -1249,8 +1254,16 @@ export default function ServiceDetailPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className={cn(statusCfg.color, "border-current")}>
-                      {statusCfg.icon} {statusCfg.label}
+                    <Badge
+                      className={`shrink-0 text-xs font-medium ${
+                        service.integrationStatus === "integrated"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                          : service.integrationStatus === "planned"
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+                            : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
+                      }`}
+                    >
+                      {statusCfg.label}
                     </Badge>
                     <Badge variant="secondary">{categoryLabel(service.category)}</Badge>
                     {service.version && (
@@ -1298,7 +1311,7 @@ export default function ServiceDetailPage() {
                   }
                   actions={
                     <Link href={`/agent/chat?agent=${service.capabilities!.agent!.id}`}>
-                      <Button size="sm" variant="outline" className="gap-1.5">
+                      <Button size="sm" variant={isNotStarted ? "ghost" : "outline"} className="gap-1.5">
                         <BotIcon className="size-3.5" />
                         在对话中使用
                       </Button>
@@ -1332,7 +1345,7 @@ export default function ServiceDetailPage() {
                 actions={
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant={isNotStarted ? "ghost" : "outline"}
                     className="gap-1.5"
                     disabled={bindMutation.isPending}
                     onClick={() => setBindOpen(true)}
@@ -1385,6 +1398,7 @@ export default function ServiceDetailPage() {
                           }}
                           isPending={bindMutation.isPending}
                           serviceId={serviceId}
+                          isNotStarted={isNotStarted}
                         />
                       ))}
                     </motion.div>
@@ -1404,7 +1418,7 @@ export default function ServiceDetailPage() {
                         <p className="text-sm font-medium text-foreground">暂未绑定工作流</p>
                         <p className="text-xs text-muted-foreground">绑定工作流后可在此直接执行自动化任务</p>
                       </div>
-                      <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setBindOpen(true)}>
+                      <Button variant={isNotStarted ? "ghost" : "outline"} size="sm" className="gap-1.5" onClick={() => setBindOpen(true)}>
                         <LinkIcon className="size-3.5" />
                         绑定工作流
                       </Button>
@@ -1434,7 +1448,7 @@ export default function ServiceDetailPage() {
                 </div>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant={isNotStarted ? "ghost" : "outline"}
                   className="h-7 gap-1 px-2 text-xs"
                   disabled={clustersMutation.isPending}
                   onClick={() => {

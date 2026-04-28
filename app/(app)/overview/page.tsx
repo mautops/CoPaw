@@ -18,10 +18,7 @@ import {
   WaypointsIcon,
   SparklesIcon,
   LayersIcon,
-  CheckCircle2Icon,
-  XCircleIcon,
   CircleDotIcon,
-  ClockIcon,
   TrendingUpIcon,
   LayoutDashboardIcon,
   PlayIcon,
@@ -40,19 +37,8 @@ interface OverviewRunStats {
   last7Days: number;
 }
 
-interface RecentRun {
-  run_id: string;
-  workflow_id: string;
-  user_id: string;
-  trigger: string;
-  executed_at: string;
-  status?: string | null;
-  chat_id?: string;
-}
-
 interface OverviewApiResponse {
   runs: OverviewRunStats;
-  recentRuns: RecentRun[];
 }
 
 // ─── Fetchers ─────────────────────────────────────────────────────────────────
@@ -202,43 +188,6 @@ function CategoryRow({
   );
 }
 
-// ─── Run status badge ──────────────────────────────────────────────────────────
-
-function RunStatusBadge({ status }: { status?: string | null }) {
-  if (status === "success")
-    return (
-      <span className="flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
-        <CheckCircle2Icon className="size-3.5" /> 成功
-      </span>
-    );
-  if (status === "failed")
-    return (
-      <span className="flex items-center gap-1 text-xs font-medium text-red-500">
-        <XCircleIcon className="size-3.5" /> 失败
-      </span>
-    );
-  if (status === "running")
-    return (
-      <span className="flex items-center gap-1 text-xs font-medium text-blue-500">
-        <CircleDotIcon className="size-3.5 animate-pulse" /> 执行中
-      </span>
-    );
-  return (
-    <span className="text-xs text-muted-foreground">—</span>
-  );
-}
-
-function formatRelativeTime(isoStr: string): string {
-  const diff = Date.now() - new Date(isoStr).getTime();
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return "刚刚";
-  if (m < 60) return `${m} 分钟前`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h} 小时前`;
-  const d = Math.floor(h / 24);
-  return `${d} 天前`;
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function OverviewPage() {
@@ -318,7 +267,6 @@ export default function OverviewPage() {
 
   // ── Run stats ──
   const runStats = overviewStats?.runs;
-  const recentRuns = overviewStats?.recentRuns ?? [];
 
   const isInitialLoading = svcsLoading || wfsLoading;
 
@@ -496,40 +444,15 @@ export default function OverviewPage() {
                 </div>
               )}
 
-              {/* 最近执行列表 */}
-              {recentRuns.length > 0 ? (
-                <div className="space-y-1">
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">最近执行</p>
-                  {recentRuns.map((run) => (
-                    <div
-                      key={run.run_id}
-                      className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted/50"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <span className="truncate text-xs font-medium">
-                          {run.workflow_id.replace(/-daily-check\.yaml$/, "").replace(/-/g, " ")}
-                        </span>
-                      </div>
-                      <div className="ml-3 flex shrink-0 items-center gap-3">
-                        <RunStatusBadge status={run.status} />
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <ClockIcon className="size-3" />
-                          {formatRelativeTime(run.executed_at)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+              {/* 无统计数据的空状态 */}
+              {!runsLoading && !runStats && (
+                <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+                  <WaypointsIcon className="size-8 text-muted-foreground/30" />
+                  <p className="text-xs text-muted-foreground">暂无执行统计</p>
+                  <p className="text-xs text-muted-foreground/70">
+                    执行工作流后，统计数据将显示在此处
+                  </p>
                 </div>
-              ) : (
-                !runsLoading && (
-                  <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-                    <WaypointsIcon className="size-8 text-muted-foreground/30" />
-                    <p className="text-xs text-muted-foreground">暂无执行记录</p>
-                    <p className="text-xs text-muted-foreground/70">
-                      在服务页面选择工作流执行后，记录将显示在此处
-                    </p>
-                  </div>
-                )
               )}
             </div>
           </div>

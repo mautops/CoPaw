@@ -79,18 +79,8 @@ export async function GET() {
       return t >= sevenDaysAgo;
     }).length;
 
-    // Recent 10 runs sorted newest-first
-    const recent = [...runs]
-      .sort(
-        (a, b) =>
-          new Date(b.executed_at ?? 0).getTime() -
-          new Date(a.executed_at ?? 0).getTime(),
-      )
-      .slice(0, 10);
-
     return NextResponse.json({
       runs: { total, success, failed, running, successRate, last7Days },
-      recentRuns: recent,
     });
   } catch (err) {
     log.error("GET /api/overview failed", err);

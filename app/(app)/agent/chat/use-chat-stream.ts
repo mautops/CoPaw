@@ -252,9 +252,6 @@ export function useChatStream({
             /* 不阻断发送 */
           }
 
-          // 追加 step result 指令：session_id 即 run_id，Agent 用 shell 写入步骤结果
-          const stepsFile = `$HOME/.copaw/workflow-runs/${workflowExecContext.filename}/${sessionId}.steps.json`;
-
           // 从 workflowData 提取每步的 result_criteria 和 threshold，生成判断条件表
           let stepCriteriaSection = "";
           if (workflowData?.steps && workflowData.steps.length > 0) {
@@ -281,7 +278,6 @@ export function useChatStream({
           }
 
           const stepInstruction = "\n" + STEP_INSTRUCTION_TEMPLATE
-            .replace(/\{\{STEPS_FILE\}\}/g, stepsFile)
             .replace("{{STEP_CRITERIA}}", stepCriteriaSection)
             .replace("{{WORKFLOW_FILENAME}}", workflowExecContext.filename)
             .replace("{{RUN_ID}}", sessionId);

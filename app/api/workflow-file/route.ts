@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     : rawPath;
   const resolved = path.resolve(expanded);
 
-  // Security: only allow reads under ~/.copaw/workflows/checklists
+  // Security: only allow reads under WORKING_DIR/workflows/checklists
   if (!resolved.startsWith(ALLOWED_BASE)) {
     log.warn(`forbidden path: ${resolved}`);
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });

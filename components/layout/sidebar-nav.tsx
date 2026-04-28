@@ -10,6 +10,7 @@ import {
   ServerIcon,
   LayoutDashboardIcon,
   MapIcon,
+  BookOpenIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,12 @@ const nav: {
     label: "产品",
     items: [
       { label: "产品蓝图", href: "/roadmap", icon: MapIcon },
+    ],
+  },
+  {
+    label: "文档",
+    items: [
+      { label: "文档", href: "/docs", icon: BookOpenIcon },
     ],
   },
 ];

@@ -115,7 +115,7 @@ export default function ServicesPage() {
               className="flex flex-col items-center gap-4 py-24 text-muted-foreground"
             >
               <ServerIcon className="size-12 opacity-20" />
-              <p className="text-sm">暂无服务，请在 ~/.copaw/services/ 目录添加 YAML 文件</p>
+              <p className="text-sm">暂无服务，请在工作目录的 services/ 子目录添加 YAML 文件</p>
             </motion.div>
           ) : (
             <Tabs value={categoryTab} onValueChange={handleCategoryChange}>

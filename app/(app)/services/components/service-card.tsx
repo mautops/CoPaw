@@ -27,7 +27,7 @@ interface ServiceCardProps {
  */
 export function ServiceCard({ s, index }: ServiceCardProps) {
   const tags = s.tags ?? [];
-  const statusCfg = STATUS_CONFIG[s.integrationStatus] ?? STATUS_CONFIG.not_started;
+  const isIntegrated = s.integrationStatus === "integrated";
 
   return (
     <motion.div
@@ -40,7 +40,13 @@ export function ServiceCard({ s, index }: ServiceCardProps) {
       }}
     >
       <Link href={`/services/${s.id}`} className="block h-full">
-        <div className="group flex h-full cursor-pointer flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm ring-1 ring-border/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/30">
+        <div
+          className={`group flex h-full cursor-pointer flex-col gap-3 rounded-xl border p-4 shadow-sm ring-1 transition-all duration-200 ${
+            isIntegrated
+              ? "bg-card ring-border/40 hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/30"
+              : "bg-muted/40 ring-border/20 opacity-70 hover:opacity-85"
+          }`}
+        >
           {/* 标题行 */}
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
@@ -69,10 +75,15 @@ export function ServiceCard({ s, index }: ServiceCardProps) {
               )}
             </div>
             <Badge
-              variant="outline"
-              className={`${statusCfg.color} shrink-0 border-current text-xs`}
+              className={`shrink-0 text-xs font-medium ${
+                isIntegrated
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                  : s.integrationStatus === "planned"
+                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+                    : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
+              }`}
             >
-              {statusCfg.icon} {statusCfg.label}
+              {STATUS_CONFIG[s.integrationStatus]?.label ?? s.integrationStatus}
             </Badge>
           </div>
 

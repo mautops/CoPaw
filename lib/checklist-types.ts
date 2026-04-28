@@ -1,4 +1,4 @@
-// Workflow 定义类型（对应 ~/.copaw/workflows/checklists/{serviceId}/*.yaml）
+// Workflow 定义类型（对应 ~/.qwenpaw/workflows/checklists/{serviceId}/*.yaml）
 
 export interface ChecklistWorkflowStep {
   id: string;

@@ -41,8 +41,9 @@ async function wfRequest<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** Allowed workflow file extensions (Markdown). */
-export const WORKFLOW_MARKDOWN_EXTS = [".md", ".markdown"] as const;
+const WORKFLOW_MARKDOWN_EXTS = [".md", ".markdown"] as const;
+const WORKFLOW_YAML_EXTS = [".yaml", ".yml"] as const;
+const WORKFLOW_ALL_EXTS = [...WORKFLOW_MARKDOWN_EXTS, ...WORKFLOW_YAML_EXTS] as const;
 
 export function isWorkflowMarkdownFilename(name: string): boolean {
   const n = name.trim().toLowerCase();
@@ -50,7 +51,7 @@ export function isWorkflowMarkdownFilename(name: string): boolean {
 }
 
 /**
- * If the last path segment has no ``.md`` / ``.markdown`` suffix, append ``.md``.
+ * If the last path segment has no recognised workflow extension, append ``.md``.
  * Preserves relative paths like ``ops/daily``.
  */
 export function ensureWorkflowMarkdownFilename(raw: string): string {
@@ -60,7 +61,7 @@ export function ensureWorkflowMarkdownFilename(raw: string): string {
   if (parts.length === 0) return t;
   const last = parts[parts.length - 1]!;
   const low = last.toLowerCase();
-  const hasExt = WORKFLOW_MARKDOWN_EXTS.some((ext) => low.endsWith(ext));
+  const hasExt = WORKFLOW_ALL_EXTS.some((ext) => low.endsWith(ext));
   if (!hasExt) {
     parts[parts.length - 1] = `${last}.md`;
   }
@@ -135,6 +136,8 @@ export interface WorkflowRun {
   status?: string | null;
   /** S3 key of the inspection report */
   report?: string | null;
+  /** Absolute path to the steps JSON file on the server filesystem */
+  steps_file?: string;
 }
 
 export interface WorkflowRunListResponse {
@@ -142,7 +145,7 @@ export interface WorkflowRunListResponse {
 }
 
 function workflowPath(filename: string) {
-  return `/${encodeURIComponent(filename)}`;
+  return `/${encodeURIComponent(ensureWorkflowMarkdownFilename(filename))}`;
 }
 
 function workflowRunsPath(filename: string) {

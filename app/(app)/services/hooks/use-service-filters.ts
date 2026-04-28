@@ -80,7 +80,13 @@ export function useServiceFilters(services: ServiceInfo[]) {
           selectedTags.every((t) => s.tags?.includes(t)),
         );
       }
-      return items;
+      // 已集成优先
+      const STATUS_ORDER: Record<string, number> = { integrated: 0, planned: 1, not_started: 2 };
+      return [...items].sort((a, b) => {
+        const aOrder = STATUS_ORDER[a.integrationStatus] ?? 99;
+        const bOrder = STATUS_ORDER[b.integrationStatus] ?? 99;
+        return aOrder - bOrder;
+      });
     };
   }, []);
 

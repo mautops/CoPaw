@@ -88,7 +88,7 @@ export function AppShell({
         >
           <LeftSidebar user={user} />
         </div>
-        <div className="flex flex-1 overflow-hidden">{children}</div>
+        <div className="relative flex flex-1 overflow-hidden">{children}</div>
       </div>
     </AppShellContext.Provider>
   );

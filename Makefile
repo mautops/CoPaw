@@ -6,7 +6,7 @@ IMAGE    := $(REGISTRY)/hi-ops
 build:
 	$(eval VERSION := $(filter-out $@, $(MAKECMDGOALS)))
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make build <version>  e.g. make build v0.0.1"; exit 1; fi
-	docker buildx build --platform linux/amd64 -t $(IMAGE):$(VERSION) -t $(IMAGE):latest .
+	docker buildx build --no-cache --platform linux/amd64 -t $(IMAGE):$(VERSION) -t $(IMAGE):latest .
 
 push:
 	$(eval VERSION := $(filter-out $@, $(MAKECMDGOALS)))

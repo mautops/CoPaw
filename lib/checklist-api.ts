@@ -2,18 +2,17 @@ import { load as yamlLoad } from 'js-yaml';
 import { chatApi } from './chat-api';
 import { CHECKLIST_EXECUTION } from './prompts';
 import type { ChecklistWorkflow, ChecklistExecution, ChecklistRunMeta } from './checklist-types';
+import { checklistWorkflowBase } from './client-paths';
 
-const WORKFLOW_BASE = `${process.env.HOME ?? '~'}/.copaw/workflows/checklists`;
-
-/** 从本地 ~/.copaw/workflows/checklists/{serviceId}/{checklistId}.yaml 加载 Workflow 定义 */
+/** 从本地 WORKING_DIR/workflows/checklists/{serviceId}/{checklistId}.yaml 加载 Workflow 定义 */
 export async function loadChecklistWorkflow(
   serviceId: string,
   checklistId: string,
 ): Promise<ChecklistWorkflow | null> {
-  // 将 checklistId 中的下划线替换为连字符，作为文件名
   const filename = checklistId.replace(/_/g, '-');
+  const base = await checklistWorkflowBase();
   try {
-    const res = await fetch(`/api/workflow-file?path=${encodeURIComponent(`${WORKFLOW_BASE}/${serviceId}/${filename}.yaml`)}`);
+    const res = await fetch(`/api/workflow-file?path=${encodeURIComponent(`${base}/${serviceId}/${filename}.yaml`)}`);
     if (!res.ok) return null;
     const text = await res.text();
     return yamlLoad(text) as ChecklistWorkflow;

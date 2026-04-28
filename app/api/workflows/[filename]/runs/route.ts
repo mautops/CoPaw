@@ -107,7 +107,8 @@ export async function POST(
     await mkdir(workflowDir(filename), { recursive: true });
     await writeFile(runFile(filename, sessionId), JSON.stringify(run, null, 2), "utf-8");
     log.info(`created run ${sessionId} for ${filename}`);
-    return NextResponse.json(run);
+    const steps_file = path.join(RUNS_DIR, filename, `${sessionId}.steps.json`);
+    return NextResponse.json({ ...run, steps_file });
   } catch (err) {
     log.error(`POST run for ${filename} failed`, err);
     return NextResponse.json({ error: String(err) }, { status: 500 });

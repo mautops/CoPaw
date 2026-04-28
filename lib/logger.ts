@@ -41,10 +41,9 @@ export interface Logger {
 }
 
 export function createLogger(tag: string): Logger {
-  const minLevel = activeLevel()
-
   function log(level: Level, msg: string, extra?: unknown) {
-    if (LEVELS[level] < minLevel) return
+    // Read LOG_LEVEL dynamically so runtime env vars take effect
+    if (LEVELS[level] < activeLevel()) return
     const line = fmt(level, tag, msg, extra)
     if (level === 'error') console.error(line)
     else if (level === 'warn') console.warn(line)

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Providers } from "./providers";
 import "./globals.css";
+import "highlight.js/styles/github-dark-dimmed.css";
 
 export const metadata: Metadata = {
   title: { default: "Hi-Ops", template: "%s | Hi-Ops" },

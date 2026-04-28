@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ContentTopbar, TopbarBreadcrumb } from "@/components/layout/content-topbar";
@@ -20,16 +20,12 @@ import {
 import {
   Loader2Icon,
   PlusIcon,
-  PlayIcon,
   BarChart2Icon,
   WaypointsIcon,
   FileTextIcon,
   TagIcon,
 } from "lucide-react";
 import { workflowApi, formatWorkflowTimestamp, type WorkflowInfo } from "@/lib/workflow-api";
-import { scopeUserFromSessionUser } from "@/lib/workflow-username";
-import { WORKFLOW_CHAT_EXEC_STORAGE_KEY, type WorkflowChatExecPayload } from "@/lib/workflow-chat-bridge";
-import { parseWorkflowYaml } from "@/components/workflow";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -115,24 +111,21 @@ function WorkflowSearch({
 
 function WorkflowCard({
   w,
-  executing,
   onOpen,
-  onExecute,
 }: {
   w: WorkflowInfo;
-  executing: boolean;
   onOpen: (w: WorkflowInfo) => void;
-  onExecute: (w: WorkflowInfo) => void;
 }) {
   const tags = w.tags ?? [];
   const router = useRouter();
+  const active = isActiveStatus(w.status);
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onOpen(w)}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen(w)}
-      className="group flex cursor-pointer flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm ring-1 ring-border/40 transition-all hover:shadow-md hover:ring-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={`group flex flex-col gap-3 rounded-xl border p-4 shadow-sm ring-1 transition-all ${
+        active
+          ? "bg-card ring-border/40"
+          : "bg-muted/40 ring-border/20 opacity-70"
+      }`}
     >
       {/* 标题行 */}
       <div className="flex items-start justify-between gap-2">
@@ -151,8 +144,16 @@ function WorkflowCard({
           )}
         </div>
         {w.status?.trim() && (
-          <Badge variant="outline" className="shrink-0 text-xs">
-            {w.status.trim()}
+          <Badge
+            className={`shrink-0 text-xs font-medium ${
+              active
+                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                : w.status.trim() === "draft"
+                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
+                  : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500"
+            }`}
+          >
+            {w.status.trim() === "active" ? "已激活" : w.status.trim() === "draft" ? "草稿" : w.status.trim()}
           </Badge>
         )}
       </div>
@@ -186,40 +187,33 @@ function WorkflowCard({
         </div>
       )}
 
-      {/* 执行按钮 */}
-      {isActiveStatus(w.status) && (
-        <div className="mt-auto flex justify-end gap-1.5">
-          <Button
-            size="icon-sm"
-            variant="outline"
-            className="shrink-0 text-muted-foreground"
-            title="查看执行图表"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/agent/workflows/${encodeURIComponent(w.filename)}/stats`);
-            }}
-          >
-            <BarChart2Icon className="size-3" />
-          </Button>
-          <Button
-            size="sm"
-            variant="default"
-            className="shrink-0 gap-1.5 text-xs"
-            disabled={executing}
-            onClick={(e) => {
-              e.stopPropagation();
-              onExecute(w);
-            }}
-          >
-            {executing ? (
-              <Loader2Icon className="size-3 animate-spin" />
-            ) : (
-              <PlayIcon className="size-3" />
-            )}
-            执行
-          </Button>
-        </div>
-      )}
+      {/* 操作按钮 */}
+      <div className="mt-auto flex justify-end gap-1.5">
+        <Button
+          size="icon-sm"
+          variant={active ? "outline" : "ghost"}
+          className="shrink-0 text-muted-foreground"
+          title="查看执行图表"
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/agent/workflows/${encodeURIComponent(w.filename)}/stats`);
+          }}
+        >
+          <BarChart2Icon className="size-3" />
+        </Button>
+        <Button
+          size="sm"
+          variant={active ? "default" : "ghost"}
+          className="shrink-0 gap-1.5 text-xs"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen(w);
+          }}
+        >
+          <FileTextIcon className="size-3" />
+          查看
+        </Button>
+      </div>
 
       {/* 更新时间 */}
       <p className="text-xs text-muted-foreground">
@@ -233,11 +227,10 @@ function WorkflowCard({
 
 export default function WorkflowsPage() {
   const router = useRouter();
-  const { showLeftSidebar, toggleLeftSidebar, user } = useAppShell();
+  const { showLeftSidebar, toggleLeftSidebar } = useAppShell();
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [catalogTab, setCatalogTab] = useState("all");
-  const [executingFilename, setExecutingFilename] = useState<string | null>(null);
   // Track highlighted filename from ?highlight= param after new workflow creation
   const [highlightedFilename, setHighlightedFilename] = useState<string | null>(null);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -293,39 +286,6 @@ export default function WorkflowsPage() {
     router.push(`/agent/workflows/${encodeURIComponent(w.filename)}`);
   }
 
-  const handleExecute = useCallback(
-    async (w: WorkflowInfo) => {
-      if (executingFilename) return;
-      setExecutingFilename(w.filename);
-      try {
-        const userId = scopeUserFromSessionUser(user ?? {}) ?? "default";
-        const detail = await workflowApi.get(w.filename);
-        const wfData = parseWorkflowYaml(detail.raw);
-        const workflowDisplayName = wfData.name?.trim() || displayTitle(w);
-        const payload: WorkflowChatExecPayload = {
-          markdown: detail.raw,
-          sessionTitle: workflowDisplayName,
-          workflowFilename: w.filename,
-          userId,
-          workflowData: wfData,
-          meta: {
-            source: "workflow",
-            workflow_filename: w.filename,
-            workflow_name: workflowDisplayName,
-          },
-        };
-        sessionStorage.setItem(WORKFLOW_CHAT_EXEC_STORAGE_KEY, JSON.stringify(payload));
-        router.push("/agent/chat?execWorkflow=1");
-      } catch (err) {
-        window.alert(
-          err instanceof Error ? `执行失败：${err.message}` : "执行失败，请重试",
-        );
-        setExecutingFilename(null);
-      }
-    },
-    [router, user, executingFilename],
-  );
-
   const catalogs = useMemo(() => {
     const seen = new Set<string>();
     for (const w of workflows ?? []) {
@@ -337,8 +297,14 @@ export default function WorkflowsPage() {
 
   const tabItems = useMemo(() => {
     const all = workflows ?? [];
-    if (catalogTab === "all") return all;
-    return all.filter((w) => catalogOf(w) === catalogTab);
+    const filtered = catalogTab === "all" ? all : all.filter((w) => catalogOf(w) === catalogTab);
+    return [...filtered].sort((a, b) => {
+      const aActive = isActiveStatus(a.status);
+      const bActive = isActiveStatus(b.status);
+      if (aActive && !bActive) return -1;
+      if (!aActive && bActive) return 1;
+      return 0;
+    });
   }, [workflows, catalogTab]);
 
   const topbarEnd = (
@@ -449,9 +415,7 @@ export default function WorkflowsPage() {
                             >
                               <WorkflowCard
                                 w={w}
-                                executing={executingFilename === w.filename}
                                 onOpen={openDetail}
-                                onExecute={handleExecute}
                               />
                             </div>
                           ))}

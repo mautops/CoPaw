@@ -43,10 +43,15 @@ export interface StepResult {
 }
 
 async function readSteps(filename: string, runId: string): Promise<StepResult[]> {
+  const filePath = stepsFile(filename, runId);
+  log.debug(`reading steps from ${filePath}`);
   try {
-    const raw = await readFile(stepsFile(filename, runId), "utf-8");
-    return JSON.parse(raw) as StepResult[];
-  } catch {
+    const raw = await readFile(filePath, "utf-8");
+    const parsed = JSON.parse(raw) as StepResult[];
+    log.debug(`parsed ${parsed.length} steps from ${filePath}`);
+    return parsed;
+  } catch (err) {
+    log.debug(`steps file not found or unreadable: ${filePath}`, err);
     return [];
   }
 }
@@ -66,6 +71,7 @@ export async function GET(
   const filename = safeWorkflowFilename(rawFilename);
   const runId = safeRunId(rawRunId);
   log.info(`GET steps ${rawFilename}/${rawRunId}`);
+  log.debug(`RUNS_DIR=${RUNS_DIR}`);
   if (!filename || !runId) {
     log.warn(`invalid parameters: filename=${rawFilename} runId=${rawRunId}`);
     return NextResponse.json({ error: "invalid parameters" }, { status: 400 });

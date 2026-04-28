@@ -6,18 +6,26 @@ const template = `
 
 每执行一个步骤时，严格按以下顺序完成三件事：
 
-**1. 步骤开始前**，用 shell 记录开始时间：
+**1. 步骤开始前**，用 shell 记录开始时间并解析工作目录：
 \`\`\`bash
 STEP_START=$(python3 -c "from datetime import datetime,timezone; print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))")
+# 解析 WORKING_DIR：与后端逻辑一致（环境变量 > ~/.copaw 存在时用旧目录 > ~/.qwenpaw）
+if [ -n "$QWENPAW_WORKING_DIR" ]; then
+  WORKING_DIR="$QWENPAW_WORKING_DIR"
+elif [ -n "$COPAW_WORKING_DIR" ]; then
+  WORKING_DIR="$COPAW_WORKING_DIR"
+elif [ -d "$HOME/.copaw" ]; then
+  WORKING_DIR="$HOME/.copaw"
+else
+  WORKING_DIR="$HOME/.qwenpaw"
+fi
+STEPS_FILE="$WORKING_DIR/workflow-runs/{{WORKFLOW_FILENAME}}/{{RUN_ID}}.steps.json"
 \`\`\`
 
 **2. 步骤完成后**，写入步骤结果文件（使用 execute_shell_command 工具）：
 
-步骤结果文件路径：{{STEPS_FILE}}
-
 \`\`\`bash
-mkdir -p "$(dirname "{{STEPS_FILE}}")"
-STEPS_FILE="{{STEPS_FILE}}"
+mkdir -p "$(dirname "$STEPS_FILE")"
 STEP_END=$(python3 -c "from datetime import datetime,timezone; print(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))")
 STEP_JSON='{"step_id":"实际步骤ID","step_title":"实际步骤名称","status":"success或failed","result":"ok或warn或critical或info","started_at":"'\$STEP_START'","finished_at":"'\$STEP_END'","output":"实际输出摘要","error":null或"错误信息"}'
 if [ -f "$STEPS_FILE" ]; then
